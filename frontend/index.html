@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!--
+===============================================================================
+AIRTEL BUSINESS AI AGENT - HTML SHELL
+===============================================================================
+
+📌 WHAT THIS FILE DOES:
+This is the root HTML template for the web application:
+1. Loads modern Google Fonts (Plus Jakarta Sans for sleek modern UI and
+   JetBrains Mono for monospace JSON/trace logs).
+2. Links to `/static/style.css` for custom responsive styles and themes.
+3. Loads React 18 and Babel Standalone for in-browser JSX compilation.
+4. Mounts the `<App />` component into `<div id="root"></div>`.
+===============================================================================
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Airtel Business Enterprise Conversational AI Assistant - Customer Discovery & Recommendation Pipeline">
+  <title>Airtel Business - Customer Discovery & Recommendation Agent</title>
+
+  <!-- Typography: Plus Jakarta Sans (Headings & UI) & JetBrains Mono (Trace Logs) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css">
+
+  <!-- React 18, React DOM & Babel Standalone for Browser Execution -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <!-- React Mount Point -->
+  <div id="root"></div>
+
+  <!-- Main Application Script -->
+  <script type="text/babel" src="/static/app.jsx"></script>
+</body>
+</html>
+

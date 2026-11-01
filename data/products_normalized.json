@@ -1,0 +1,650 @@
+[
+  {
+    "product_id": "P01",
+    "category": "Connectivity",
+    "product_name": "Biz Fibre 100",
+    "description": "Business fibre broadband, 100 Mbps, unlimited data",
+    "unit": "per site",
+    "price_min_inr_per_month": 999,
+    "price_max_inr_per_month": 1199,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 5,
+    "target_segments": [
+      "Micro Retail & Services",
+      "Professional Offices"
+    ]
+  },
+  {
+    "product_id": "P02",
+    "category": "Connectivity",
+    "product_name": "Biz Fibre 300",
+    "description": "Business fibre broadband, 300 Mbps, unlimited data, static IP optional",
+    "unit": "per site",
+    "price_min_inr_per_month": 1499,
+    "price_max_inr_per_month": 1799,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 5,
+    "target_segments": [
+      "Professional Offices",
+      "Multi-site Businesses"
+    ]
+  },
+  {
+    "product_id": "P03",
+    "category": "Connectivity",
+    "product_name": "Biz Fibre 1G",
+    "description": "Business fibre broadband, 1 Gbps, priority support",
+    "unit": "per site",
+    "price_min_inr_per_month": 3999,
+    "price_max_inr_per_month": 4499,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1
+    ],
+    "min_employees": 5,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [],
+    "typical_install_days": 7,
+    "target_segments": [
+      "Professional Offices",
+      "Multi-site Businesses",
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P04",
+    "category": "Connectivity",
+    "product_name": "Biz 5G AirFiber 100",
+    "description": "Wireless (5G FWA) broadband, 100 Mbps, plug-and-play, for sites without fibre",
+    "unit": "per site",
+    "price_min_inr_per_month": 899,
+    "price_max_inr_per_month": 1099,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 6,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 2,
+    "target_segments": [
+      "Micro Retail & Services",
+      "Professional Offices"
+    ]
+  },
+  {
+    "product_id": "P05",
+    "category": "Connectivity",
+    "product_name": "Internet Leased Line 20",
+    "description": "Dedicated 1:1 internet, 20 Mbps, 99.5% SLA",
+    "unit": "per site",
+    "price_min_inr_per_month": 8000,
+    "price_max_inr_per_month": 12000,
+    "one_time_setup_inr": 10000,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 10,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [],
+    "typical_install_days": 21,
+    "target_segments": [
+      "Small Manufacturing",
+      "Multi-site Businesses"
+    ]
+  },
+  {
+    "product_id": "P06",
+    "category": "Connectivity",
+    "product_name": "Internet Leased Line 100",
+    "description": "Dedicated 1:1 internet, 100 Mbps, 99.9% SLA",
+    "unit": "per site",
+    "price_min_inr_per_month": 25000,
+    "price_max_inr_per_month": 35000,
+    "one_time_setup_inr": 15000,
+    "min_contract_months": 24,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 25,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [],
+    "typical_install_days": 30,
+    "target_segments": [
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P07",
+    "category": "Connectivity",
+    "product_name": "Business Postpaid 299",
+    "description": "Business mobile line, 50 GB data, unlimited calls",
+    "unit": "per line",
+    "price_min_inr_per_month": 299,
+    "price_max_inr_per_month": 399,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 1,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 1,
+    "target_segments": [
+      "Micro Retail & Services",
+      "Professional Offices",
+      "Multi-site Businesses",
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P08",
+    "category": "Connectivity",
+    "product_name": "Business Postpaid 599",
+    "description": "Business mobile line, 150 GB data, roaming, priority care",
+    "unit": "per line",
+    "price_min_inr_per_month": 599,
+    "price_max_inr_per_month": 799,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 1,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 1,
+    "target_segments": [
+      "Professional Offices",
+      "Multi-site Businesses",
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P09",
+    "category": "Connectivity",
+    "product_name": "Backup 4G/5G Failover",
+    "description": "Automatic failover router with data SIM for when the main link is down",
+    "unit": "per site",
+    "price_min_inr_per_month": 499,
+    "price_max_inr_per_month": 599,
+    "one_time_setup_inr": 1500,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [
+      "P01",
+      "P02",
+      "P03",
+      "P05",
+      "P06"
+    ],
+    "typical_install_days": 3,
+    "target_segments": [
+      "Multi-site Businesses",
+      "Professional Offices"
+    ]
+  },
+  {
+    "product_id": "P10",
+    "category": "Connectivity",
+    "product_name": "Managed SD-WAN",
+    "description": "Central management of links across sites, app-priority routing",
+    "unit": "per site",
+    "price_min_inr_per_month": 2500,
+    "price_max_inr_per_month": 3500,
+    "one_time_setup_inr": 5000,
+    "min_contract_months": 24,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 10,
+    "min_sites": 3,
+    "requires_gstin": true,
+    "requires_one_of": [
+      "P01",
+      "P02",
+      "P03",
+      "P05",
+      "P06"
+    ],
+    "typical_install_days": 14,
+    "target_segments": [
+      "Multi-site Businesses"
+    ]
+  },
+  {
+    "product_id": "P11",
+    "category": "Connectivity",
+    "product_name": "Static IP",
+    "description": "Fixed public IP for CCTV, servers or remote access",
+    "unit": "per IP",
+    "price_min_inr_per_month": 200,
+    "price_max_inr_per_month": 300,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [
+      "P01",
+      "P02",
+      "P03"
+    ],
+    "typical_install_days": 1,
+    "target_segments": [
+      "Professional Offices",
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P12",
+    "category": "Communication",
+    "product_name": "Cloud Telephony / SIP",
+    "description": "Business phone lines over internet with IVR, call recording",
+    "unit": "per channel",
+    "price_min_inr_per_month": 1000,
+    "price_max_inr_per_month": 1500,
+    "one_time_setup_inr": 2000,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 3,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06"
+    ],
+    "typical_install_days": 5,
+    "target_segments": [
+      "Professional Offices",
+      "Multi-site Businesses"
+    ]
+  },
+  {
+    "product_id": "P13",
+    "category": "Communication",
+    "product_name": "Toll-free Number",
+    "description": "1800 number routed to mobile or cloud telephony",
+    "unit": "per number",
+    "price_min_inr_per_month": 1500,
+    "price_max_inr_per_month": 2000,
+    "one_time_setup_inr": 1000,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [],
+    "typical_install_days": 3,
+    "target_segments": [
+      "Multi-site Businesses",
+      "Professional Offices"
+    ]
+  },
+  {
+    "product_id": "P14",
+    "category": "Communication",
+    "product_name": "Business SMS 10k",
+    "description": "10,000 SMS per month for alerts and promotions, DLT registration assisted",
+    "unit": "per pack",
+    "price_min_inr_per_month": 1500,
+    "price_max_inr_per_month": 2000,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 1,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [],
+    "typical_install_days": 4,
+    "target_segments": [
+      "Professional Offices",
+      "Multi-site Businesses",
+      "Micro Retail & Services"
+    ]
+  },
+  {
+    "product_id": "P15",
+    "category": "Communication",
+    "product_name": "WhatsApp Business API Starter",
+    "description": "Verified WhatsApp channel, catalogue, 1,000 conversations a month",
+    "unit": "per account",
+    "price_min_inr_per_month": 999,
+    "price_max_inr_per_month": 1499,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 3,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [],
+    "typical_install_days": 3,
+    "target_segments": [
+      "Micro Retail & Services",
+      "Professional Offices",
+      "Multi-site Businesses"
+    ]
+  },
+  {
+    "product_id": "P16",
+    "category": "Cloud & Productivity",
+    "product_name": "Cloud Email & Office Suite",
+    "description": "Business email on own domain, documents, video meetings",
+    "unit": "per user",
+    "price_min_inr_per_month": 125,
+    "price_max_inr_per_month": 150,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 1,
+    "target_segments": [
+      "Professional Offices",
+      "Multi-site Businesses",
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P17",
+    "category": "Cloud & Productivity",
+    "product_name": "Cloud Backup 1 TB",
+    "description": "Automatic backup of PCs and phones, 1 TB",
+    "unit": "per account",
+    "price_min_inr_per_month": 499,
+    "price_max_inr_per_month": 699,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 1,
+    "target_segments": [
+      "Professional Offices",
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P18",
+    "category": "Cloud & Productivity",
+    "product_name": "Website + Domain Starter",
+    "description": "Domain, 5-page website builder, hosting, SSL",
+    "unit": "per account",
+    "price_min_inr_per_month": 299,
+    "price_max_inr_per_month": 499,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 2,
+    "target_segments": [
+      "Micro Retail & Services",
+      "Professional Offices"
+    ]
+  },
+  {
+    "product_id": "P19",
+    "category": "Cloud & Productivity",
+    "product_name": "Cloud POS & Billing",
+    "description": "GST-ready billing, inventory, UPI/card acceptance on a tablet",
+    "unit": "per counter",
+    "price_min_inr_per_month": 599,
+    "price_max_inr_per_month": 899,
+    "one_time_setup_inr": 2500,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 3,
+    "target_segments": [
+      "Micro Retail & Services",
+      "Multi-site Businesses"
+    ]
+  },
+  {
+    "product_id": "P20",
+    "category": "Security",
+    "product_name": "Endpoint Security",
+    "description": "Antivirus and ransomware protection for PCs and phones",
+    "unit": "per device",
+    "price_min_inr_per_month": 99,
+    "price_max_inr_per_month": 149,
+    "one_time_setup_inr": 0,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 1,
+    "target_segments": [
+      "Professional Offices",
+      "Small Manufacturing",
+      "Multi-site Businesses"
+    ]
+  },
+  {
+    "product_id": "P21",
+    "category": "Security",
+    "product_name": "Managed Firewall",
+    "description": "Next-gen firewall at the site, managed by Accel SOC",
+    "unit": "per site",
+    "price_min_inr_per_month": 1999,
+    "price_max_inr_per_month": 2999,
+    "one_time_setup_inr": 4000,
+    "min_contract_months": 24,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 10,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [
+      "P01",
+      "P02",
+      "P03",
+      "P05",
+      "P06"
+    ],
+    "typical_install_days": 10,
+    "target_segments": [
+      "Small Manufacturing",
+      "Multi-site Businesses",
+      "Professional Offices"
+    ]
+  },
+  {
+    "product_id": "P22",
+    "category": "Security",
+    "product_name": "Secure Wi-Fi with Guest Network",
+    "description": "Managed Wi-Fi access point with separate customer Wi-Fi and content filtering",
+    "unit": "per site",
+    "price_min_inr_per_month": 399,
+    "price_max_inr_per_month": 599,
+    "one_time_setup_inr": 1000,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [
+      "P01",
+      "P02",
+      "P03",
+      "P04"
+    ],
+    "typical_install_days": 3,
+    "target_segments": [
+      "Micro Retail & Services",
+      "Multi-site Businesses",
+      "Professional Offices"
+    ]
+  },
+  {
+    "product_id": "P23",
+    "category": "IoT & Physical",
+    "product_name": "Cloud CCTV",
+    "description": "HD camera with 30-day cloud recording and mobile app view",
+    "unit": "per camera",
+    "price_min_inr_per_month": 199,
+    "price_max_inr_per_month": 299,
+    "one_time_setup_inr": 1800,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06"
+    ],
+    "typical_install_days": 4,
+    "target_segments": [
+      "Micro Retail & Services",
+      "Multi-site Businesses",
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P24",
+    "category": "IoT & Physical",
+    "product_name": "Machine Monitoring IoT",
+    "description": "IoT SIM + sensor kit for machine uptime and energy use",
+    "unit": "per device",
+    "price_min_inr_per_month": 149,
+    "price_max_inr_per_month": 249,
+    "one_time_setup_inr": 3000,
+    "min_contract_months": 24,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 10,
+    "min_sites": 1,
+    "requires_gstin": true,
+    "requires_one_of": [],
+    "typical_install_days": 10,
+    "target_segments": [
+      "Small Manufacturing"
+    ]
+  },
+  {
+    "product_id": "P25",
+    "category": "IoT & Physical",
+    "product_name": "Fleet Tracker",
+    "description": "GPS tracker with IoT SIM and live dashboard",
+    "unit": "per vehicle",
+    "price_min_inr_per_month": 199,
+    "price_max_inr_per_month": 299,
+    "one_time_setup_inr": 1500,
+    "min_contract_months": 12,
+    "available_city_tiers": [
+      1,
+      2
+    ],
+    "min_employees": 1,
+    "min_sites": 1,
+    "requires_gstin": false,
+    "requires_one_of": [],
+    "typical_install_days": 3,
+    "target_segments": [
+      "Multi-site Businesses",
+      "Small Manufacturing"
+    ]
+  }
+]

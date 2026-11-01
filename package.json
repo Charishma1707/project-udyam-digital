@@ -1,0 +1,27 @@
+{
+  "name": "6ae1873397bc1_digital",
+  "version": "1.0.0",
+  "description": "Enterprise-grade conversational AI assistant for **Airtel Business** designed to conduct natural, multi-lingual customer discovery with small and medium business owners across India, featuring a **Real-Time Live AI Pipeline Visualizer** for debugging, demonstrations, and hackathon judging.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test node-tests/*.test.js",
+    "db:preprocess": "node node-src/db/preprocessAndLoad.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "csv-parse": "^7.0.3",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "fuse.js": "^7.5.0",
+    "jimp": "^1.6.1",
+    "multer": "^2.5.0",
+    "pg": "^8.23.1",
+    "sarvamai": "^1.1.13",
+    "tesseract.js": "^7.0.0",
+    "xlsx": "^0.18.5"
+  }
+}

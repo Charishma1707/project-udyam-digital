@@ -1,0 +1,358 @@
+[
+  {
+    "city": "Agra",
+    "city_tier": 2,
+    "state": "Uttar Pradesh",
+    "aliases": [],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Ahmedabad",
+    "city_tier": 1,
+    "state": "Gujarat",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 188
+  },
+  {
+    "city": "Amritsar",
+    "city_tier": 2,
+    "state": "Punjab",
+    "aliases": [],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Bengaluru",
+    "city_tier": 1,
+    "state": "Karnataka",
+    "aliases": [
+      "Bangalore",
+      "Blr"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 396
+  },
+  {
+    "city": "Bhopal",
+    "city_tier": 2,
+    "state": "Madhya Pradesh",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 171
+  },
+  {
+    "city": "Bhubaneswar",
+    "city_tier": 2,
+    "state": "Odisha",
+    "aliases": [
+      "Cuttack"
+    ],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Chandigarh",
+    "city_tier": 2,
+    "state": "Punjab",
+    "aliases": [
+      "Mohali",
+      "Panchkula",
+      "Tricity"
+    ],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Chennai",
+    "city_tier": 1,
+    "state": "Tamil Nadu",
+    "aliases": [
+      "Madras"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 301
+  },
+  {
+    "city": "Coimbatore",
+    "city_tier": 2,
+    "state": "Tamil Nadu",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 164
+  },
+  {
+    "city": "Dehradun",
+    "city_tier": 2,
+    "state": "Uttarakhand",
+    "aliases": [],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Delhi",
+    "city_tier": 1,
+    "state": "Delhi",
+    "aliases": [
+      "New Delhi",
+      "NCR",
+      "Delhi NCR"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 445
+  },
+  {
+    "city": "Gurgaon",
+    "city_tier": 1,
+    "state": "Haryana",
+    "aliases": [
+      "Gurugram",
+      "Millennium City"
+    ],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Guwahati",
+    "city_tier": 2,
+    "state": "Assam",
+    "aliases": [],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Hyderabad",
+    "city_tier": 1,
+    "state": "Telangana",
+    "aliases": [
+      "Hyd",
+      "Cyberabad",
+      "Secunderabad"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 321
+  },
+  {
+    "city": "Indore",
+    "city_tier": 2,
+    "state": "Madhya Pradesh",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 180
+  },
+  {
+    "city": "Jaipur",
+    "city_tier": 2,
+    "state": "Rajasthan",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 169
+  },
+  {
+    "city": "Kanpur",
+    "city_tier": 2,
+    "state": "Uttar Pradesh",
+    "aliases": [],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Kochi",
+    "city_tier": 2,
+    "state": "Kerala",
+    "aliases": [
+      "Cochin",
+      "Ernakulam"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 191
+  },
+  {
+    "city": "Kolkata",
+    "city_tier": 1,
+    "state": "West Bengal",
+    "aliases": [
+      "Calcutta"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 233
+  },
+  {
+    "city": "Lucknow",
+    "city_tier": 2,
+    "state": "Uttar Pradesh",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 178
+  },
+  {
+    "city": "Ludhiana",
+    "city_tier": 2,
+    "state": "Punjab",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 185
+  },
+  {
+    "city": "Madurai",
+    "city_tier": 2,
+    "state": "Tamil Nadu",
+    "aliases": [],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Mumbai",
+    "city_tier": 1,
+    "state": "Maharashtra",
+    "aliases": [
+      "Bombay",
+      "Navi Mumbai",
+      "Thane"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 429
+  },
+  {
+    "city": "Mysuru",
+    "city_tier": 2,
+    "state": "Karnataka",
+    "aliases": [
+      "Mysore"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 169
+  },
+  {
+    "city": "Nagpur",
+    "city_tier": 2,
+    "state": "Maharashtra",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 178
+  },
+  {
+    "city": "Nashik",
+    "city_tier": 2,
+    "state": "Maharashtra",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 164
+  },
+  {
+    "city": "Noida",
+    "city_tier": 1,
+    "state": "Uttar Pradesh",
+    "aliases": [
+      "Greater Noida"
+    ],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Panaji",
+    "city_tier": 2,
+    "state": "Goa",
+    "aliases": [
+      "Goa"
+    ],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Patna",
+    "city_tier": 2,
+    "state": "Bihar",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 160
+  },
+  {
+    "city": "Pune",
+    "city_tier": 1,
+    "state": "Maharashtra",
+    "aliases": [
+      "Poona",
+      "Pimpri-Chinchwad"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 265
+  },
+  {
+    "city": "Raipur",
+    "city_tier": 2,
+    "state": "Chhattisgarh",
+    "aliases": [],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Ranchi",
+    "city_tier": 2,
+    "state": "Jharkhand",
+    "aliases": [],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Surat",
+    "city_tier": 2,
+    "state": "Gujarat",
+    "aliases": [],
+    "source": "smb_leads.csv",
+    "lead_count": 157
+  },
+  {
+    "city": "Thiruvananthapuram",
+    "city_tier": 2,
+    "state": "Kerala",
+    "aliases": [
+      "Trivandrum"
+    ],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Vadodara",
+    "city_tier": 2,
+    "state": "Gujarat",
+    "aliases": [
+      "Baroda"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 196
+  },
+  {
+    "city": "Varanasi",
+    "city_tier": 2,
+    "state": "Uttar Pradesh",
+    "aliases": [
+      "Banaras",
+      "Kashi"
+    ],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Vijayawada",
+    "city_tier": 2,
+    "state": "Andhra Pradesh",
+    "aliases": [
+      "Amaravati"
+    ],
+    "source": "national_registry",
+    "lead_count": 0
+  },
+  {
+    "city": "Visakhapatnam",
+    "city_tier": 2,
+    "state": "Andhra Pradesh",
+    "aliases": [
+      "Vizag",
+      "Waltair"
+    ],
+    "source": "smb_leads.csv",
+    "lead_count": 160
+  }
+]

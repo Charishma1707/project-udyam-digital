@@ -52,18 +52,8 @@ RATIONALE_MAP = {
     "max_installation_days": "Installation timeline determines eligibility for plug-and-play wireless versus physical fibre lines."
 }
 
-# Deterministic priority sequence
-PRIORITY_ORDER = [
-    'business_type',
-    'employee_count',
-    'num_sites',
-    'city',
-    'needs',
-    'monthly_telecom_spend_inr',
-    'has_gstin',
-    'has_udyam',
-    'max_installation_days'
-]
+# Deterministic priority sequence uses REQUIRED_FIELDS directly
+PRIORITY_ORDER = REQUIRED_FIELDS
 
 
 class QuestionPlanner:
@@ -138,10 +128,4 @@ class QuestionPlanner:
                     "canonical_question": QUESTION_MAP.get(field, f"Could you please share your {field.replace('_', ' ')}?"),
                     "reason": RATIONALE_MAP.get(field, f"{field.replace('_', ' ')} is required to qualify your business.")
                 }
-
-        first = missing_fields[0]
-        return {
-            "field": first,
-            "canonical_question": QUESTION_MAP.get(first, f"Could you please share your {first.replace('_', ' ')}?"),
-            "reason": RATIONALE_MAP.get(first, f"{first.replace('_', ' ')} is required to complete your profile.")
-        }
+        return None

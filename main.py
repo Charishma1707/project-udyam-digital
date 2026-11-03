@@ -323,6 +323,12 @@ async def get_order_tracking(order_id: str):
     return order
 
 
+@app.get("/api/orders")
+async def get_all_orders():
+    """Returns all placed customer orders from the database."""
+    return {"orders": order_lifecycle_service.get_all_orders()}
+
+
 @app.get("/api/sales/dashboard")
 async def get_sales_dashboard():
     """Returns Sales Command Center KPIs, active escalations, and lost quote log."""
@@ -330,12 +336,53 @@ async def get_sales_dashboard():
 
 
 @app.post("/api/sales/orders/{order_id}/status")
-async def update_order_status(order_id: str, request: OrderStatusUpdateRequest):
-    """Allows sales agent to update milestones or resolve customer escalations."""
-    updated = order_lifecycle_service.update_order_stage(order_id, request.model_dump())
+@app.post("/api/orders/{order_id}/status")
+@app.patch("/api/orders/{order_id}/status")
+async def update_order_status(order_id: str, payload: Dict[str, Any]):
+    """Allows sales agent or admin to update milestones or toggle order status in DB."""
+    updated = order_lifecycle_service.update_order_stage(order_id, payload)
     if not updated:
         raise HTTPException(status_code=404, detail="Order not found")
     return {"success": True, "order": updated}
+
+
+@app.post("/api/admin/messages/send")
+async def send_admin_message(payload: Dict[str, Any]):
+    """Allows Admin to send custom message, bundle recommendation, or response to user."""
+    session_id = payload.get("session_id") or "default_session"
+    customer_name = payload.get("customer_name") or "Valued Customer"
+    msg_text = payload.get("message") or ""
+    bundle_code = payload.get("bundle_code")
+    return order_lifecycle_service.send_admin_message(
+        session_id=session_id,
+        customer_name=customer_name,
+        message=msg_text,
+        bundle_code=bundle_code
+    )
+
+
+@app.get("/api/user/messages/{session_id}")
+async def get_user_messages(session_id: str):
+    """Retrieves messages sent by Admin to this customer."""
+    msgs = order_lifecycle_service.get_customer_messages(session_id)
+    return {"messages": msgs}
+
+
+@app.post("/api/auth/login")
+async def login(payload: Dict[str, Any]):
+    """Simple role-based login (User or Admin)."""
+    role = payload.get("role", "user").lower()
+    email = payload.get("email", "guest@airtel.com")
+    name = payload.get("name", "Airtel User" if role == "user" else "Airtel Operations Admin")
+    return {
+        "success": True,
+        "token": f"token_{role}_{os.urandom(4).hex()}",
+        "user": {
+            "email": email,
+            "name": name,
+            "role": role
+        }
+    }
 
 
 # =============================================================================

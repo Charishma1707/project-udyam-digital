@@ -1,20 +1,30 @@
-FROM node:22-alpine
+FROM python:3.13-slim
 
 WORKDIR /app
 
-# Install app dependencies
-COPY package*.json ./
-RUN npm install --omit=dev
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy source code and frontend
-COPY node-src ./node-src
+# Install python dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy pure Python application codebase
+COPY schema ./schema
+COPY agent ./agent
+COPY data_preprocessing ./data_preprocessing
+COPY recommendation ./recommendation
+COPY kyc_verification ./kyc_verification
+COPY order_tracking ./order_tracking
+COPY database ./database
 COPY frontend ./frontend
-COPY server.js ./
+COPY data ./data
 COPY YTL_TrackA_Udyam_Digital_Data ./YTL_TrackA_Udyam_Digital_Data
+COPY main.py ./
 
-# Set environment
 ENV PORT=8000
 EXPOSE 8000
 
-# Start server
-CMD ["node", "server.js"]
+CMD ["python", "main.py"]

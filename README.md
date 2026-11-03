@@ -1,9 +1,10 @@
 # Airtel Business — Project Udyam Digital
 ### Enterprise Conversational AI Advisor, 11-Stage Pipeline Visualizer & Smart Digital KYC Engine
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8%2B-blue.svg)](tsconfig.json)
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/Tests-41%2F41%20Passed-brightgreen.svg)](node-tests/)
+[![Python](https://img.shields.io/badge/Python-3.13%2B-blue.svg)](main.py)
+[![FastAPI](https://img.shields.io/badge/Framework-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![Pydantic v2](https://img.shields.io/badge/Validation-Pydantic%20v2-e92063.svg)](schema/customer_profile.py)
+[![Pytest](https://img.shields.io/badge/Tests-14%2F14%20Passed-brightgreen.svg)](tests/)
 [![Docker](https://img.shields.io/badge/Docker-PostgreSQL%2016-blue.svg)](docker-compose.yml)
 [![Sarvam AI](https://img.shields.io/badge/AI%20Engine-Sarvam%20Indic%20105B-orange.svg)](https://www.sarvam.ai/)
 [![Compliance](https://img.shields.io/badge/Compliance-DPDP%20Act%202023-purple.svg)](#security--dpdp-act-2023-compliance)
@@ -12,49 +13,92 @@
 
 ## Executive Summary
 
-Built for the **Accel YTL Hackathon (Track A)**, **Project Udyam Digital** is an enterprise-grade AI sales platform for **Airtel Business (B2B)** designed to serve India's 6+ crore Micro, Small, and Medium Enterprises (MSMEs). 
+Built for the **Accel YTL Hackathon (Track A)**, **Project Udyam Digital** is an enterprise-grade AI sales platform for **Airtel Business (B2B)** designed to serve India's 6+ crore Micro, Small, and Medium Enterprises (MSMEs).
 
-It tackles key telecom lead conversion friction points—long 17.6-day activation lead times, 56% post-needs-assessment drop-offs, and manual follow-ups—through an end-to-end autonomous customer journey:
+It solves key telecom conversion friction points—17.6-day activation cycle times, 56% post-needs-assessment drop-offs, and 3x manual follow-ups—through an autonomous, modular Python architecture:
 
 ```
 [Voice / Text Chat in Indic Languages]
                │
                ▼
-[11-Stage AI Discovery & Extraction] ──► [Deterministic Missing Field Planner]
+[11-Stage AI Discovery Agent] ──► [Deterministic Question Planner]
                │
                ▼
-[Hard Filtering & Bundle Recommendation] ──► [Top 2 Bundles + What-If Unlocks]
+[Hard Filtering & Bundle Engine] ──► [Top 2 Bundles + What-If Unlocks]
                │
                ▼
-[Smart Digital KYC & OCR Engine] ──► [AES-256-GCM + Zero-Residue Memory Purge]
+[Smart Digital KYC & OCR Engine] ──► [AES-256-GCM + RAM Zero-Purging]
                │
                ▼
-[Quote Acceptance & Dynamic SLA Contract] ──► [5-Milestone Order Tracker & Escalations]
+[Quote Acceptance & SLA Contract] ──► [5-Milestone Order Tracker & Escalations]
 ```
 
 ---
 
-## Key Modules & Capabilities
+## Clean Modular Architecture
 
-| Module | Core Features | Core Implementation |
-| :--- | :--- | :--- |
-| **Phase 1: Conversational Discovery** | Real-time speech & text, Indic language detection (Hindi, Telugu, Tamil, English, Hinglish), zero-hallucination schema extraction (`temperature: 0.0`), deterministic missing field prioritization. | [`extractor.js`](file:///node-src/services/extractor.js), [`planner.js`](file:///node-src/services/planner.js), [`detector.js`](file:///node-src/services/detector.js) |
-| **Live AI Pipeline Visualizer** | Split-screen debugging UI displaying 11 discrete stages in real-time with visual diff cards, developer telemetry, latency benchmarks, and raw prompts. | [`frontend/app.jsx`](file:///frontend/app.jsx), [`conversationManager.js`](file:///node-src/services/conversationManager.js) |
-| **Phase 2: Recommendation Engine** | Strict eligibility checks (Tier 1 vs 2, headcount, GSTIN lock), tailored Primary & Value-Saver bundles, mathematical scoring formula, What-If unlock recommendations. | [`recommendationEngine.js`](file:///node-src/services/recommendationEngine.js), [`targetSegmentService.js`](file:///node-src/services/targetSegmentService.js) |
-| **Phase 3: Smart Digital KYC** | Multi-document OCR (GSTIN, Udyam, Aadhaar, Signatory IDs), image enhancement & rotation correction, active mock registry cross-referencing, automated document status checks. | [`ocrService.js`](file:///node-src/services/ocrService.js), [`imagePreprocessor.js`](file:///node-src/services/imagePreprocessor.js) |
-| **Security & DPDP Compliance** | AES-256-GCM authenticated encryption for stored credentials, RAM buffer zero-residue purging (`securePurgeBuffer()`), public PII masking, SHA-256 deduplication. | [`secureVault.js`](file:///node-src/services/secureVault.js) |
-| **Phase 4 & 5: Orders & Drop Analytics** | Instant quote acceptance, KYC enforcement gating, dynamic SLA contracts, 5-milestone order tracker with countdowns, structured drop reason capture & counter-offers. | [`orderService.js`](file:///node-src/services/orderService.js) |
-| **Phase 6: Sales Command Center** | Dual-view agent portal, KPI tracking, live escalation queue, order status editor, lost quote analysis log. | [`frontend/app.jsx`](file:///frontend/app.jsx), [`server.js`](file:///server.js) |
-| **Data Engineering & ETL** | 11,282 normalized synthetic records (catalogue, GSTIN registry, Udyam registry, city tier mappings, SMB leads) loaded in sub-second execution with PostgreSQL / memory fallback. | [`node-src/db/preprocessAndLoad.js`](file:///node-src/db/preprocessAndLoad.js) |
+The repository is organized into dedicated, readable Python packages:
+
+```text
+├── agent/                             # Conversational AI & 11-Stage Pipeline
+│   ├── discovery_agent.py             # 11-stage trace generator and orchestrator
+│   ├── sarvam_llm_client.py           # Sarvam AI Indic LLM & Speech-to-Text client
+│   ├── entity_extractor.py            # Zero-temperature schema extraction agent
+│   ├── question_planner.py            # Deterministic missing field prioritized question planner
+│   ├── speech_cleaner.py              # Speech sanitizer & GSTIN/Udyam identifier protection
+│   └── session_memory.py              # Thread-safe multi-turn session store
+│
+├── schema/                            # Pydantic v2 Data Models
+│   ├── customer_profile.py            # 23-field CustomerSchema with numeric coercion & safe merge
+│   └── api_models.py                  # Typed request/response contracts for REST endpoints
+│
+├── data_preprocessing/                # ETL & Reference Data Mappings
+│   ├── etl_pipeline.py                # Automated parser for 11,282 synthetic records
+│   ├── city_tier_mapping.py           # Indian city to telecom network tier (Tier 1 vs 2) tool
+│   └── business_segment_mapper.py     # Deterministic 4-tier business type to segment resolver
+│
+├── recommendation/                    # Recommendation & Scoring
+│   └── bundle_engine.py               # Eligibility filtering, scoring formula, What-If simulator
+│
+├── kyc_verification/                  # Smart Digital KYC & Compliance
+│   ├── smart_kyc_service.py           # OCR extraction, registry cross-check, status validation
+│   └── secure_vault.py                # AES-256-GCM encryption & RAM zero-purging (DPDP Act 2023)
+│
+├── order_tracking/                    # Order Fulfillment & Sales Portal
+│   └── order_lifecycle.py             # Dynamic SLA contracts, 5-milestone tracker, lost quote log
+│
+├── database/                          # Persistence & Registries
+│   └── db_client.py                   # PostgreSQL connection + high-speed in-memory store
+│
+├── frontend/                          # Web User Interface
+│   ├── index.html                     # HTML5 single-page application mount
+│   ├── database.html                  # Interactive Database Explorer interface
+│   ├── style.css                      # Airtel Business enterprise dark theme
+│   └── app.jsx                        # React 18 UI (Live Chat + 11-Stage Pipeline Visualizer)
+│
+├── tests/                             # Automated Test Suite (14 passing tests)
+│   ├── test_agent_pipeline.py         # Pipeline trace, STT cleaner, planner tests
+│   ├── test_customer_schema.py        # Schema coercion, defaults, safe merge tests
+│   ├── test_recommendation.py         # Bundle engine, segment mapping, what-if tests
+│   ├── test_kyc_and_security.py       # AES-256-GCM, PII masking, registry validation tests
+│   └── test_api_endpoints.py          # FastAPI endpoint integration tests
+│
+├── YTL_TrackA_Udyam_Digital_Data/     # Dataset: Products, GSTIN, Udyam, Leads, Specimen KYC
+├── data/                              # Preprocessed normalized JSON caches
+├── main.py                            # Single FastAPI server entrypoint
+├── requirements.txt                   # Pure Python dependencies
+├── Dockerfile                         # Python 3.13 container definition
+└── docker-compose.yml                 # PostgreSQL container + persistent volumes
+```
 
 ---
 
 ## Real-Time Live AI Pipeline Visualizer (11 Stages)
 
-The left side of the UI features an interactive customer chat with voice input and audio playback. The right side renders the real-time AI pipeline trace:
+The split-screen user interface provides transparency for debugging, demonstrations, and hackathon judging:
 
 1. **Stage 1 · Customer Speech:** Audio byte stream, recording status, format.
-2. **Stage 2 · Speech-to-Text:** Raw Sarvam STT (`saaras:v3`) and natural cleaned transcript.
+2. **Stage 2 · Speech-to-Text:** Raw Sarvam STT (`saaras:v3`) and cleaned natural transcript.
 3. **Stage 3 · Language Detection:** Dynamic Indic language badge (`English`, `Hindi`, `Telugu`, `Tamil`, `Mixed Hinglish`).
 4. **Stage 4 · Schema Extraction:** Structured JSON extracted from the latest turn (Sarvam `sarvam-105b-conversations`).
 5. **Stage 5 · Schema Diff:** Visual diff cards (`Previous Schema ➔ Current Schema`) highlighting newly updated fields.
@@ -69,148 +113,60 @@ The left side of the UI features an interactive customer chat with voice input a
 
 ## Security & DPDP Act 2023 Compliance
 
-1. **AES-256-GCM Cryptographic Storage:** Document buffers are encrypted with unique 96-bit initialization vectors (IVs) and authenticated verification tags.
-2. **Zero-Residue Memory Safety:** In-memory RAM buffers are zeroed out immediately after OCR execution (`securePurgeBuffer()`) to prevent residual memory dumps.
-3. **Data Minimization & Masking:** Identifiers are masked in UI and logs (e.g. `27XXXXXXXX7D1ZP`), while SHA-256 hashes enable duplicate checks without storing plaintext.
-
----
-
-## Project Structure
-
-```text
-├── node-src/                      # Clean Architecture Backend
-│   ├── config.js                  # Environment & Sarvam API configuration
-│   ├── models/
-│   │   └── customerSchema.js      # CustomerSchema (23 fields, numeric coercion, safe merge)
-│   ├── services/
-│   │   ├── conversationManager.js # 11-stage pipeline orchestrator
-│   │   ├── extractor.js           # Zero-hallucination Schema Extraction Agent
-│   │   ├── detector.js            # Deterministic Missing Information Detector
-│   │   ├── planner.js             # Prioritized Question Planner & Rationale Map
-│   │   ├── recommendationEngine.js# Hard filtering & bundle ranking engine
-│   │   ├── ocrService.js          # Smart KYC OCR & registry cross-referencing
-│   │   ├── imagePreprocessor.js   # Contrast enhancement & 4-way rotation correction
-│   │   ├── secureVault.js         # AES-256-GCM encryption & RAM zero-purging
-│   │   ├── orderService.js        # Order lifecycle, contracts & escalations
-│   │   ├── targetSegmentService.js# Business type to canonical segment mapper
-│   │   ├── cityTierTool.js        # City tier lookup (Tier 1 vs Tier 2)
-│   │   ├── sttCleaner.js          # Speech text sanitizer with identifier protection
-│   │   ├── sessionStore.js        # Multi-turn in-memory session manager
-│   │   └── sarvamClient.js        # Sarvam AI Node SDK Wrapper (Chat & STT)
-│   └── db/
-│       ├── dbClient.js            # Dual PostgreSQL + Persistent Memory Client
-│       └── preprocessAndLoad.js   # Automated ETL pipeline for 11,282 CSV records
-├── docker/
-│   └── init-db/
-│       └── 01-init-tables.sql     # PostgreSQL relational schema (4 tables, indexes)
-├── docker-compose.yml             # PostgreSQL 16 container with persistent volumes
-├── Dockerfile                     # Production Node.js Alpine container
-├── node-tests/                    # Automated Test Suite (41 tests passing)
-│   ├── customerSchema.test.js
-│   ├── sttCleaner.test.js
-│   ├── detectorAndPlanner.test.js
-│   ├── conversationScenarios.test.js
-│   ├── databaseEtl.test.js
-│   ├── secureVault.test.js
-│   ├── smartOcrService.test.js
-│   ├── orderLifecycle.test.js
-│   └── recommendationEngine.test.js
-├── frontend/
-│   ├── index.html                 # HTML5 container with React 18 & Babel
-│   ├── style.css                  # Airtel Business enterprise dark theme
-│   └── app.jsx                    # React Application (Chat, Visualizer, KYC, Sales Portal)
-├── YTL_TrackA_Udyam_Digital_Data/ # Dataset: Products, GSTIN, Udyam, Leads, Specimen KYC
-├── data/                          # Persistent preprocessed JSON summaries
-├── server.ts                      # Strongly-typed Express Server Entrypoint
-├── server.js                      # Dual JS Server Entrypoint & API Routes
-├── tsconfig.json                  # TypeScript compiler configuration
-├── package.json                   # Project manifest & test scripts
-├── .env.example                   # Environment configuration template
-└── README.md
-```
+1. **AES-256-GCM Cryptographic Storage:** Raw document buffers are encrypted with unique 96-bit initialization vectors (IVs) and authenticated verification tags.
+2. **Zero-Residue Memory Safety:** In-memory RAM buffers are zeroed out via `secure_purge_buffer()` immediately post-OCR to thwart memory dumps.
+3. **Data Minimization & Masking:** Identifiers are masked in public responses and UI (e.g., `27XXXXXXXX7D1ZP`, `UDYAM-00-XXXX567`), while SHA-256 hashes enable duplicate checks without storing plaintext.
 
 ---
 
 ## Quickstart Guide
 
 ### 1. Prerequisites
-- [Node.js](https://nodejs.org/) v18 or later
-- [Sarvam AI API Key](https://www.sarvam.ai/)
-- (Optional) [Docker Desktop](https://www.docker.com/) for containerized PostgreSQL
+- [Python 3.10+](https://www.python.org/)
+- [Sarvam AI API Key](https://www.sarvam.ai/) (optional for local mock testing)
 
-### 2. Clone & Install
+### 2. Install Dependencies
 ```bash
-git clone https://github.com/<your-username>/<repo-name>.git
-cd <repo-name>
-npm install
+pip install -r requirements.txt
 ```
 
 ### 3. Setup Environment Variables
 Create a `.env` file in the project root:
-```bash
-cp .env.example .env
-```
-Fill in your API credentials:
 ```ini
 SARVAM_API_KEY=your_sarvam_api_key_here
 PORT=8000
 ```
 
-### 4. Run Preprocessing & ETL
-Populates the in-memory/PostgreSQL stores with 11,282 normalized records from the synthetic dataset:
+### 4. Run the Application
 ```bash
-npm run db:preprocess
+python main.py
 ```
-
-### 5. Start the Application
+Or with Uvicorn hot-reload:
 ```bash
-# Run with TypeScript runtime (tsx):
-npm start
-
-# Run with TypeScript hot-reload watch mode:
-npm run dev
-
-# Run TypeScript type checker:
-npm run typecheck
-
-# Build / compile to ./dist:
-npm run build
-
-# Run legacy JavaScript server (optional):
-npm run start:js
+uvicorn main:app --reload --port 8000
 ```
-The application will be live at: **`http://localhost:8000`**
+Open your browser at: **`http://localhost:8000`**
 
----
-
-## Running with Docker Compose
-
-To run the complete containerized stack (Node.js application + PostgreSQL 16 with persistent volume storage):
-
-```bash
-docker compose up -d
-```
-- **Web Application:** `http://localhost:8000`
-- **PostgreSQL:** Port `5432` with volume `postgres_data`
+- **Main AI Chat & Visualizer:** [`http://localhost:8000/`](http://localhost:8000/)
+- **Interactive Database Explorer:** [`http://localhost:8000/database`](http://localhost:8000/database)
+- **Interactive API Docs (Swagger):** [`http://localhost:8000/docs`](http://localhost:8000/docs)
 
 ---
 
 ## Automated Test Suite
 
-Run the full suite of **41 automated tests**:
+Run all **14 automated tests**:
 
 ```bash
-npm test
+pytest tests/ -v
 ```
 
-### What is tested:
-- **Conversation & Extraction:** Multi-entity extraction, multi-lingual turns (Telugu, Hindi, English), safe schema merging.
-- **Detector & Planner:** Deterministic missing field identification and priority selection.
-- **Database & ETL:** Registry verification (GSTIN, Udyam, Products, SMB Leads).
-- **Security & Privacy:** AES-256-GCM encryption/decryption, tampering detection, RAM buffer zero-purging, identifier masking.
-- **Smart KYC OCR:** Document validation against registry, handling degraded/rotated images, detecting cancelled certificates.
-- **Recommendation Engine:** Rule-based bundle eligibility, GSTIN gating, What-If unlock insights.
-- **Order Lifecycle:** Contract generation, status progression, escalations, drop reasons.
+### Test Coverage:
+- `test_agent_pipeline.py`: 11-stage trace execution, speech normalization, question priority planner.
+- `test_customer_schema.py`: Numeric string coercion, null protection, safe merge logic.
+- `test_recommendation.py`: Commercial eligibility rules, segment mapping, bundle formulation.
+- `test_kyc_and_security.py`: AES-256-GCM encryption/decryption, PII masking, registry checks.
+- `test_api_endpoints.py`: FastAPI routes (`/health`, `/api/products`, `/api/database/status`, `/chat`).
 
 ---
 
@@ -218,13 +174,15 @@ npm test
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/health` | Server and persistent store health status |
-| `POST` | `/chat` | Process conversation turn and return 11-stage pipeline trace |
+| `GET` | `/health` | Health check returning backend status and DB connection |
+| `POST` | `/chat` | Process customer text message and return 11-stage pipeline trace |
 | `POST` | `/voice` | Upload audio recording for Sarvam STT and discovery processing |
+| `GET` | `/database` | Interactive Database Table Explorer interface |
 | `GET` | `/api/database/status` | Database connection status and record counts |
+| `GET` | `/api/database/table/{name}` | Fetch rows from specific database table |
 | `GET` | `/api/products` | Retrieve all 25 catalogue products |
-| `GET` | `/api/lookup/gstin/:gstin` | Cross-reference GSTIN with mock registry |
-| `GET` | `/api/lookup/udyam/:udyam` | Cross-reference Udyam number with mock registry |
+| `GET` | `/api/lookup/gstin/{gstin}` | Cross-reference GSTIN with mock government registry |
+| `GET` | `/api/lookup/udyam/{udyam}` | Cross-reference Udyam number with mock MSME registry |
 | `POST` | `/api/orders/accept` | Accept quote, verify KYC, generate contract, start order tracker |
 | `POST` | `/api/orders/reject` | Record quote drop reason, customer feedback, and counter-offer |
 | `POST` | `/api/kyc/upload` | Securely upload KYC document for OCR extraction and registry check |
@@ -233,6 +191,4 @@ npm test
 
 ## License & Disclaimer
 
-This project is developed for the **Accel YTL Hackathon**. All businesses, people, identifiers, and documents in the dataset are synthetic and fictional.
-
-Licensed under the [ISC License](LICENSE).
+Developed for the **Accel YTL Hackathon (Track A)**. All businesses, people, identifiers, documents, and figures in the dataset are synthetic and fictional.

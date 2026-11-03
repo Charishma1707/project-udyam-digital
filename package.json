@@ -2,9 +2,13 @@
   "name": "6ae1873397bc1_digital",
   "version": "1.0.0",
   "description": "Enterprise-grade conversational AI assistant for **Airtel Business** designed to conduct natural, multi-lingual customer discovery with small and medium business owners across India, featuring a **Real-Time Live AI Pipeline Visualizer** for debugging, demonstrations, and hackathon judging.",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
-    "start": "node server.js",
+    "start": "tsx server.ts",
+    "start:js": "node server.js",
+    "dev": "tsx watch server.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
     "test": "node --test node-tests/*.test.js",
     "db:preprocess": "node node-src/db/preprocessAndLoad.js"
   },
@@ -23,5 +27,14 @@
     "sarvamai": "^1.1.13",
     "tesseract.js": "^7.0.0",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.3.0",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }

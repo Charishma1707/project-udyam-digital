@@ -1,6 +1,7 @@
 # Airtel Business — Project Udyam Digital
 ### Enterprise Conversational AI Advisor, 11-Stage Pipeline Visualizer & Smart Digital KYC Engine
 
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8%2B-blue.svg)](tsconfig.json)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![Tests](https://img.shields.io/badge/Tests-41%2F41%20Passed-brightgreen.svg)](node-tests/)
 [![Docker](https://img.shields.io/badge/Docker-PostgreSQL%2016-blue.svg)](docker-compose.yml)
@@ -120,7 +121,9 @@ The left side of the UI features an interactive customer chat with voice input a
 │   └── app.jsx                    # React Application (Chat, Visualizer, KYC, Sales Portal)
 ├── YTL_TrackA_Udyam_Digital_Data/ # Dataset: Products, GSTIN, Udyam, Leads, Specimen KYC
 ├── data/                          # Persistent preprocessed JSON summaries
-├── server.js                      # Express Server Entrypoint & API Routes
+├── server.ts                      # Strongly-typed Express Server Entrypoint
+├── server.js                      # Dual JS Server Entrypoint & API Routes
+├── tsconfig.json                  # TypeScript compiler configuration
 ├── package.json                   # Project manifest & test scripts
 ├── .env.example                   # Environment configuration template
 └── README.md
@@ -161,7 +164,20 @@ npm run db:preprocess
 
 ### 5. Start the Application
 ```bash
+# Run with TypeScript runtime (tsx):
 npm start
+
+# Run with TypeScript hot-reload watch mode:
+npm run dev
+
+# Run TypeScript type checker:
+npm run typecheck
+
+# Build / compile to ./dist:
+npm run build
+
+# Run legacy JavaScript server (optional):
+npm run start:js
 ```
 The application will be live at: **`http://localhost:8000`**
 

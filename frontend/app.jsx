@@ -1,16 +1,17 @@
 /**
  * ============================================================================
  * AIRTEL BUSINESS - ENTERPRISE COMMERCE & AI SALES PLATFORM
+ * Signature Airtel Red Theme ("Build a Business Together")
  * ============================================================================
  * Dual-Role Architecture:
  * 1. Customer Portal (User Mode):
- *    - Storefront Products Catalogue (Airtel Business Solutions)
- *    - AI Shopping / Sales Assistant (Image 2 & 4: In-chat product carousel,
- *      suggestion chips, voice recording, live KYC verification badge)
+ *    - Storefront Products Catalogue in Airtel Red
+ *    - AI Shopping / Sales Assistant (Image 2 & 4 in Airtel Red: In-chat product
+ *      carousel, suggestion chips, voice recording, live KYC verification badge)
  *    - Live 4-Milestone Order Tracker (Image 1: S00060, green checkmarks,
  *      connector bars, timestamps)
- * 2. Admin Operations Command Center (Admin Mode - Image 3):
- *    - Royal blue sidebar (Dashboard, Orders, Products, Escalations)
+ * 2. Admin Operations Command Center (Admin Mode - Image 3 in Airtel Burgundy):
+ *    - Airtel Deep Crimson sidebar (Dashboard, Orders, Products, Escalations)
  *    - Orders Management Table with live status updating
  *    - AI Escalations & Direct Customer Messaging
  * ============================================================================
@@ -31,6 +32,9 @@ function App() {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [planViewMode, setPlanViewMode] = useState("recharge"); // 'recharge' (Image 1 Airtel style) | 'grid'
+  const [showSignInModal, setShowSignInModal] = useState(false); // Image 2 Sign-in modal
+  const [customerName, setCustomerName] = useState("Dean Ambrose");
 
   // Orders State (Loaded from Database)
   const [orders, setOrders] = useState([]);
@@ -41,7 +45,7 @@ function App() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content: "Namaste! I am your Airtel Business AI Advisor. How can I help power your enterprise with high-speed fibre, 5G AirFiber, or cloud security today?",
+      content: "Namaste! Welcome to Airtel Business. Build a business together with guaranteed high-speed fibre, 5G AirFiber, and cloud security. How can I assist your enterprise today?",
       time: "Just now",
       recommendations: null
     }
@@ -105,7 +109,6 @@ function App() {
       const res = await fetch(`/api/user/messages/${sessionId}`);
       const data = await res.json();
       if (data.messages && data.messages.length > 0) {
-        // Append unread admin message to chat
         const lastMsg = data.messages[data.messages.length - 1];
         setMessages(prev => {
           if (!prev.some(m => m.id === lastMsg.message_id)) {
@@ -150,7 +153,6 @@ function App() {
       const data = await res.json();
 
       let recs = null;
-      // If customer discovery is ready, fetch bundle recommendations
       if (data.ready_for_recommendation || data.customer_schema?.business_type) {
         try {
           const recRes = await fetch(`/api/recommend/${sessionId}`);
@@ -331,16 +333,20 @@ function App() {
   return (
     <div className="app-wrapper" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* ====================================================================
-          TOP APPLICATION HEADER (BRAND + ROLE SWITCHER)
+          TOP APPLICATION HEADER (AIRTEL RED BRAND + ROLE SWITCHER)
           ==================================================================== */}
-      <header className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', background: '#0F172A', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <header className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 24px', background: '#FFFFFF', borderBottom: '2px solid #FEE2E2', boxShadow: '0 2px 10px rgba(237, 27, 36, 0.05)' }}>
         <div className="brand-section" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ background: '#E11D48', color: '#FFF', fontWeight: 900, padding: '4px 10px', borderRadius: '6px', fontSize: '0.8rem', letterSpacing: '0.05em' }}>
+          <div style={{ background: '#ED1B24', color: '#FFFFFF', fontWeight: 900, padding: '5px 12px', borderRadius: '8px', fontSize: '0.95rem', letterSpacing: '0.04em', boxShadow: '0 2px 10px rgba(237, 27, 36, 0.3)' }}>
             airtel
           </div>
           <div>
-            <h1 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>Airtel Business Enterprise</h1>
-            <p style={{ fontSize: '0.72rem', color: '#94A3B8', margin: 0 }}>Project Udyam Digital • 100% Pure Python</p>
+            <h1 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+              airtel <span style={{ color: '#ED1B24' }}>business</span>
+            </h1>
+            <p style={{ fontSize: '0.72rem', color: '#ED1B24', fontWeight: 700, margin: 0 }}>
+              Build a Business Together • Project Udyam Digital
+            </p>
           </div>
         </div>
 
@@ -351,7 +357,7 @@ function App() {
               className={`nav-tab-btn ${customerTab === 'products' ? 'active' : ''}`}
               onClick={() => setCustomerTab('products')}
             >
-              🛍️ Products & Solutions
+              🛍️ Solutions Catalogue
             </button>
             <button 
               className={`nav-tab-btn ${customerTab === 'chat' ? 'active' : ''}`}
@@ -368,20 +374,49 @@ function App() {
           </div>
         )}
 
-        {/* Right: Role Switcher Pill */}
-        <div className="role-pill-group">
-          <button 
-            className={`role-pill-btn ${currentRole === 'user' ? 'active customer' : ''}`}
-            onClick={() => setCurrentRole('user')}
-          >
-            👤 Customer View
-          </button>
-          <button 
-            className={`role-pill-btn ${currentRole === 'admin' ? 'active' : ''}`}
-            onClick={() => setCurrentRole('admin')}
-          >
-            🛡️ Admin Operations
-          </button>
+        {/* Right: User Profile & Role Switcher Pill (Airtel Red) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {currentRole === "user" && (
+            <button 
+              onClick={() => setShowSignInModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: '#FEF2F2',
+                border: '1px solid #FECACA',
+                borderRadius: '9999px',
+                padding: '6px 14px',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                color: '#7F1D1D',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              title="Click to view Airtel Account (Image 2)"
+            >
+              <span style={{ fontSize: '0.9rem' }}>👤</span>
+              <span>{customerName}</span>
+              <span style={{ fontSize: '0.65rem', background: '#ED1B24', color: '#FFFFFF', padding: '1px 6px', borderRadius: '9999px', fontWeight: 800 }}>
+                Airtel VIP
+              </span>
+            </button>
+          )}
+
+          <div className="role-pill-group">
+            <button 
+              className={`role-pill-btn ${currentRole === 'user' ? 'active' : ''}`}
+              onClick={() => setCurrentRole('user')}
+            >
+              👤 Customer View
+            </button>
+            <button 
+              className={`role-pill-btn ${currentRole === 'admin' ? 'active' : ''}`}
+              onClick={() => setCurrentRole('admin')}
+            >
+              🛡️ Admin Operations
+            </button>
+          </div>
         </div>
       </header>
 
@@ -389,41 +424,78 @@ function App() {
           ROLE 1: CUSTOMER VIEW (STOREFRONT / AI ASSISTANT / ORDER TRACKING)
           ==================================================================== */}
       {currentRole === "user" && (
-        <main style={{ flex: 1, overflowY: 'auto', background: '#F8FAFC' }}>
+        <main style={{ flex: 1, overflowY: 'auto', background: '#FAFAFA' }}>
           
-          {/* TAB 1: PRODUCTS STOREFRONT */}
+          {/* TAB 1: PRODUCTS STOREFRONT (AIRTEL RED THEME - IMAGE 1 APP STYLE) */}
           {customerTab === "products" && (
             <div style={{ maxWidth: '1100px', margin: '24px auto', padding: '0 20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
                 <div>
-                  <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0F172A' }}>Enterprise Business Solutions</h2>
-                  <p style={{ fontSize: '0.85rem', color: '#64748B' }}>Discover guaranteed high-uptime connectivity, IoT, and cloud tools tailored for your MSME scale.</p>
+                  <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0F172A' }}>
+                    Enterprise Telecom Solutions <span style={{ color: '#ED1B24' }}>for MSMEs</span>
+                  </h2>
+                  <p style={{ fontSize: '0.85rem', color: '#64748B' }}>
+                    Guaranteed 99.5% - 99.9% uptime connectivity, Cloud tools, and IoT security engineered by Airtel Business.
+                  </p>
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="🔍 Search broadband, leased line, CCTV..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '0.85rem', width: '280px' }}
-                />
+
+                {/* View Mode Toggle (Image 1 Mobile Recharge Style vs Grid) */}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#F8FAFC', padding: '4px', borderRadius: '10px', border: '1px solid #FECACA' }}>
+                  <button
+                    onClick={() => setPlanViewMode("recharge")}
+                    style={{
+                      padding: '7px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: 'none',
+                      background: planViewMode === 'recharge' ? '#ED1B24' : 'transparent',
+                      color: planViewMode === 'recharge' ? '#FFFFFF' : '#7F1D1D',
+                      boxShadow: planViewMode === 'recharge' ? '0 2px 8px rgba(237, 27, 36, 0.3)' : 'none',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    📱 Airtel Recharge Plans (Image 1 Style)
+                  </button>
+                  <button
+                    onClick={() => setPlanViewMode("grid")}
+                    style={{
+                      padding: '7px 14px',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: 'none',
+                      background: planViewMode === 'grid' ? '#ED1B24' : 'transparent',
+                      color: planViewMode === 'grid' ? '#FFFFFF' : '#7F1D1D',
+                      boxShadow: planViewMode === 'grid' ? '0 2px 8px rgba(237, 27, 36, 0.3)' : 'none',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    🖥️ Enterprise Grid Cards
+                  </button>
+                </div>
               </div>
 
-              {/* Category Pills */}
+              {/* Category Pills (Airtel Red) */}
               <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {["All", "Connectivity", "Cloud & Productivity", "Security", "IoT & Physical"].map(cat => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
                     style={{
-                      padding: '8px 16px',
+                      padding: '8px 18px',
                       borderRadius: '9999px',
                       fontSize: '0.8rem',
                       fontWeight: 700,
                       border: '1px solid',
-                      borderColor: selectedCategory === cat ? '#E11D48' : '#CBD5E1',
-                      background: selectedCategory === cat ? '#E11D48' : '#FFFFFF',
-                      color: selectedCategory === cat ? '#FFFFFF' : '#475569',
-                      cursor: 'pointer'
+                      borderColor: selectedCategory === cat ? '#ED1B24' : '#FECACA',
+                      background: selectedCategory === cat ? '#ED1B24' : '#FFFFFF',
+                      color: selectedCategory === cat ? '#FFFFFF' : '#7F1D1D',
+                      boxShadow: selectedCategory === cat ? '0 2px 8px rgba(237, 27, 36, 0.3)' : 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
                     }}
                   >
                     {cat}
@@ -431,54 +503,149 @@ function App() {
                 ))}
               </div>
 
-              {/* Products Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-                {filteredProducts.map(p => (
-                  <div key={p.product_id} style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #E2E8F0', padding: '20px', display: 'flex', flexDirection: 'column', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                      <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', background: '#F1F5F9', color: '#475569', padding: '3px 8px', borderRadius: '4px' }}>
-                        {p.category}
-                      </span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: p.requires_gstin === 'Y' ? '#E11D48' : '#10B981' }}>
-                        {p.requires_gstin === 'Y' ? '🔒 Requires GSTIN' : '✅ No GST Needed'}
+              {/* VIEW 1: IMAGE 1 RECHARGE LIST (RECHARGE SCREEN EXACT MATCH) */}
+              {planViewMode === "recharge" && (
+                <div className="recharge-screen-box">
+                  {/* Top Bar matching Image 1: "रिचार्ज" and "बदलिए" */}
+                  <div className="recharge-top-bar">
+                    <div className="recharge-title">
+                      <span style={{ cursor: 'pointer', color: '#ED1B24' }}>←</span>
+                      <span>रिचार्ज</span>
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748B' }}>
+                        (Airtel Enterprise Recharge & Leased Plans)
                       </span>
                     </div>
-
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0F172A', marginBottom: '6px' }}>{p.product_name}</h3>
-                    <p style={{ fontSize: '0.78rem', color: '#64748B', flex: 1, marginBottom: '14px', lineHeight: '1.4' }}>
-                      Typical install: {p.typical_install_days} days • Min Staff: {p.min_employees} • Min Sites: {p.min_sites}
-                    </p>
-
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #F1F5F9' }}>
-                      <div>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0F172A' }}>₹{p.monthly_price_inr.toLocaleString()}</div>
-                        <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>per month • setup ₹{p.one_time_setup_inr}</div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          setCustomerTab("chat");
-                          handleSendMessage(`I want to learn more and get a quote for ${p.product_name}`);
-                        }}
-                        style={{ background: '#2563EB', color: '#FFFFFF', border: 'none', padding: '8px 16px', borderRadius: '8px', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
-                      >
-                        Ask AI Assistant ➔
-                      </button>
-                    </div>
+                    <button 
+                      className="recharge-filter-action"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      बदलिए (Reset Filter)
+                    </button>
                   </div>
-                ))}
-              </div>
+
+                  {/* Search Bar */}
+                  <div className="recharge-search-row">
+                    <span>🔍</span>
+                    <input 
+                      type="text" 
+                      className="recharge-search-input"
+                      placeholder="Search ₹249, ₹399, ₹598, or Enterprise Leased Line..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+
+                  {/* List of Plan Cards directly matching Image 1 */}
+                  <div>
+                    {filteredProducts.map(p => (
+                      <div key={p.product_id} className="recharge-item-card">
+                        <div className="recharge-main-row">
+                          {/* Left: Price Column */}
+                          <div className="recharge-price-col">
+                            <div className="recharge-price-val">₹{p.monthly_price_inr.toLocaleString()}</div>
+                            <div className="recharge-price-sub">असीमित कॉल्स • GSTIN {p.requires_gstin === 'Y' ? 'अनिवार्य' : 'मुक्त'}</div>
+                          </div>
+
+                          {/* Middle: Data Allowance & Speed */}
+                          <div className="recharge-data-col">
+                            <div className="recharge-data-val">
+                              {p.category === 'Connectivity' ? '1.5GB/day or Leased Line' : p.product_name}
+                            </div>
+                            <div className="recharge-data-sub">
+                              <span>⏱️ {p.typical_install_days} Days Install</span>
+                              <span>•</span>
+                              <span>👥 Min {p.min_employees} Staff</span>
+                            </div>
+                          </div>
+
+                          {/* Validity Column */}
+                          <div className="recharge-validity-col">
+                            <div className="recharge-validity-val">
+                              {p.monthly_price_inr < 1000 ? '28 दिन / 28 Days' : '12-Month SLA'}
+                            </div>
+                            <div className="recharge-validity-sub">99.5% Guaranteed</div>
+                          </div>
+
+                          {/* Right: Circular Red Forward Button (Image 1 & 2) */}
+                          <button
+                            className="btn-recharge-arrow"
+                            title={`Select ${p.product_name} and ask AI`}
+                            onClick={() => {
+                              setCustomerTab("chat");
+                              handleSendMessage(`I want to learn more and get a customized quote for ${p.product_name} (₹${p.monthly_price_inr.toLocaleString()}/mo)`);
+                            }}
+                          >
+                            ➔
+                          </button>
+                        </div>
+
+                        {/* Perks Row (Image 1 footer icons) */}
+                        <div className="recharge-perks-row">
+                          <span className="recharge-perk-item">🚀 <strong>Fibre Ultra-Fast</strong></span>
+                          <span className="recharge-perk-item">🛡️ <strong>Airtel Secure Shield</strong></span>
+                          <span className="recharge-perk-item">📞 <strong>24x7 NOC Support</strong></span>
+                          {p.one_time_setup_inr === 0 ? (
+                            <span className="recharge-perk-item" style={{ color: '#16A34A' }}>🎉 <strong>Zero Setup Fee</strong></span>
+                          ) : (
+                            <span className="recharge-perk-item">⚙️ Setup: ₹{p.one_time_setup_inr}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* VIEW 2: ENTERPRISE GRID CARDS */}
+              {planViewMode === "grid" && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                  {filteredProducts.map(p => (
+                    <div key={p.product_id} style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #FECACA', padding: '20px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 14px rgba(237, 27, 36, 0.04)', transition: 'transform 0.2s' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', background: '#FEF2F2', color: '#ED1B24', padding: '3px 8px', borderRadius: '4px', border: '1px solid #FECACA' }}>
+                          {p.category}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: p.requires_gstin === 'Y' ? '#ED1B24' : '#16A34A' }}>
+                          {p.requires_gstin === 'Y' ? '🔒 Requires GSTIN' : '✅ No GST Needed'}
+                        </span>
+                      </div>
+
+                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', marginBottom: '6px' }}>{p.product_name}</h3>
+                      <p style={{ fontSize: '0.78rem', color: '#64748B', flex: 1, marginBottom: '14px', lineHeight: '1.4' }}>
+                        Typical install: <strong>{p.typical_install_days} days</strong> • Min Staff: {p.min_employees} • Min Sites: {p.min_sites}
+                      </p>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #FEE2E2' }}>
+                        <div>
+                          <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ED1B24' }}>₹{p.monthly_price_inr.toLocaleString()}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>per month • setup ₹{p.one_time_setup_inr}</div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setCustomerTab("chat");
+                            handleSendMessage(`I want to learn more and get a quote for ${p.product_name}`);
+                          }}
+                          style={{ background: '#ED1B24', color: '#FFFFFF', border: 'none', padding: '9px 18px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 8px rgba(237, 27, 36, 0.3)', transition: 'background 0.2s' }}
+                        >
+                          Ask AI Assistant ➔
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          {/* TAB 2: AI SHOPPING & SALES ASSISTANT (MATCHES IMAGE 2 & 4) */}
+          {/* TAB 2: AI SHOPPING & SALES ASSISTANT (AIRTEL RED THEME - IMAGE 2 & 4) */}
           {customerTab === "chat" && (
             <div className="assistant-wrapper">
               <div className="assistant-header">
                 <div className="assistant-title">
-                  <span>✨</span> Shopping & Business Assistant
+                  <span style={{ fontSize: '1.2rem' }}>✨</span> airtel <span style={{ fontWeight: 400 }}>Shopping Assistant</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.76rem', color: '#16A34A', fontWeight: 700 }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22C55E' }}></span> Online
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.76rem', color: '#FFFFFF', fontWeight: 700, background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: '9999px' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ADE80' }}></span> Online
                 </div>
               </div>
 
@@ -494,15 +661,15 @@ function App() {
                       <div className="chat-bubble-ai">
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
                           <span className="chat-avatar-ai">✨</span>
-                          <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#4C1D95' }}>Airtel AI Advisor</span>
+                          <span style={{ fontSize: '0.76rem', fontWeight: 800, color: '#ED1B24' }}>Airtel AI Business Advisor</span>
                         </div>
-                        <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+                        <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>{m.content}</div>
 
-                        {/* In-Chat Product Carousel (Image 2 & 4) */}
+                        {/* In-Chat Product Carousel (Image 2 & 4 in Airtel Red) */}
                         {m.recommendations && m.recommendations.length > 0 && (
                           <div style={{ marginTop: '14px' }}>
-                            <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#4C1D95', marginBottom: '6px' }}>
-                              Tailored Packages for Your Business:
+                            <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#ED1B24', marginBottom: '6px' }}>
+                              Recommended Business Packages:
                             </div>
                             <div className="product-carousel-row">
                               {m.recommendations.map((b, bIdx) => (
@@ -511,7 +678,7 @@ function App() {
                                     {b.type === "PRIMARY_BEST_MATCH" ? "🚀" : "💡"}
                                   </div>
                                   <div className="carousel-body">
-                                    <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#2563EB', textTransform: 'uppercase' }}>
+                                    <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#ED1B24', textTransform: 'uppercase' }}>
                                       {b.type.replace('_', ' ')}
                                     </div>
                                     <div className="carousel-title">{b.bundle_name}</div>
@@ -536,38 +703,38 @@ function App() {
                   </div>
                 ))}
                 {isAiLoading && (
-                  <div className="chat-bubble-ai" style={{ fontStyle: 'italic', color: '#64748B' }}>
-                    ✨ AI Advisor is analyzing requirements and telecom plans...
+                  <div className="chat-bubble-ai" style={{ fontStyle: 'italic', color: '#ED1B24' }}>
+                    ✨ Airtel AI Advisor is analyzing requirements and qualifying business plans...
                   </div>
                 )}
               </div>
 
               {/* Digital KYC Verification Inline Card */}
-              <div style={{ padding: '10px 16px', background: '#F1F5F9', borderTop: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ padding: '10px 16px', background: '#FEF2F2', borderTop: '1px solid #FECACA', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '1.1rem' }}>🛡️</span>
                   <div>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0F172A' }}>Digital KYC Verification (DPDP Act 2023)</div>
-                    <div style={{ fontSize: '0.68rem', color: '#64748B' }}>
+                    <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#7F1D1D' }}>Digital KYC Verification (DPDP Act 2023)</div>
+                    <div style={{ fontSize: '0.68rem', color: '#991B1B' }}>
                       {kycVerified ? `Verified: ${kycVerified.extracted_identifier}` : 'Upload GST or Udyam certificate for instant verification'}
                     </div>
                   </div>
                 </div>
                 <div>
                   {kycVerified ? (
-                    <span style={{ background: '#DCFCE7', color: '#166534', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800 }}>
+                    <span style={{ background: '#DCFCE7', color: '#166534', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800, border: '1px solid #86EFAC' }}>
                       ✅ VERIFIED ACTIVE
                     </span>
                   ) : (
-                    <label style={{ background: '#0F172A', color: '#FFFFFF', padding: '6px 12px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}>
-                      {kycUploading ? 'Verifying...' : 'Upload KYC File'}
+                    <label style={{ background: '#ED1B24', color: '#FFFFFF', padding: '6px 14px', borderRadius: '6px', fontSize: '0.72rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 6px rgba(237, 27, 36, 0.3)' }}>
+                      {kycUploading ? 'Verifying...' : 'Upload KYC Certificate'}
                       <input type="file" style={{ display: 'none' }} onChange={(e) => handleKycUpload(e.target.files[0])} />
                     </label>
                   )}
                 </div>
               </div>
 
-              {/* Suggestion Chips Bar (Image 2 & 4) */}
+              {/* Suggestion Chips Bar (Airtel Red) */}
               <div className="suggestion-chips-bar">
                 {[
                   "Need Office WiFi for 15 Staff",
@@ -631,7 +798,7 @@ function App() {
                   <select 
                     value={activeTrackingOrderId} 
                     onChange={(e) => setActiveTrackingOrderId(e.target.value)}
-                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '0.82rem', fontWeight: 700 }}
+                    style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #FECACA', fontSize: '0.82rem', fontWeight: 700 }}
                   >
                     {orders.map(o => (
                       <option key={o.order_id} value={o.order_id}>
@@ -641,14 +808,14 @@ function App() {
                   </select>
                   <button 
                     onClick={fetchOrders}
-                    style={{ padding: '6px 12px', background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem' }}
+                    style={{ padding: '6px 12px', background: '#FEF2F2', border: '1px solid #FECACA', color: '#ED1B24', borderRadius: '6px', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}
                   >
                     🔄 Refresh
                   </button>
                 </div>
               </div>
 
-              {/* Order Tracker Card (Image 1 replica) */}
+              {/* Order Tracker Card (Image 1 replica in Airtel Red Border) */}
               <div className="order-tracker-card">
                 {/* Order ID Banner */}
                 <div className="order-header-banner">
@@ -716,18 +883,18 @@ function App() {
                 {/* Package & SLA Contract Details */}
                 <div className="order-details-box">
                   <div>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A' }}>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#7F1D1D' }}>
                       {activeTrackingOrder?.bundle_name || "Enterprise High-Speed Suite"}
                     </div>
-                    <div style={{ fontSize: '0.74rem', color: '#64748B' }}>
+                    <div style={{ fontSize: '0.74rem', color: '#991B1B' }}>
                       Contract: {activeTrackingOrder?.contract_months || 12} Months • SLA: {activeTrackingOrder?.contract_terms?.sla_uptime || '99.5% Commercial Uptime'}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#16A34A' }}>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ED1B24' }}>
                       ₹{(activeTrackingOrder?.monthly_cost || 2499).toLocaleString()}
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>monthly advance billing</div>
+                    <div style={{ fontSize: '0.68rem', color: '#7F1D1D' }}>monthly advance billing</div>
                   </div>
                 </div>
               </div>
@@ -737,17 +904,17 @@ function App() {
       )}
 
       {/* ====================================================================
-          ROLE 2: ADMIN OPERATIONS COMMAND CENTER (MATCHES IMAGE 3)
+          ROLE 2: ADMIN OPERATIONS COMMAND CENTER (AIRTEL CRIMSON - IMAGE 3)
           ==================================================================== */}
       {currentRole === "admin" && (
         <div className="admin-shell">
-          {/* Royal Blue Sidebar (Image 3) */}
+          {/* Airtel Deep Crimson Sidebar */}
           <aside className="admin-sidebar-blue">
             <div className="admin-brand">
-              <span style={{ background: '#FFFFFF', color: '#1E3A8A', padding: '3px 8px', borderRadius: '6px', fontSize: '0.8rem' }}>
-                ADMIN
+              <span style={{ background: '#ED1B24', color: '#FFFFFF', padding: '3px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 900 }}>
+                airtel
               </span>
-              Airtel Operations
+              Operations
             </div>
 
             <div className="admin-nav-list">
@@ -777,8 +944,8 @@ function App() {
               </button>
             </div>
 
-            <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.72rem', color: '#93C5FD' }}>
-              👤 Logged in as: Ops Admin<br />
+            <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', fontSize: '0.72rem', color: '#FECACA' }}>
+              👤 Logged in as: Airtel Ops Admin<br />
               Region: India Core (FastAPI)
             </div>
           </aside>
@@ -795,7 +962,7 @@ function App() {
                   </div>
                   <button 
                     onClick={fetchOrders}
-                    style={{ background: '#2563EB', color: '#FFFFFF', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer' }}
+                    style={{ background: '#ED1B24', color: '#FFFFFF', padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 800, fontSize: '0.8rem', cursor: 'pointer', boxShadow: '0 2px 8px rgba(237, 27, 36, 0.3)' }}
                   >
                     🔄 Refresh Orders
                   </button>
@@ -816,7 +983,7 @@ function App() {
                     <tbody>
                       {orders.map((o) => (
                         <tr key={o.order_id}>
-                          <td style={{ fontWeight: 800, color: '#2563EB' }}>{o.order_id}</td>
+                          <td style={{ fontWeight: 800, color: '#ED1B24' }}>{o.order_id}</td>
                           <td>
                             <div style={{ fontWeight: 700 }}>{o.customer_name}</div>
                             <div style={{ fontSize: '0.7rem', color: '#64748B' }}>{o.business_type}</div>
@@ -825,7 +992,7 @@ function App() {
                             <div style={{ fontWeight: 600 }}>{o.bundle_name}</div>
                             <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>{o.bundle_code}</div>
                           </td>
-                          <td style={{ fontWeight: 700, color: '#0F172A' }}>
+                          <td style={{ fontWeight: 800, color: '#ED1B24' }}>
                             ₹{o.monthly_cost?.toLocaleString()}
                           </td>
                           <td>
@@ -834,8 +1001,9 @@ function App() {
                               borderRadius: '9999px',
                               fontSize: '0.72rem',
                               fontWeight: 800,
-                              background: o.status === 'Delivered' ? '#DCFCE7' : o.status === 'Order Confirm' ? '#DBEAFE' : '#FEF3C7',
-                              color: o.status === 'Delivered' ? '#166534' : o.status === 'Order Confirm' ? '#1E40AF' : '#92400E'
+                              background: o.status === 'Delivered' ? '#DCFCE7' : o.status === 'Order Confirm' ? '#FEF2F2' : '#FEF3C7',
+                              color: o.status === 'Delivered' ? '#166534' : o.status === 'Order Confirm' ? '#ED1B24' : '#92400E',
+                              border: o.status === 'Order Confirm' ? '1px solid #FECACA' : 'none'
                             }}>
                               {o.status}
                             </span>
@@ -871,7 +1039,7 @@ function App() {
 
                 {/* Send Message Card */}
                 <div className="admin-top-card" style={{ maxWidth: '650px' }}>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '14px' }}>💬 Send Message / Custom Bundle to Customer</h3>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#7F1D1D', marginBottom: '14px' }}>💬 Send Message / Custom Bundle to Customer</h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div>
                       <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#475569' }}>Target Customer Session:</label>
@@ -880,7 +1048,7 @@ function App() {
                         placeholder="session_... (Leave empty for active user)"
                         value={adminTargetSession}
                         onChange={(e) => setAdminTargetSession(e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', marginTop: '4px', fontSize: '0.82rem' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #FECACA', marginTop: '4px', fontSize: '0.82rem' }}
                       />
                     </div>
                     <div>
@@ -890,12 +1058,12 @@ function App() {
                         placeholder="e.g. Hello, we reviewed your multi-site requirement. We can provide 1G Optical Leased Line with 20% discount on 24-month contract."
                         value={adminMsgText}
                         onChange={(e) => setAdminMsgText(e.target.value)}
-                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #CBD5E1', marginTop: '4px', fontSize: '0.82rem', fontFamily: 'inherit' }}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #FECACA', marginTop: '4px', fontSize: '0.82rem', fontFamily: 'inherit' }}
                       />
                     </div>
                     <button 
                       onClick={handleSendAdminMessage}
-                      style={{ background: '#2563EB', color: '#FFFFFF', border: 'none', padding: '10px 18px', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-start' }}
+                      style={{ background: '#ED1B24', color: '#FFFFFF', border: 'none', padding: '10px 18px', borderRadius: '8px', fontWeight: 800, cursor: 'pointer', alignSelf: 'flex-start', boxShadow: '0 2px 8px rgba(237, 27, 36, 0.3)' }}
                     >
                       🚀 Send Message to Customer Chat
                     </button>
@@ -929,10 +1097,10 @@ function App() {
                     <tbody>
                       {products.map((p) => (
                         <tr key={p.product_id}>
-                          <td style={{ fontWeight: 800, color: '#2563EB' }}>{p.product_id}</td>
+                          <td style={{ fontWeight: 800, color: '#ED1B24' }}>{p.product_id}</td>
                           <td style={{ fontWeight: 700 }}>{p.product_name}</td>
                           <td>{p.category}</td>
-                          <td style={{ fontWeight: 700 }}>₹{p.monthly_price_inr.toLocaleString()}</td>
+                          <td style={{ fontWeight: 800, color: '#ED1B24' }}>₹{p.monthly_price_inr.toLocaleString()}</td>
                           <td>₹{p.one_time_setup_inr}</td>
                           <td>{p.requires_gstin === 'Y' ? 'Yes' : 'No'}</td>
                           <td>{p.typical_install_days} Days</td>
@@ -952,27 +1120,106 @@ function App() {
                   <div className="admin-top-card">
                     <div style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 700 }}>TOTAL SMB LEADS</div>
                     <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0F172A' }}>5,000</div>
-                    <div style={{ fontSize: '0.7rem', color: '#10B981' }}>↑ Synthetic Pipeline</div>
+                    <div style={{ fontSize: '0.7rem', color: '#16A34A' }}>↑ Synthetic Pipeline</div>
                   </div>
                   <div className="admin-top-card">
                     <div style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 700 }}>ACTIVE ORDERS</div>
-                    <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#2563EB' }}>{orders.length}</div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ED1B24' }}>{orders.length}</div>
                     <div style={{ fontSize: '0.7rem', color: '#64748B' }}>In active fulfillment</div>
                   </div>
                   <div className="admin-top-card">
                     <div style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 700 }}>SLA UPTIME TARGET</div>
                     <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#16A34A' }}>99.9%</div>
-                    <div style={{ fontSize: '0.7rem', color: '#10B981' }}>Guaranteed Enterprise</div>
+                    <div style={{ fontSize: '0.7rem', color: '#16A34A' }}>Guaranteed Enterprise</div>
                   </div>
                   <div className="admin-top-card">
                     <div style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 700 }}>AVG ACTIVATION CYCLE</div>
-                    <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#E11D48' }}>3.2 Days</div>
-                    <div style={{ fontSize: '0.7rem', color: '#10B981' }}>Down from 17.6 days</div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ED1B24' }}>3.2 Days</div>
+                    <div style={{ fontSize: '0.7rem', color: '#16A34A' }}>Down from 17.6 days</div>
                   </div>
                 </div>
               </div>
             )}
           </main>
+        </div>
+      )}
+
+      {/* ====================================================================
+          IMAGE 2: AIRTEL SIGN-IN & PROFILE MODAL ("BUILD A BUSINESS TOGETHER")
+          ==================================================================== */}
+      {showSignInModal && (
+        <div className="airtel-modal-overlay" onClick={() => setShowSignInModal(false)}>
+          <div className="airtel-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="airtel-wave-bg"></div>
+            
+            {/* Status Bar simulation like Image 2 */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 20px 0 20px', fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
+              <span>••••• EE</span>
+              <span>12:53 pm</span>
+              <span>🔋 31%</span>
+            </div>
+
+            <div className="airtel-modal-header">
+              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                SIGN IN
+              </div>
+              <div className="airtel-modal-logo">airtel</div>
+              <div className="airtel-modal-tagline">Build a Business Together</div>
+            </div>
+
+            <div className="airtel-modal-body">
+              <div className="airtel-input-group">
+                <label className="airtel-input-label">Enter Your Name</label>
+                <div className="airtel-input-wrapper">
+                  <span>👤</span>
+                  <input 
+                    type="text" 
+                    className="airtel-input-field" 
+                    value={customerName} 
+                    onChange={(e) => setCustomerName(e.target.value)} 
+                  />
+                </div>
+              </div>
+
+              <div className="airtel-input-group">
+                <label className="airtel-input-label">Password</label>
+                <div className="airtel-input-wrapper">
+                  <span>🔒</span>
+                  <input 
+                    type="password" 
+                    className="airtel-input-field" 
+                    defaultValue="password123" 
+                  />
+                </div>
+              </div>
+
+              <div className="airtel-forgot-link">Forgot Your Password?</div>
+
+              <button 
+                className="btn-airtel-signin"
+                onClick={() => setShowSignInModal(false)}
+              >
+                Sign in Now
+              </button>
+
+              <div className="airtel-social-section">
+                <div className="airtel-social-label">or Via Social Media</div>
+                <div className="airtel-social-icons">
+                  <button className="social-circle-btn" style={{ color: '#1877F2' }}>f</button>
+                  <button className="social-circle-btn" style={{ color: '#EA4335' }}>G+</button>
+                  <button className="social-circle-btn" style={{ color: '#1DA1F2' }}>🐦</button>
+                </div>
+              </div>
+
+              <button 
+                className="floating-arrow-btn"
+                onClick={() => setShowSignInModal(false)}
+                title="Continue"
+              >
+                ➔
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

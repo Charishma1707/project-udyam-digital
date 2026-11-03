@@ -1,11 +1,9 @@
 {
-  "generated_at": "2026-11-03T11:24:05.659Z",
-  "metrics": {
-    "products": 25,
-    "gstin_registry": 3534,
-    "udyam_registry": 2723,
-    "smb_leads": 5000,
-    "city_tier_mapping": 38,
-    "total_records": 11320
-  }
+  "products": 25,
+  "gstin_registry": 3534,
+  "udyam_registry": 2723,
+  "leads": 5000,
+  "bundles_computed": 306,
+  "product_stats_computed": 25,
+  "total_records": 11282
 }

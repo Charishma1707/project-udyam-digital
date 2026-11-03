@@ -42,9 +42,10 @@ def run_etl() -> Dict[str, Any]:
                     "product_id": row.get("product_id"),
                     "product_name": row.get("product_name"),
                     "category": row.get("category"),
-                    "monthly_price_inr": float(row.get("monthly_price_inr") or 0),
+                    "monthly_price_inr": float(row.get("price_min_inr_per_month") or row.get("monthly_price_inr") or 0),
+                    "price_max_inr_per_month": float(row.get("price_max_inr_per_month") or row.get("price_min_inr_per_month") or 0),
                     "one_time_setup_inr": float(row.get("one_time_setup_inr") or 0),
-                    "contract_months": int(row.get("contract_months") or 12),
+                    "contract_months": int(row.get("min_contract_months") or row.get("contract_months") or 12),
                     "min_employees": int(row.get("min_employees") or 1),
                     "min_sites": int(row.get("min_sites") or 1),
                     "requires_gstin": row.get("requires_gstin", "N"),
@@ -68,16 +69,114 @@ def run_etl() -> Dict[str, Any]:
         with open(udyam_csv, "r", encoding="utf-8") as f:
             udyam_count = sum(1 for _ in f) - 1
 
+    # 3. Process 5,000 SMB Leads to Generate Bundle & Product Statistics
     leads_csv = DATASET_DIR / "smb_leads.csv"
+    bundle_aggregates: Dict[str, Any] = {}
+    product_aggregates: Dict[str, Any] = {}
+
     if leads_csv.exists():
         with open(leads_csv, "r", encoding="utf-8") as f:
-            leads_count = sum(1 for _ in f) - 1
+            reader = csv.DictReader(f)
+            for row in reader:
+                leads_count += 1
+                b_code = row.get("bundle_products", "").strip()
+                outcome = row.get("outcome", "").strip()
+                nps = float(row.get("nps_score")) if row.get("nps_score") else None
+                churn = row.get("churned_within_6_months", "").strip().upper() == "Y"
+                m_val = float(row.get("monthly_bundle_value_inr") or 0)
+                s_val = float(row.get("one_time_setup_inr") or 0)
+                segment = row.get("segment", "").strip()
 
+                # Bundle statistics aggregation (Activated customers)
+                if b_code and outcome == "Activated":
+                    if b_code not in bundle_aggregates:
+                        bundle_aggregates[b_code] = {
+                            "bundle_code": b_code,
+                            "total_sold": 0,
+                            "monthly_vals": [],
+                            "setup_fees": [],
+                            "nps_scores": [],
+                            "churn_count": 0,
+                            "segments": {}
+                        }
+                    b_agg = bundle_aggregates[b_code]
+                    b_agg["total_sold"] += 1
+                    b_agg["monthly_vals"].append(m_val)
+                    b_agg["setup_fees"].append(s_val)
+                    if nps is not None:
+                        b_agg["nps_scores"].append(nps)
+                    if churn:
+                        b_agg["churn_count"] += 1
+                    b_agg["segments"][segment] = b_agg["segments"].get(segment, 0) + 1
+
+                # Product conversion & NPS aggregation
+                poi = [p.strip() for p in (row.get("products_of_interest") or "").split(";") if p.strip()]
+                for p_id in poi:
+                    if p_id not in product_aggregates:
+                        product_aggregates[p_id] = {
+                            "product_id": p_id,
+                            "times_recommended": 0,
+                            "times_activated": 0,
+                            "nps_scores": [],
+                            "churn_count": 0
+                        }
+                    product_aggregates[p_id]["times_recommended"] += 1
+                    if outcome == "Activated":
+                        product_aggregates[p_id]["times_activated"] += 1
+                        if nps is not None:
+                            product_aggregates[p_id]["nps_scores"].append(nps)
+                        if churn:
+                            product_aggregates[p_id]["churn_count"] += 1
+
+    # Format Bundle Statistics
+    bundle_stats = []
+    for code, b_data in sorted(bundle_aggregates.items(), key=lambda x: x[1]["total_sold"], reverse=True):
+        m_list = b_data["monthly_vals"]
+        s_list = b_data["setup_fees"]
+        n_list = b_data["nps_scores"]
+        total = b_data["total_sold"]
+        top_seg = max(b_data["segments"].items(), key=lambda x: x[1])[0] if b_data["segments"] else "General"
+
+        bundle_stats.append({
+            "bundle_code": code,
+            "total_sold": total,
+            "avg_monthly_value": round(sum(m_list) / len(m_list), 2) if m_list else 0,
+            "avg_setup_fee": round(sum(s_list) / len(s_list), 2) if s_list else 0,
+            "avg_nps": round(sum(n_list) / len(n_list), 2) if n_list else 7.0,
+            "churn_rate": round(b_data["churn_count"] / total, 3) if total else 0.0,
+            "top_segment": top_seg
+        })
+
+    with open(DATA_DIR / "bundle_statistics.json", "w", encoding="utf-8") as f:
+        json.dump(bundle_stats, f, indent=2)
+
+    # Format Product Statistics
+    product_stats = []
+    for pid, p_data in sorted(product_aggregates.items(), key=lambda x: x[1]["times_activated"], reverse=True):
+        recs = p_data["times_recommended"]
+        acts = p_data["times_activated"]
+        n_list = p_data["nps_scores"]
+
+        product_stats.append({
+            "product_id": pid,
+            "times_recommended": recs,
+            "times_activated": acts,
+            "conversion_rate": round(acts / recs, 3) if recs else 0.0,
+            "avg_nps": round(sum(n_list) / len(n_list), 2) if n_list else 7.0,
+            "churn_rate": round(p_data["churn_count"] / acts, 3) if acts else 0.0
+        })
+
+    with open(DATA_DIR / "product_statistics.json", "w", encoding="utf-8") as f:
+        json.dump(product_stats, f, indent=2)
+
+    # 4. Generate Overall Dataset Summary
     summary = {
         "products": len(products),
         "gstin_registry": max(0, gstin_count),
         "udyam_registry": max(0, udyam_count),
         "leads": max(0, leads_count),
+        "bundles_computed": len(bundle_stats),
+        "product_stats_computed": len(product_stats),
         "total_records": len(products) + max(0, gstin_count) + max(0, udyam_count) + max(0, leads_count)
     }
 

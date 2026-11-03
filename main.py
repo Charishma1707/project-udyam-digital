@@ -45,6 +45,7 @@ from data_preprocessing.business_segment_mapper import business_segment_mapper
 from data_preprocessing.etl_pipeline import run_etl
 from recommendation.bundle_engine import bundle_engine
 from kyc_verification.smart_kyc_service import smart_kyc_service
+from kyc_verification.smart_kyc_verifier import smart_kyc_verifier, find_applicant_files
 from order_tracking.order_lifecycle import order_lifecycle_service
 from database.db_client import db_client
 
@@ -287,6 +288,38 @@ async def upload_kyc(
         session_id=session_id,
         expected_name=expected_name
     )
+
+
+@app.get("/api/kyc/applicants")
+async def list_kyc_applicants():
+    """Returns all available test applicants in the dataset (K01 to K12)."""
+    kyc_dir = BASE_DIR / "YTL_TrackA_Udyam_Digital_Data" / "kyc_documents"
+    applicants = []
+    for i in range(1, 13):
+        app_id = f"K{i:02d}"
+        files = find_applicant_files(str(kyc_dir), app_id)
+        valid_files = {k: v for k, v in files.items() if v}
+        if valid_files:
+            applicants.append({
+                "applicant_id": app_id,
+                "document_count": len(valid_files),
+                "slots": list(valid_files.keys())
+            })
+    return {"count": len(applicants), "applicants": applicants}
+
+
+@app.post("/api/kyc/verify-applicant/{applicant_id}")
+async def verify_applicant(applicant_id: str):
+    """Executes SmartKYCVerifier (OCR + multi-tier checks) for applicant K01-K12."""
+    kyc_dir = BASE_DIR / "YTL_TrackA_Udyam_Digital_Data" / "kyc_documents"
+    files = find_applicant_files(str(kyc_dir), applicant_id.upper())
+    valid_files = {k: v for k, v in files.items() if v}
+    if not valid_files:
+        raise HTTPException(status_code=404, detail=f"No KYC documents found for applicant {applicant_id}")
+    
+    result = smart_kyc_verifier.verify_customer(applicant_id.upper(), files)
+    return result
+
 
 
 @app.post("/api/orders/accept")

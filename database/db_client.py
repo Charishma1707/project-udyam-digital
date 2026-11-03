@@ -19,8 +19,18 @@ import csv
 import json
 from pathlib import Path
 from typing import Dict, List, Optional, Any
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    PSYCOPG2_AVAILABLE = True
+except ImportError:
+    PSYCOPG2_AVAILABLE = False
+
 DATA_DIR = BASE_DIR / "data"
 DATASET_DIR = BASE_DIR / "YTL_TrackA_Udyam_Digital_Data"
 
@@ -28,6 +38,8 @@ DATASET_DIR = BASE_DIR / "YTL_TrackA_Udyam_Digital_Data"
 class DatabaseClient:
     def __init__(self):
         self.is_connected = False
+        self.database_url = os.getenv("DATABASE_URL")
+        self.conn = None
         self.products: List[Dict[str, Any]] = []
         self.gstin_registry: Dict[str, Dict[str, Any]] = {}
         self.udyam_registry: Dict[str, Dict[str, Any]] = {}
@@ -36,7 +48,20 @@ class DatabaseClient:
         self.bundle_statistics: List[Dict[str, Any]] = []
         self.product_statistics: List[Dict[str, Any]] = []
 
+        self.init_postgres()
         self.load_cache()
+
+    def init_postgres(self):
+        """Attempts connection to PostgreSQL (Cloud or Local) when configured."""
+        if not PSYCOPG2_AVAILABLE or not self.database_url:
+            return
+        try:
+            self.conn = psycopg2.connect(self.database_url, connect_timeout=3)
+            self.conn.autocommit = True
+            self.is_connected = True
+        except Exception:
+            self.is_connected = False
+            self.conn = None
 
     def load_cache(self):
         """Loads data into memory for ultra-fast sub-millisecond retrieval."""
@@ -113,16 +138,36 @@ class DatabaseClient:
                 self.product_statistics = json.load(f)
 
     def find_gstin(self, gstin: Optional[str]) -> Optional[Dict[str, Any]]:
-        """Validates and retrieves GSTIN tax entity details."""
+        """Validates and retrieves GSTIN tax entity details (Cloud DB with Cache fallback)."""
         if not gstin:
             return None
-        return self.gstin_registry.get(gstin.strip().upper())
+        gid = gstin.strip().upper()
+        if self.is_connected and self.conn:
+            try:
+                with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("SELECT * FROM gstin_registry WHERE gstin = %s LIMIT 1;", (gid,))
+                    row = cur.fetchone()
+                    if row:
+                        return dict(row)
+            except Exception:
+                pass
+        return self.gstin_registry.get(gid)
 
     def find_udyam(self, udyam_number: Optional[str]) -> Optional[Dict[str, Any]]:
-        """Validates and retrieves MSME Udyam entity details."""
+        """Validates and retrieves MSME Udyam entity details (Cloud DB with Cache fallback)."""
         if not udyam_number:
             return None
-        return self.udyam_registry.get(udyam_number.strip().upper())
+        uid = udyam_number.strip().upper()
+        if self.is_connected and self.conn:
+            try:
+                with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("SELECT * FROM udyam_registry WHERE udyam_number = %s LIMIT 1;", (uid,))
+                    row = cur.fetchone()
+                    if row:
+                        return dict(row)
+            except Exception:
+                pass
+        return self.udyam_registry.get(uid)
 
     def get_products(self) -> List[Dict[str, Any]]:
         """Returns catalogue of normalized enterprise products."""
@@ -135,7 +180,10 @@ class DatabaseClient:
     def get_status(self) -> Dict[str, Any]:
         """Returns current database health and record counts."""
         return {
-            "postgres": {"ok": self.is_connected},
+            "postgres": {
+                "ok": self.is_connected,
+                "url_configured": bool(self.database_url)
+            },
             "memory_store": {
                 "products": len(self.products),
                 "gstin": len(self.gstin_registry),

@@ -32,7 +32,6 @@ function App() {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [planViewMode, setPlanViewMode] = useState("recharge"); // 'recharge' (Image 1 Airtel style) | 'grid'
   const [showSignInModal, setShowSignInModal] = useState(false); // Image 2 Sign-in modal
   const [customerName, setCustomerName] = useState("Dean Ambrose");
 
@@ -426,7 +425,7 @@ function App() {
       {currentRole === "user" && (
         <main style={{ flex: 1, overflowY: 'auto', background: '#FAFAFA' }}>
           
-          {/* TAB 1: PRODUCTS STOREFRONT (AIRTEL RED THEME - IMAGE 1 APP STYLE) */}
+          {/* TAB 1: PRODUCTS STOREFRONT (AIRTEL RED THEME - ENTERPRISE SOLUTIONS) */}
           {customerTab === "products" && (
             <div style={{ maxWidth: '1100px', margin: '24px auto', padding: '0 20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '14px' }}>
@@ -439,43 +438,13 @@ function App() {
                   </p>
                 </div>
 
-                {/* View Mode Toggle (Image 1 Mobile Recharge Style vs Grid) */}
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#F8FAFC', padding: '4px', borderRadius: '10px', border: '1px solid #FECACA' }}>
-                  <button
-                    onClick={() => setPlanViewMode("recharge")}
-                    style={{
-                      padding: '7px 14px',
-                      borderRadius: '8px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      border: 'none',
-                      background: planViewMode === 'recharge' ? '#ED1B24' : 'transparent',
-                      color: planViewMode === 'recharge' ? '#FFFFFF' : '#7F1D1D',
-                      boxShadow: planViewMode === 'recharge' ? '0 2px 8px rgba(237, 27, 36, 0.3)' : 'none',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    📱 Airtel Recharge Plans (Image 1 Style)
-                  </button>
-                  <button
-                    onClick={() => setPlanViewMode("grid")}
-                    style={{
-                      padding: '7px 14px',
-                      borderRadius: '8px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      border: 'none',
-                      background: planViewMode === 'grid' ? '#ED1B24' : 'transparent',
-                      color: planViewMode === 'grid' ? '#FFFFFF' : '#7F1D1D',
-                      boxShadow: planViewMode === 'grid' ? '0 2px 8px rgba(237, 27, 36, 0.3)' : 'none',
-                      transition: 'all 0.2s'
-                    }}
-                  >
-                    🖥️ Enterprise Grid Cards
-                  </button>
-                </div>
+                <input 
+                  type="text" 
+                  placeholder="🔍 Search broadband, 5G AirFiber, CCTV..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #FECACA', fontSize: '0.85rem', width: '280px', outline: 'none' }}
+                />
               </div>
 
               {/* Category Pills (Airtel Red) */}
@@ -503,137 +472,42 @@ function App() {
                 ))}
               </div>
 
-              {/* VIEW 1: IMAGE 1 RECHARGE LIST (RECHARGE SCREEN EXACT MATCH) */}
-              {planViewMode === "recharge" && (
-                <div className="recharge-screen-box">
-                  {/* Top Bar matching Image 1: "रिचार्ज" and "बदलिए" */}
-                  <div className="recharge-top-bar">
-                    <div className="recharge-title">
-                      <span style={{ cursor: 'pointer', color: '#ED1B24' }}>←</span>
-                      <span>रिचार्ज</span>
-                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748B' }}>
-                        (Airtel Enterprise Recharge & Leased Plans)
+              {/* Enterprise Solutions Grid Cards */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                {filteredProducts.map(p => (
+                  <div key={p.product_id} style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #FECACA', padding: '20px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 14px rgba(237, 27, 36, 0.04)', transition: 'transform 0.2s' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', background: '#FEF2F2', color: '#ED1B24', padding: '3px 8px', borderRadius: '4px', border: '1px solid #FECACA' }}>
+                        {p.category}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: p.requires_gstin === 'Y' ? '#ED1B24' : '#16A34A' }}>
+                        {p.requires_gstin === 'Y' ? '🔒 Requires GSTIN' : '✅ No GST Needed'}
                       </span>
                     </div>
-                    <button 
-                      className="recharge-filter-action"
-                      onClick={() => setSearchQuery("")}
-                    >
-                      बदलिए (Reset Filter)
-                    </button>
-                  </div>
 
-                  {/* Search Bar */}
-                  <div className="recharge-search-row">
-                    <span>🔍</span>
-                    <input 
-                      type="text" 
-                      className="recharge-search-input"
-                      placeholder="Search ₹249, ₹399, ₹598, or Enterprise Leased Line..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', marginBottom: '6px' }}>{p.product_name}</h3>
+                    <p style={{ fontSize: '0.78rem', color: '#64748B', flex: 1, marginBottom: '14px', lineHeight: '1.4' }}>
+                      Typical install: <strong>{p.typical_install_days} days</strong> • Min Staff: {p.min_employees} • Min Sites: {p.min_sites}
+                    </p>
 
-                  {/* List of Plan Cards directly matching Image 1 */}
-                  <div>
-                    {filteredProducts.map(p => (
-                      <div key={p.product_id} className="recharge-item-card">
-                        <div className="recharge-main-row">
-                          {/* Left: Price Column */}
-                          <div className="recharge-price-col">
-                            <div className="recharge-price-val">₹{p.monthly_price_inr.toLocaleString()}</div>
-                            <div className="recharge-price-sub">असीमित कॉल्स • GSTIN {p.requires_gstin === 'Y' ? 'अनिवार्य' : 'मुक्त'}</div>
-                          </div>
-
-                          {/* Middle: Data Allowance & Speed */}
-                          <div className="recharge-data-col">
-                            <div className="recharge-data-val">
-                              {p.category === 'Connectivity' ? '1.5GB/day or Leased Line' : p.product_name}
-                            </div>
-                            <div className="recharge-data-sub">
-                              <span>⏱️ {p.typical_install_days} Days Install</span>
-                              <span>•</span>
-                              <span>👥 Min {p.min_employees} Staff</span>
-                            </div>
-                          </div>
-
-                          {/* Validity Column */}
-                          <div className="recharge-validity-col">
-                            <div className="recharge-validity-val">
-                              {p.monthly_price_inr < 1000 ? '28 दिन / 28 Days' : '12-Month SLA'}
-                            </div>
-                            <div className="recharge-validity-sub">99.5% Guaranteed</div>
-                          </div>
-
-                          {/* Right: Circular Red Forward Button (Image 1 & 2) */}
-                          <button
-                            className="btn-recharge-arrow"
-                            title={`Select ${p.product_name} and ask AI`}
-                            onClick={() => {
-                              setCustomerTab("chat");
-                              handleSendMessage(`I want to learn more and get a customized quote for ${p.product_name} (₹${p.monthly_price_inr.toLocaleString()}/mo)`);
-                            }}
-                          >
-                            ➔
-                          </button>
-                        </div>
-
-                        {/* Perks Row (Image 1 footer icons) */}
-                        <div className="recharge-perks-row">
-                          <span className="recharge-perk-item">🚀 <strong>Fibre Ultra-Fast</strong></span>
-                          <span className="recharge-perk-item">🛡️ <strong>Airtel Secure Shield</strong></span>
-                          <span className="recharge-perk-item">📞 <strong>24x7 NOC Support</strong></span>
-                          {p.one_time_setup_inr === 0 ? (
-                            <span className="recharge-perk-item" style={{ color: '#16A34A' }}>🎉 <strong>Zero Setup Fee</strong></span>
-                          ) : (
-                            <span className="recharge-perk-item">⚙️ Setup: ₹{p.one_time_setup_inr}</span>
-                          )}
-                        </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #FEE2E2' }}>
+                      <div>
+                        <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ED1B24' }}>₹{p.monthly_price_inr.toLocaleString()}</div>
+                        <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>per month • setup ₹{p.one_time_setup_inr}</div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* VIEW 2: ENTERPRISE GRID CARDS */}
-              {planViewMode === "grid" && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-                  {filteredProducts.map(p => (
-                    <div key={p.product_id} style={{ background: '#FFFFFF', borderRadius: '14px', border: '1px solid #FECACA', padding: '20px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 14px rgba(237, 27, 36, 0.04)', transition: 'transform 0.2s' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', background: '#FEF2F2', color: '#ED1B24', padding: '3px 8px', borderRadius: '4px', border: '1px solid #FECACA' }}>
-                          {p.category}
-                        </span>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: p.requires_gstin === 'Y' ? '#ED1B24' : '#16A34A' }}>
-                          {p.requires_gstin === 'Y' ? '🔒 Requires GSTIN' : '✅ No GST Needed'}
-                        </span>
-                      </div>
-
-                      <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0F172A', marginBottom: '6px' }}>{p.product_name}</h3>
-                      <p style={{ fontSize: '0.78rem', color: '#64748B', flex: 1, marginBottom: '14px', lineHeight: '1.4' }}>
-                        Typical install: <strong>{p.typical_install_days} days</strong> • Min Staff: {p.min_employees} • Min Sites: {p.min_sites}
-                      </p>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: '12px', borderTop: '1px solid #FEE2E2' }}>
-                        <div>
-                          <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#ED1B24' }}>₹{p.monthly_price_inr.toLocaleString()}</div>
-                          <div style={{ fontSize: '0.68rem', color: '#94A3B8' }}>per month • setup ₹{p.one_time_setup_inr}</div>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setCustomerTab("chat");
-                            handleSendMessage(`I want to learn more and get a quote for ${p.product_name}`);
-                          }}
-                          style={{ background: '#ED1B24', color: '#FFFFFF', border: 'none', padding: '9px 18px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 8px rgba(237, 27, 36, 0.3)', transition: 'background 0.2s' }}
-                        >
-                          Ask AI Assistant ➔
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => {
+                          setCustomerTab("chat");
+                          handleSendMessage(`I want to learn more and get a quote for ${p.product_name}`);
+                        }}
+                        style={{ background: '#ED1B24', color: '#FFFFFF', border: 'none', padding: '9px 18px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', boxShadow: '0 2px 8px rgba(237, 27, 36, 0.3)', transition: 'background 0.2s' }}
+                      >
+                        Ask AI Assistant ➔
+                      </button>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

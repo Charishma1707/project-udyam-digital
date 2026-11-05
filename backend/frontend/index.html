@@ -1292,8 +1292,11 @@
         // Update recommendation package live
         updateRecommendedPlanUI(data.recommended_plan, data.customer_schema);
 
-        // If the AI has generated a proposal, also append the interactive proposal card into the chat flow
-        if (data.recommended_plan && (data.completion_percentage >= 40 || data.recommended_plan.products?.length > 0)) {
+        // If the AI flagged an escalation (low confidence or architecture complexity), append escalation card
+        if (data.escalation) {
+          appendEscalationCardToChat(data.escalation);
+        } else if (data.recommended_plan && (data.completion_percentage >= 40 || data.recommended_plan.products?.length > 0)) {
+          // Otherwise, if recommendation proposal is ready, append interactive proposal card
           appendRecommendationCardToChat(data.recommended_plan, data.customer_schema);
         }
       } catch (err) {

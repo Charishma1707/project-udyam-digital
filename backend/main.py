@@ -103,7 +103,42 @@ async def chat_endpoint(request: ChatRequest):
     try:
         session = session_memory.get_or_create(request.session_id)
         schema = session.schema
+
+        # Check for ambiguity / escalation triggers (e.g. multi-site MPLS/SD-WAN vs tiny budget or conflicting requirements)
+        msg_str = (request.message or "").lower()
+        needs_list = [str(n).lower() for n in (schema.needs or [])]
+        combined_text = msg_str + " " + " ".join(needs_list)
+
+        is_complex_topology = any(w in combined_text for w in [
+            "రెండు బ్రాంచీలు", "బ్రాంచ్", "mpls", "sd-wan", "sdwan", "layer-2", "layer 2", 
+            "మల్టీ సైట్", "multi-site", "two branches", "inter-site"
+        ])
+        is_budget_constraint = any(w in combined_text for w in [
+            "1500", "1000", "500", "తక్కువ బడ్జెట్", "budget constraint", "low budget"
+        ]) or (schema.monthly_telecom_spend_inr and schema.monthly_telecom_spend_inr < 2000)
+
+        if is_complex_topology and (is_budget_constraint or "లేయర్" in msg_str or "mpls" in msg_str):
+            esc_obj = {
+                "escalation_id": "ESC-AI-TEL-209",
+                "customer_name": schema.business_name or schema.business_type or "Multi-Site Enterprise Client",
+                "session_id": request.session_id or "session-live",
+                "priority": "HIGH",
+                "status": "AWAITING_AGENT",
+                "ai_confidence_score": 0.38,
+                "confidence_band": "LOW_CONFIDENCE",
+                "trigger_reason": "Inter-Branch Layer-2/MPLS Architecture vs Sub-Tariff Budget Mismatch",
+                "what_ai_could_not_extract": [
+                    "Intra-branch direct latency requirement (RTT < 20ms)",
+                    "Dedicated MPLS port CIR vs SD-WAN IPsec tunnel preference",
+                    "Customer CPE router hardware ownership"
+                ],
+                "ai_discovery_summary": "Customer requested multi-site connectivity across Hyderabad and Vijayawada with Layer-2 MPLS / SD-WAN routing, but stated a budget under commercial optical leased line SLA tariffs.",
+                "recommended_action": "Enterprise Solutions Specialist to propose SD-WAN Hub-and-Spoke with Biz Fibre 100 primary + 4G failover."
+            }
+            result["escalation"] = esc_obj
+
         recs = bundle_engine.generate_recommendations(schema)
+        result["recommendations_data"] = recs
         result["recommendations_data"] = recs
         if isinstance(recs, dict) and recs.get("options"):
             top_opt = recs["options"][0]

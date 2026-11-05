@@ -1,0 +1,707 @@
+{
+  "title": "AI Discovery & Recommendation End-to-End Development Trace",
+  "session_id": "dev-trace-session-2026",
+  "turns": [
+    {
+      "turn": 1,
+      "user_input": "Hello, we are a software startup called Apex Innovations in Bangalore with 25 employees.",
+      "ai_reply": "Understood, we have noted your business as Software Startup, location in Bangalore, 25 employees. How many branches or business locations do you currently operate?",
+      "completion_percentage": 55,
+      "ready_for_recommendation": false,
+      "customer_schema": {
+        "business_name": "Apex Innovations",
+        "business_type": "Software Startup",
+        "city": "Bangalore",
+        "employee_count": 25,
+        "num_sites": 0,
+        "monthly_telecom_spend_inr": 0.0,
+        "overall_budget": 0.0,
+        "needs": [],
+        "has_gstin": "N",
+        "has_udyam": "N",
+        "max_installation_days": 0
+      },
+      "missing_fields": [
+        "num_sites",
+        "needs",
+        "monthly_telecom_spend_inr",
+        "max_installation_days"
+      ],
+      "schema_diff": {
+        "business_name": {
+          "previous": null,
+          "current": "Apex Innovations"
+        },
+        "business_type": {
+          "previous": null,
+          "current": "Software Startup"
+        },
+        "city": {
+          "previous": null,
+          "current": "Bangalore"
+        },
+        "employee_count": {
+          "previous": null,
+          "current": 25
+        },
+        "num_sites": {
+          "previous": null,
+          "current": 0
+        },
+        "monthly_telecom_spend_inr": {
+          "previous": null,
+          "current": 0.0
+        },
+        "overall_budget": {
+          "previous": null,
+          "current": 0.0
+        },
+        "has_gstin": {
+          "previous": null,
+          "current": "N"
+        },
+        "has_udyam": {
+          "previous": null,
+          "current": "N"
+        },
+        "max_installation_days": {
+          "previous": null,
+          "current": 0
+        }
+      },
+      "pipeline_trace": [
+        {
+          "stage": 1,
+          "name": "Customer Speech",
+          "status": "SKIPPED",
+          "data": {
+            "mode": "text_input"
+          }
+        },
+        {
+          "stage": 2,
+          "name": "Speech-to-Text",
+          "status": "SKIPPED",
+          "data": {
+            "input": "Hello, we are a software startup called Apex Innovations in Bangalore with 25 employees.",
+            "cleaned": "Hello, we are a software startup called Apex Innovations in Bangalore with 25 employees."
+          }
+        },
+        {
+          "stage": 3,
+          "name": "Language Detection",
+          "status": "SUCCESS",
+          "data": {
+            "detected_language": "English"
+          }
+        },
+        {
+          "stage": 4,
+          "name": "Schema Extraction (Sarvam 105B)",
+          "status": "SUCCESS",
+          "data": {
+            "extracted_entities": {
+              "business_name": "Apex Innovations",
+              "business_type": "Software Startup",
+              "city": "Bangalore",
+              "employee_count": 25,
+              "num_sites": 0,
+              "current_provider": "",
+              "monthly_telecom_spend_inr": 0.0,
+              "overall_budget": 0.0,
+              "needs": [],
+              "has_gstin": "N",
+              "gstin": "",
+              "has_udyam": "N",
+              "udyam_number": "",
+              "max_installation_days": 0
+            }
+          }
+        },
+        {
+          "stage": 5,
+          "name": "Schema Comparison (Diff)",
+          "status": "SUCCESS",
+          "data": {
+            "diff": {
+              "business_name": {
+                "previous": null,
+                "current": "Apex Innovations"
+              },
+              "business_type": {
+                "previous": null,
+                "current": "Software Startup"
+              },
+              "city": {
+                "previous": null,
+                "current": "Bangalore"
+              },
+              "employee_count": {
+                "previous": null,
+                "current": 25
+              },
+              "num_sites": {
+                "previous": null,
+                "current": 0
+              },
+              "monthly_telecom_spend_inr": {
+                "previous": null,
+                "current": 0.0
+              },
+              "overall_budget": {
+                "previous": null,
+                "current": 0.0
+              },
+              "has_gstin": {
+                "previous": null,
+                "current": "N"
+              },
+              "has_udyam": {
+                "previous": null,
+                "current": "N"
+              },
+              "max_installation_days": {
+                "previous": null,
+                "current": 0
+              }
+            }
+          }
+        },
+        {
+          "stage": 6,
+          "name": "Missing Information Detection",
+          "status": "SUCCESS",
+          "data": {
+            "missing_fields": [
+              "num_sites",
+              "needs",
+              "monthly_telecom_spend_inr",
+              "max_installation_days"
+            ],
+            "schema_complete": false
+          }
+        },
+        {
+          "stage": 7,
+          "name": "Schema Completion Meter",
+          "status": "SUCCESS",
+          "data": {
+            "completion_percentage": 55
+          }
+        },
+        {
+          "stage": 8,
+          "name": "Question Planner",
+          "status": "SUCCESS",
+          "data": {
+            "field": "num_sites",
+            "canonical_question": "How many branches or business locations do you currently operate?",
+            "reason": "Number of locations determines whether single-site fibre or multi-site SD-WAN failover is required."
+          }
+        },
+        {
+          "stage": 9,
+          "name": "Conversation Memory",
+          "status": "SUCCESS",
+          "data": {
+            "turn_count": 1
+          }
+        },
+        {
+          "stage": 10,
+          "name": "Current Customer Schema",
+          "status": "SUCCESS",
+          "data": {
+            "schema": {
+              "lead_id": null,
+              "business_name": "Apex Innovations",
+              "contact_name": null,
+              "contact_role": null,
+              "business_type": "Software Startup",
+              "segment": null,
+              "city": "Bangalore",
+              "state": null,
+              "city_tier": null,
+              "preferred_language": null,
+              "employee_count": 25,
+              "num_sites": 0,
+              "annual_turnover_band": null,
+              "current_internet": null,
+              "current_provider": null,
+              "monthly_telecom_spend_inr": 0.0,
+              "overall_budget": 0.0,
+              "needs": [],
+              "has_gstin": "N",
+              "gstin": null,
+              "has_udyam": "N",
+              "udyam_number": null,
+              "max_installation_days": 0
+            }
+          }
+        },
+        {
+          "stage": 11,
+          "name": "Ready for Recommendation",
+          "status": "SUCCESS",
+          "data": {
+            "ready": false
+          }
+        }
+      ]
+    },
+    {
+      "turn": 2,
+      "user_input": "We have 2 branch offices in Indiranagar and Whitefield, and we need 500 Mbps dedicated fiber with 99.9% uptime SLA.",
+      "ai_reply": "Understood, we have noted your business as Software Startup, location in Bangalore, 25 employees, 2 site(s), requirements for 500 Mbps dedicated fiber, 99.9% uptime SLA. What is your approximate monthly telecom spend or telecom budget?",
+      "completion_percentage": 77,
+      "ready_for_recommendation": false,
+      "customer_schema": {
+        "business_name": "Apex Innovations",
+        "business_type": "Software Startup",
+        "city": "Bangalore",
+        "employee_count": 25,
+        "num_sites": 2,
+        "monthly_telecom_spend_inr": 0.0,
+        "overall_budget": 0.0,
+        "needs": [
+          "500 Mbps dedicated fiber",
+          "99.9% uptime SLA"
+        ],
+        "has_gstin": "N",
+        "has_udyam": "N",
+        "max_installation_days": 0
+      },
+      "missing_fields": [
+        "monthly_telecom_spend_inr",
+        "max_installation_days"
+      ],
+      "schema_diff": {
+        "num_sites": {
+          "previous": 0,
+          "current": 2
+        },
+        "needs": {
+          "previous": [],
+          "current": [
+            "500 Mbps dedicated fiber",
+            "99.9% uptime SLA"
+          ]
+        }
+      },
+      "pipeline_trace": [
+        {
+          "stage": 1,
+          "name": "Customer Speech",
+          "status": "SKIPPED",
+          "data": {
+            "mode": "text_input"
+          }
+        },
+        {
+          "stage": 2,
+          "name": "Speech-to-Text",
+          "status": "SKIPPED",
+          "data": {
+            "input": "We have 2 branch offices in Indiranagar and Whitefield, and we need 500 Mbps dedicated fiber with 99.9% uptime SLA.",
+            "cleaned": "We have 2 branch offices in Indiranagar and Whitefield, and we need 500 Mbps dedicated fiber with 99.9% uptime SLA."
+          }
+        },
+        {
+          "stage": 3,
+          "name": "Language Detection",
+          "status": "SUCCESS",
+          "data": {
+            "detected_language": "English"
+          }
+        },
+        {
+          "stage": 4,
+          "name": "Schema Extraction (Sarvam 105B)",
+          "status": "SUCCESS",
+          "data": {
+            "extracted_entities": {
+              "business_name": "",
+              "business_type": "Software Startup",
+              "city": "Bangalore",
+              "employee_count": 25,
+              "num_sites": 2,
+              "current_provider": "",
+              "monthly_telecom_spend_inr": 0.0,
+              "overall_budget": 0.0,
+              "needs": [
+                "500 Mbps dedicated fiber",
+                "99.9% uptime SLA"
+              ],
+              "has_gstin": "",
+              "gstin": "",
+              "has_udyam": "",
+              "udyam_number": "",
+              "max_installation_days": 0
+            }
+          }
+        },
+        {
+          "stage": 5,
+          "name": "Schema Comparison (Diff)",
+          "status": "SUCCESS",
+          "data": {
+            "diff": {
+              "num_sites": {
+                "previous": 0,
+                "current": 2
+              },
+              "needs": {
+                "previous": [],
+                "current": [
+                  "500 Mbps dedicated fiber",
+                  "99.9% uptime SLA"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "stage": 6,
+          "name": "Missing Information Detection",
+          "status": "SUCCESS",
+          "data": {
+            "missing_fields": [
+              "monthly_telecom_spend_inr",
+              "max_installation_days"
+            ],
+            "schema_complete": false
+          }
+        },
+        {
+          "stage": 7,
+          "name": "Schema Completion Meter",
+          "status": "SUCCESS",
+          "data": {
+            "completion_percentage": 77
+          }
+        },
+        {
+          "stage": 8,
+          "name": "Question Planner",
+          "status": "SUCCESS",
+          "data": {
+            "field": "monthly_telecom_spend_inr",
+            "canonical_question": "What is your approximate monthly telecom spend or telecom budget?",
+            "reason": "Monthly telecom spend or telecom budget is required to evaluate cost savings and fit suitable communication plans."
+          }
+        },
+        {
+          "stage": 9,
+          "name": "Conversation Memory",
+          "status": "SUCCESS",
+          "data": {
+            "turn_count": 3
+          }
+        },
+        {
+          "stage": 10,
+          "name": "Current Customer Schema",
+          "status": "SUCCESS",
+          "data": {
+            "schema": {
+              "lead_id": null,
+              "business_name": "Apex Innovations",
+              "contact_name": null,
+              "contact_role": null,
+              "business_type": "Software Startup",
+              "segment": null,
+              "city": "Bangalore",
+              "state": null,
+              "city_tier": null,
+              "preferred_language": null,
+              "employee_count": 25,
+              "num_sites": 2,
+              "annual_turnover_band": null,
+              "current_internet": null,
+              "current_provider": null,
+              "monthly_telecom_spend_inr": 0.0,
+              "overall_budget": 0.0,
+              "needs": [
+                "500 Mbps dedicated fiber",
+                "99.9% uptime SLA"
+              ],
+              "has_gstin": "N",
+              "gstin": null,
+              "has_udyam": "N",
+              "udyam_number": null,
+              "max_installation_days": 0
+            }
+          }
+        },
+        {
+          "stage": 11,
+          "name": "Ready for Recommendation",
+          "status": "SUCCESS",
+          "data": {
+            "ready": false
+          }
+        }
+      ]
+    },
+    {
+      "turn": 3,
+      "user_input": "Our budget is 15000 per month and we need static IP with cloud backup and zero downtime failover. Our GSTIN is 29AAAAA0000A1Z5.",
+      "ai_reply": "Understood, we have noted your business as Software Startup, location in Bangalore, 25 employees, 2 site(s), requirements for 500 Mbps dedicated fiber, 99.9% uptime SLA, static IP, cloud backup, zero downtime failover, budget around \u20b915000/mo. Within how many days do you need the installation completed?",
+      "completion_percentage": 88,
+      "ready_for_recommendation": false,
+      "customer_schema": {
+        "business_name": "Apex Innovations",
+        "business_type": "Software Startup",
+        "city": "Bangalore",
+        "employee_count": 25,
+        "num_sites": 2,
+        "monthly_telecom_spend_inr": 15000.0,
+        "overall_budget": 0.0,
+        "needs": [
+          "500 Mbps dedicated fiber",
+          "cloud backup",
+          "zero downtime failover",
+          "99.9% uptime SLA",
+          "static IP"
+        ],
+        "has_gstin": "Y",
+        "gstin": "29AAAAA0000A1Z5",
+        "has_udyam": "N",
+        "max_installation_days": 0
+      },
+      "missing_fields": [
+        "max_installation_days"
+      ],
+      "schema_diff": {
+        "monthly_telecom_spend_inr": {
+          "previous": 0.0,
+          "current": 15000.0
+        },
+        "needs": {
+          "previous": [
+            "500 Mbps dedicated fiber",
+            "99.9% uptime SLA"
+          ],
+          "current": [
+            "500 Mbps dedicated fiber",
+            "cloud backup",
+            "zero downtime failover",
+            "99.9% uptime SLA",
+            "static IP"
+          ]
+        },
+        "has_gstin": {
+          "previous": "N",
+          "current": "Y"
+        },
+        "gstin": {
+          "previous": null,
+          "current": "29AAAAA0000A1Z5"
+        }
+      },
+      "pipeline_trace": [
+        {
+          "stage": 1,
+          "name": "Customer Speech",
+          "status": "SKIPPED",
+          "data": {
+            "mode": "text_input"
+          }
+        },
+        {
+          "stage": 2,
+          "name": "Speech-to-Text",
+          "status": "SKIPPED",
+          "data": {
+            "input": "Our budget is 15000 per month and we need static IP with cloud backup and zero downtime failover. Our GSTIN is 29AAAAA0000A1Z5.",
+            "cleaned": "Our budget is 15000 per month and we need static IP with cloud backup and zero downtime failover. Our GSTIN is 29AAAAA0000A1Z5."
+          }
+        },
+        {
+          "stage": 3,
+          "name": "Language Detection",
+          "status": "SUCCESS",
+          "data": {
+            "detected_language": "English"
+          }
+        },
+        {
+          "stage": 4,
+          "name": "Schema Extraction (Sarvam 105B)",
+          "status": "SUCCESS",
+          "data": {
+            "extracted_entities": {
+              "business_name": "",
+              "business_type": "Software Startup",
+              "city": "Bangalore",
+              "employee_count": 25,
+              "num_sites": 2,
+              "current_provider": "",
+              "monthly_telecom_spend_inr": 15000.0,
+              "overall_budget": 0.0,
+              "needs": [
+                "500 Mbps dedicated fiber",
+                "99.9% uptime SLA",
+                "static IP",
+                "cloud backup",
+                "zero downtime failover"
+              ],
+              "has_gstin": "Y",
+              "gstin": "29AAAAA0000A1Z5",
+              "has_udyam": "",
+              "udyam_number": "",
+              "max_installation_days": 0
+            }
+          }
+        },
+        {
+          "stage": 5,
+          "name": "Schema Comparison (Diff)",
+          "status": "SUCCESS",
+          "data": {
+            "diff": {
+              "monthly_telecom_spend_inr": {
+                "previous": 0.0,
+                "current": 15000.0
+              },
+              "needs": {
+                "previous": [
+                  "500 Mbps dedicated fiber",
+                  "99.9% uptime SLA"
+                ],
+                "current": [
+                  "500 Mbps dedicated fiber",
+                  "cloud backup",
+                  "zero downtime failover",
+                  "99.9% uptime SLA",
+                  "static IP"
+                ]
+              },
+              "has_gstin": {
+                "previous": "N",
+                "current": "Y"
+              },
+              "gstin": {
+                "previous": null,
+                "current": "29AAAAA0000A1Z5"
+              }
+            }
+          }
+        },
+        {
+          "stage": 6,
+          "name": "Missing Information Detection",
+          "status": "SUCCESS",
+          "data": {
+            "missing_fields": [
+              "max_installation_days"
+            ],
+            "schema_complete": false
+          }
+        },
+        {
+          "stage": 7,
+          "name": "Schema Completion Meter",
+          "status": "SUCCESS",
+          "data": {
+            "completion_percentage": 88
+          }
+        },
+        {
+          "stage": 8,
+          "name": "Question Planner",
+          "status": "SUCCESS",
+          "data": {
+            "field": "max_installation_days",
+            "canonical_question": "Within how many days do you need the installation completed?",
+            "reason": "Installation timeline determines eligibility for plug-and-play wireless versus physical fibre lines."
+          }
+        },
+        {
+          "stage": 9,
+          "name": "Conversation Memory",
+          "status": "SUCCESS",
+          "data": {
+            "turn_count": 5
+          }
+        },
+        {
+          "stage": 10,
+          "name": "Current Customer Schema",
+          "status": "SUCCESS",
+          "data": {
+            "schema": {
+              "lead_id": null,
+              "business_name": "Apex Innovations",
+              "contact_name": null,
+              "contact_role": null,
+              "business_type": "Software Startup",
+              "segment": null,
+              "city": "Bangalore",
+              "state": null,
+              "city_tier": null,
+              "preferred_language": null,
+              "employee_count": 25,
+              "num_sites": 2,
+              "annual_turnover_band": null,
+              "current_internet": null,
+              "current_provider": null,
+              "monthly_telecom_spend_inr": 15000.0,
+              "overall_budget": 0.0,
+              "needs": [
+                "500 Mbps dedicated fiber",
+                "cloud backup",
+                "zero downtime failover",
+                "99.9% uptime SLA",
+                "static IP"
+              ],
+              "has_gstin": "Y",
+              "gstin": "29AAAAA0000A1Z5",
+              "has_udyam": "N",
+              "udyam_number": null,
+              "max_installation_days": 0
+            }
+          }
+        },
+        {
+          "stage": 11,
+          "name": "Ready for Recommendation",
+          "status": "SUCCESS",
+          "data": {
+            "ready": false
+          }
+        }
+      ]
+    }
+  ],
+  "final_recommendation": {
+    "ready": false,
+    "profile_used": {
+      "business_name": null,
+      "business_type": null,
+      "segment": "Micro Retail & Services",
+      "city": null,
+      "city_tier": 1,
+      "employee_count": 5,
+      "num_sites": 1,
+      "has_gstin": false,
+      "gstin_valid_for_sale": false,
+      "monthly_telecom_spend_inr": null,
+      "needs": []
+    },
+    "missing_fields": [
+      "needs"
+    ],
+    "next_question": "What telecom or IT solutions do you need (e.g., high-speed broadband, CCTV, cloud calling, POS)?",
+    "options": [],
+    "warnings": [
+      "PROFILE_INCOMPLETE"
+    ],
+    "customer_segment": "Micro Retail & Services",
+    "city_tier": 1,
+    "eligible_products_count": 15,
+    "total_products_count": 25,
+    "bundles": [],
+    "what_if_insights": []
+  }
+}

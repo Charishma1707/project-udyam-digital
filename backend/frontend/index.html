@@ -1304,6 +1304,7 @@
 
     let currentRecommendationData = null;
     let toggledAddonIds = new Set();
+    let untoggledPrimaryItemIds = new Set();
 
     function updateCustomerSchemaUI(s, completion) {
       if (!s) return;
@@ -1360,56 +1361,64 @@
       // Standard telecom provisioned stack if raw products is empty or simple array
       const productItems = [
         {
+          id: 'PROD-FIBRE',
           name: '300 Mbps Symmetric Optical Fibre',
           tag: '99.9% Uptime',
           tagClass: 'bg-blue-100 text-blue-700',
           desc: 'Dedicated 1:1 Bandwidth with strict SLA',
           price: '₹2,699/mo',
+          monthly: 2699,
           period: 'Annual Contract',
           icon: 'speed',
           iconBg: 'bg-blue-600 text-white',
           cardBg: 'bg-blue-50/40 border-blue-100',
           checked: true,
-          setup: ''
+          setup: 0
         },
         {
+          id: 'PROD-CCTV',
           name: '4 HD Cloud CCTV Cameras',
           tag: '30-Day Cloud',
           tagClass: 'bg-amber-100 text-amber-800',
           desc: 'Encrypted cloud secure archive & audit trail',
           price: '+ ₹1,200/mo',
+          monthly: 1200,
           period: 'NABH Compliant',
           icon: 'videocam',
           iconBg: 'bg-amber-600 text-white',
           cardBg: 'bg-amber-50/40 border-amber-100',
           checked: true,
-          setup: ''
+          setup: 0
         },
         {
+          id: 'PROD-IP',
           name: 'Static IPv4 Subnet Pool',
           tag: '/29 Public Subnet',
           tagClass: 'bg-purple-100 text-purple-700',
           desc: 'Secure Tele-Radiology & PACS hospital servers',
           price: '+ ₹300/mo',
+          monthly: 300,
           period: 'Smart Routing',
           icon: 'dns',
           iconBg: 'bg-purple-600 text-white',
           cardBg: 'bg-purple-50/40 border-purple-100',
           checked: true,
-          setup: ''
+          setup: 0
         },
         {
+          id: 'PROD-SETUP',
           name: 'Enterprise Splicing & Setup',
           tag: 'Zero Pkts Loss',
           tagClass: 'bg-emerald-100 text-emerald-800',
           desc: 'OTDR tested zero loss optical patch termination',
           price: '₹1,000 One-time',
+          monthly: 0,
           period: 'Cisco Router Config',
           icon: 'handyman',
           iconBg: 'bg-emerald-600 text-white',
           cardBg: 'bg-emerald-50/40 border-emerald-100',
           checked: true,
-          setup: ''
+          setup: 1000
         }
       ];
 
@@ -1419,12 +1428,14 @@
         const firstName = typeof first === 'object' ? first.product_name : first;
         const firstPrice = typeof first === 'object' ? (first.monthly || first.monthly_price_inr || 2699) : 2699;
         productItems[0].name = firstName;
+        productItems[0].monthly = Number(firstPrice);
         productItems[0].price = `₹${Number(firstPrice).toLocaleString('en-IN')}/mo`;
       }
 
       productItems.forEach((item, idx) => {
+        const isUntoggled = untoggledPrimaryItemIds.has(item.id);
         const card = document.createElement('div');
-        card.className = `p-3 rounded-xl border ${item.cardBg} transition flex items-start justify-between gap-3`;
+        card.className = `p-3 rounded-xl border ${item.cardBg} transition flex items-start justify-between gap-3 ${isUntoggled ? 'opacity-50 grayscale-[40%]' : ''}`;
         card.innerHTML = `
           <div class="flex items-start gap-2.5 flex-1 min-w-0">
             <div class="w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center shrink-0 mt-0.5">
@@ -1444,7 +1455,7 @@
           </div>
           <div class="shrink-0 pt-0.5">
             <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="recalculatePlanTotals()" class="sr-only peer">
+              <input type="checkbox" ${isUntoggled ? '' : 'checked'} onchange="togglePrimaryStackItem('${item.id}', ${item.monthly}, ${item.setup})" class="sr-only peer">
               <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#e40000]"></div>
             </label>
           </div>
@@ -1532,6 +1543,18 @@
       });
     }
 
+    function togglePrimaryStackItem(itemId, monthlyAmount = 0, setupAmount = 0) {
+      if (untoggledPrimaryItemIds.has(itemId)) {
+        untoggledPrimaryItemIds.delete(itemId);
+      } else {
+        untoggledPrimaryItemIds.add(itemId);
+      }
+      recalculatePlanTotals();
+      if (currentRecommendationData) {
+        renderPlanIncludedProducts(currentRecommendationData.products || []);
+      }
+    }
+
     function toggleRecommendationAddon(addonId, monthlyAmount = 500) {
       if (toggledAddonIds.has(addonId)) {
         toggledAddonIds.delete(addonId);
@@ -1539,13 +1562,40 @@
         toggledAddonIds.add(addonId);
       }
       recalculatePlanTotals();
+      if (currentRecommendationData) {
+        renderPlanAddons(currentRecommendationData.optional_addons || []);
+      }
     }
 
     function recalculatePlanTotals() {
-      // Base plan monthly is 4,199 (Healthcare Enterprise Suite) or custom
-      let baseMonthly = (currentRecommendationData && currentRecommendationData.monthly_cost) ? Number(currentRecommendationData.monthly_cost) : 4199;
-      let baseSetup = 1000;
+      // Base breakdown for primary stack items
+      const primaryItemMonthly = {
+        'PROD-FIBRE': 2699,
+        'PROD-CCTV': 1200,
+        'PROD-IP': 300,
+        'PROD-SETUP': 0
+      };
+      const primaryItemSetup = {
+        'PROD-SETUP': 1000
+      };
 
+      // Calculate primary monthly
+      let baseMonthly = 0;
+      Object.entries(primaryItemMonthly).forEach(([id, amt]) => {
+        if (!untoggledPrimaryItemIds.has(id)) {
+          baseMonthly += amt;
+        }
+      });
+
+      // Calculate primary setup
+      let baseSetup = 0;
+      Object.entries(primaryItemSetup).forEach(([id, amt]) => {
+        if (!untoggledPrimaryItemIds.has(id)) {
+          baseSetup += amt;
+        }
+      });
+
+      // Add deltas from toggled add-ons
       const addonPrices = {
         'ADDON-CISCO': 550,
         'ADDON-SLA': 600,
@@ -1563,9 +1613,9 @@
       const summaryEl = document.getElementById('rec-contract-summary');
 
       if (priceEl) priceEl.textContent = '₹' + Math.round(baseMonthly).toLocaleString('en-IN');
-      if (setupEl) setupEl.textContent = '+ ₹' + Math.round(baseSetup).toLocaleString('en-IN');
+      if (setupEl) setupEl.textContent = baseSetup > 0 ? '+ ₹' + Math.round(baseSetup).toLocaleString('en-IN') : '₹0 (Free)';
       if (summaryEl) {
-        summaryEl.textContent = `₹${Math.round(baseMonthly).toLocaleString('en-IN')}/mo recurring + ₹${Math.round(baseSetup).toLocaleString('en-IN')} one-time • 12 Months Contract`;
+        summaryEl.textContent = `₹${Math.round(baseMonthly).toLocaleString('en-IN')}/mo recurring + ${baseSetup > 0 ? '₹' + Math.round(baseSetup).toLocaleString('en-IN') : '₹0'} one-time • 12 Months Contract`;
       }
     }
 

@@ -845,7 +845,8 @@
   </div>
 
   <script>
-    const API_BASE = 'http://127.0.0.1:8000';
+    // Dynamically resolves to current origin (localhost:8000 locally, or https://<app>.onrender.com on Render)
+    const API_BASE = window.location.origin.includes('http') ? window.location.origin : 'http://127.0.0.1:8000';
     let allProducts = [];
     let allOrders = [];
     let cart = []; // Array of { product: Object, quantity: number, isAddon: boolean }

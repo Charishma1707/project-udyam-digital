@@ -11,7 +11,9 @@ def test_health_check():
 def test_database_status():
     res = client.get("/api/database/status")
     assert res.status_code == 200
-    assert res.json()["memory_store"]["products"] > 0
+    data = res.json()
+    assert "primary_database" in data
+    assert data["registries"]["products"] > 0
 
 def test_chat_api():
     payload = {"message": "Hello, we run an engineering consultancy in Delhi with 8 employees."}

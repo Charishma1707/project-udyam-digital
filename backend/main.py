@@ -520,11 +520,27 @@ async def verify_uploaded_kyc(
             "signatory": signatory_file
         }
 
+        s3_records = {}
         for slot, ufile in file_map.items():
             if ufile and ufile.filename:
                 suffix = os.path.splitext(ufile.filename)[1] or ".png"
+                content = await ufile.read()
+                
+                # 1. Store in S3 with Client-Side & Server-Side AES-256 Encryption FIRST
+                try:
+                    from kyc_verification.s3_storage import secure_s3_service
+                    s3_res = secure_s3_service.upload_encrypted_file(
+                        raw_bytes=content,
+                        session_id=session_id,
+                        slot_name=slot,
+                        original_filename=ufile.filename
+                    )
+                    s3_records[slot] = s3_res
+                except Exception as s3_err:
+                    print(f"Warning: S3 storage exception for {slot}: {s3_err}")
+
+                # 2. Ephemeral buffer for AI verification
                 with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-                    content = await ufile.read()
                     tmp.write(content)
                     temp_paths[slot] = tmp.name
                     saved_files[slot] = tmp.name
@@ -536,6 +552,7 @@ async def verify_uploaded_kyc(
 
         user_inputs = {"company_name": company_name} if company_name else None
         result = smart_kyc_verifier.verify_customer("UPLOAD_" + session_id[:8], saved_files, user_inputs=user_inputs)
+        result["s3_encrypted_storage"] = s3_records
         return result
     finally:
         # DPDP Act 2023 zero-retention ephemeral cleanup

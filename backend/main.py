@@ -84,6 +84,27 @@ if FRONTEND_DIR.exists():
 if STITCH_DIR.exists():
     app.mount("/stitch", StaticFiles(directory=str(STITCH_DIR)), name="stitch")
 
+# -----------------------------------------------------------------------------
+# REAL-TIME AI INTERACTION LOGGER (DEV AUDIT LOG)
+# -----------------------------------------------------------------------------
+from datetime import datetime
+
+DEV_LOG_PATH = BASE_DIR.parent / "ai_interaction_log.jsonl"
+
+def log_ai_interaction(event_type: str, request_data: Any, response_data: Any):
+    """Appends live customer requests and corresponding AI responses in real-time."""
+    try:
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "event_type": event_type,
+            "request": request_data,
+            "response": response_data
+        }
+        with open(DEV_LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(log_entry, default=str) + "\n")
+    except Exception as e:
+        print(f"Warning: Failed to write to ai_interaction_log.jsonl: {e}")
+
 # =============================================================================
 # 1. CONVERSATION DISCOVERY (CHAT & SPEECH)
 # =============================================================================
@@ -175,6 +196,13 @@ async def chat_endpoint(request: ChatRequest):
     except Exception as e:
         result["recommendation_error"] = str(e)
 
+    # Real-time log to ai_interaction_log.jsonl in workspace folder
+    log_ai_interaction(
+        event_type="CHAT_REQUEST",
+        request_data={"message": request.message, "session_id": request.session_id},
+        response_data=result
+    )
+
     return JSONResponse(content=result)
 
 
@@ -221,6 +249,13 @@ async def voice_endpoint(
     except Exception as e:
         result["recommendation_error"] = str(e)
 
+    # Real-time log to ai_interaction_log.jsonl in workspace folder
+    log_ai_interaction(
+        event_type="CHAT_REQUEST",
+        request_data={"message": request.message, "session_id": request.session_id},
+        response_data=result
+    )
+
     return JSONResponse(content=result)
 
 
@@ -264,6 +299,11 @@ async def generate_recommendations(payload: Dict[str, Any]):
     raw = payload.get("schema") or payload
     schema = CustomerSchema(**raw)
     recs = bundle_engine.generate_recommendations(schema)
+    log_ai_interaction(
+        event_type="RECOMMENDATION_ENGINE_REQUEST",
+        request_data=payload,
+        response_data=recs
+    )
     return recs
 
 

@@ -2085,6 +2085,21 @@
       }
     }
 
+    // Helper: Mask sensitive identifiers (PII) per DPDP Act 2023
+    function maskIdentifier(val, type = 'gstin') {
+      if (!val || typeof val !== 'string') return '-';
+      const clean = val.trim().toUpperCase();
+      if (clean.length <= 4) return '****';
+      if (type === 'gstin' && clean.length === 15) {
+        return clean.slice(0, 2) + 'XXXXXXXX' + clean.slice(-5);
+      } else if (type === 'pan' && clean.length === 10) {
+        return clean.slice(0, 2) + 'XXXXXX' + clean.slice(-2);
+      } else if (type === 'udyam') {
+        return clean.slice(0, 8) + 'XXXX' + clean.slice(-3);
+      }
+      return clean.slice(0, 2) + '****' + clean.slice(-3);
+    }
+
     function renderKycResults(data) {
       const isApproved = data.kyc_approved === true || data.status === 'APPROVED';
       const ext = data.extracted_data || {};
@@ -2191,14 +2206,14 @@
       const gstApproved = Boolean(gst.gstin && !issues.some(i => (i.code || '').includes('GST') || (i.document || '') === 'gst'));
       document.getElementById('gstStatusBadge').textContent = gstApproved ? 'VERIFIED' : (gst.gstin ? 'FLAGGED' : 'FAILED');
       document.getElementById('gstStatusBadge').className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${gstApproved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`;
-      document.getElementById('kycGstin').textContent = gst.gstin || 'Not Detected';
+      document.getElementById('kycGstin').textContent = gst.gstin ? maskIdentifier(gst.gstin, 'gstin') : 'Not Detected';
       document.getElementById('kycLegalName').textContent = 'Legal: ' + (gst.legal_name || gst.trade_name || 'Not Detected');
 
       // Udyam Card
       const udyamApproved = Boolean(udyam.udyam_number && !issues.some(i => (i.code || '').includes('UDYAM') || (i.document || '') === 'udyam'));
       document.getElementById('udyamStatusBadge').textContent = udyamApproved ? 'VERIFIED' : (udyam.udyam_number ? 'FLAGGED' : 'FAILED');
       document.getElementById('udyamStatusBadge').className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${udyamApproved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`;
-      document.getElementById('kycUdyam').textContent = udyam.udyam_number || 'Not Detected';
+      document.getElementById('kycUdyam').textContent = udyam.udyam_number ? maskIdentifier(udyam.udyam_number, 'udyam') : 'Not Detected';
       document.getElementById('kycUdyamName').textContent = 'Enterprise: ' + (udyam.enterprise_name || 'Not Detected');
 
       // Address Card
@@ -2213,7 +2228,7 @@
       document.getElementById('signatoryStatusBadge').textContent = sigApproved ? 'VERIFIED' : 'FLAGGED';
       document.getElementById('signatoryStatusBadge').className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${sigApproved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`;
       document.getElementById('kycSignatoryName').textContent = signatory.name || 'Signatory Verified';
-      document.getElementById('kycSignatoryPan').textContent = signatory.pan ? `PAN: ${signatory.pan}` : (signatory.designation ? `Role: ${signatory.designation}` : 'Identity Checked');
+      document.getElementById('kycSignatoryPan').textContent = signatory.pan ? `PAN: ${maskIdentifier(signatory.pan, 'pan')}` : (signatory.designation ? `Role: ${signatory.designation}` : 'Identity Checked');
     }
 
     // SYNC VERIFIED KYC DATA ACROSS CUSTOMER DISCOVERY & CART

@@ -1,0 +1,218 @@
+[
+  {
+    "id": "CUST-01",
+    "company": "Balaji Dental Care & Diagnostics",
+    "industry": "Healthcare & Diagnostics",
+    "segment": "Micro Retail & Services",
+    "employees": 18,
+    "sites": 1,
+    "budget": 5000,
+    "primary_bundle": "Micro Retail & Services Recommended",
+    "primary_score": 90,
+    "primary_monthly": 11946.0,
+    "primary_products": [
+      "P01",
+      "P08",
+      "P15",
+      "P20",
+      "P22"
+    ],
+    "value_monthly": 5263.0,
+    "json_file": "customer_01_healthcare.json",
+    "md_file": "customer_01_healthcare.md"
+  },
+  {
+    "id": "CUST-02",
+    "company": "NexaCloud AI Labs Pvt Ltd",
+    "industry": "IT & SaaS Technology",
+    "segment": "Professional Offices",
+    "employees": 45,
+    "sites": 1,
+    "budget": 35000,
+    "primary_bundle": "Professional Offices Recommended",
+    "primary_score": 72,
+    "primary_monthly": 19925.0,
+    "primary_products": [
+      "P01",
+      "P08",
+      "P11",
+      "P16",
+      "P20"
+    ],
+    "value_monthly": 18453.0,
+    "json_file": "customer_02_it_startup.json",
+    "md_file": "customer_02_it_startup.md"
+  },
+  {
+    "id": "CUST-03",
+    "company": "Reliance FreshMart Superstore Chain",
+    "industry": "Multi-Site Retail & Grocery",
+    "segment": "Micro Retail & Services",
+    "employees": 24,
+    "sites": 4,
+    "budget": 16000,
+    "primary_bundle": "Micro Retail & Services Recommended",
+    "primary_score": 68,
+    "primary_monthly": 22450.0,
+    "primary_products": [
+      "P01",
+      "P08",
+      "P16",
+      "P19",
+      "P20",
+      "P22"
+    ],
+    "value_monthly": 15767.0,
+    "json_file": "customer_03_retail_supermarket.json",
+    "md_file": "customer_03_retail_supermarket.md"
+  },
+  {
+    "id": "CUST-04",
+    "company": "Bharat Precision Tooling Works",
+    "industry": "Industrial Small Manufacturing",
+    "segment": "Small Manufacturing",
+    "employees": 35,
+    "sites": 2,
+    "budget": 22000,
+    "primary_bundle": "Small Manufacturing Recommended",
+    "primary_score": 74,
+    "primary_monthly": 20397.0,
+    "primary_products": [
+      "P01",
+      "P08",
+      "P16",
+      "P20",
+      "P22",
+      "P23",
+      "P25"
+    ],
+    "value_monthly": 8427.0,
+    "json_file": "customer_04_manufacturing.json",
+    "md_file": "customer_04_manufacturing.md"
+  },
+  {
+    "id": "CUST-05",
+    "company": "Sharma General Provision Store",
+    "industry": "Micro Retail & Sole Proprietor",
+    "segment": "Micro Retail & Services",
+    "employees": 2,
+    "sites": 1,
+    "budget": 800,
+    "primary_bundle": "Micro Retail & Services Recommended",
+    "primary_score": 91,
+    "primary_monthly": 1386.0,
+    "primary_products": [
+      "P08"
+    ],
+    "value_monthly": 1340.0,
+    "json_file": "customer_05_micro_kirana.json",
+    "md_file": "customer_05_micro_kirana.md"
+  },
+  {
+    "id": "CUST-06",
+    "company": "Apex Wealth Advisors & CA Firm",
+    "industry": "Financial & Accounting Services",
+    "segment": "Professional Offices",
+    "employees": 8,
+    "sites": 1,
+    "budget": 7500,
+    "primary_bundle": "Professional Offices Recommended",
+    "primary_score": 83,
+    "primary_monthly": 11477.0,
+    "primary_products": [
+      "P01",
+      "P07",
+      "P08",
+      "P16",
+      "P20"
+    ],
+    "value_monthly": 7616.0,
+    "json_file": "customer_06_financial_ca.json",
+    "md_file": "customer_06_financial_ca.md"
+  },
+  {
+    "id": "CUST-07",
+    "company": "SwiftFreight Logistics & Supply Chain",
+    "industry": "Logistics & Fleet Warehousing",
+    "segment": "Multi-site Businesses",
+    "employees": 20,
+    "sites": 3,
+    "budget": 28000,
+    "primary_bundle": "Multi-site Businesses Recommended",
+    "primary_score": 72,
+    "primary_monthly": 16868.0,
+    "primary_products": [
+      "P01",
+      "P08",
+      "P16",
+      "P20",
+      "P22"
+    ],
+    "value_monthly": 19808.0,
+    "json_file": "customer_07_logistics_hub.json",
+    "md_file": "customer_07_logistics_hub.md"
+  },
+  {
+    "id": "CUST-08",
+    "company": "Vidya Mandir IIT-JEE Coaching Institute",
+    "industry": "Education & Coaching Academy",
+    "segment": "Micro Retail & Services",
+    "employees": 15,
+    "sites": 1,
+    "budget": 6500,
+    "primary_bundle": "Micro Retail & Services Recommended",
+    "primary_score": 76,
+    "primary_monthly": 13806.0,
+    "primary_products": [
+      "P01",
+      "P07",
+      "P08",
+      "P20",
+      "P22"
+    ],
+    "value_monthly": 12401.0,
+    "json_file": "customer_08_education_coaching.json",
+    "md_file": "customer_08_education_coaching.md"
+  },
+  {
+    "id": "CUST-09",
+    "company": "Grand Heritage Boutique Suites & Dine",
+    "industry": "Hospitality & Restaurant",
+    "segment": "Micro Retail & Services",
+    "employees": 16,
+    "sites": 1,
+    "budget": 9500,
+    "primary_bundle": "Micro Retail & Services Recommended",
+    "primary_score": 78,
+    "primary_monthly": 10468.0,
+    "primary_products": [
+      "P01",
+      "P08",
+      "P20",
+      "P22"
+    ],
+    "value_monthly": 14668.0,
+    "json_file": "customer_09_hotel_hospitality.json",
+    "md_file": "customer_09_hotel_hospitality.md"
+  },
+  {
+    "id": "CUST-10",
+    "company": "Surat Silk & Cotton Mill (Cancelled GSTIN)",
+    "industry": "Textile Trader (Regulatory Edge Case)",
+    "segment": "Micro Retail & Services",
+    "employees": 10,
+    "sites": 1,
+    "budget": 4000,
+    "primary_bundle": "Micro Retail & Services Recommended",
+    "primary_score": 70,
+    "primary_monthly": 9393.0,
+    "primary_products": [
+      "P01",
+      "P08",
+      "P16"
+    ],
+    "value_monthly": 6930.0,
+    "json_file": "customer_10_edge_case_cancelled_gst.json",
+    "md_file": "customer_10_edge_case_cancelled_gst.md"
+  }
+]

@@ -1,194 +1,125 @@
 # Airtel Business — Project Udyam Digital
-### Enterprise Conversational AI Advisor, 11-Stage Pipeline Visualizer & Smart Digital KYC Engine
 
-[![Python](https://img.shields.io/badge/Python-3.13%2B-blue.svg)](main.py)
+> **Enterprise B2B Conversational AI Discovery, Smart Digital KYC & Order Provisioning Platform**
+
+[![Python 3.13](https://img.shields.io/badge/Python-3.13%2B-blue.svg)](backend/)
 [![FastAPI](https://img.shields.io/badge/Framework-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
-[![Pydantic v2](https://img.shields.io/badge/Validation-Pydantic%20v2-e92063.svg)](schema/customer_profile.py)
-[![Pytest](https://img.shields.io/badge/Tests-14%2F14%20Passed-brightgreen.svg)](tests/)
-[![Docker](https://img.shields.io/badge/Docker-PostgreSQL%2016-blue.svg)](docker-compose.yml)
-[![Sarvam AI](https://img.shields.io/badge/AI%20Engine-Sarvam%20Indic%20105B-orange.svg)](https://www.sarvam.ai/)
-[![Compliance](https://img.shields.io/badge/Compliance-DPDP%20Act%202023-purple.svg)](#security--dpdp-act-2023-compliance)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL%20%2F%20Neon-4169e1.svg)](https://neon.tech/)
+[![Compliance](https://img.shields.io/badge/Compliance-DPDP%20Act%202023-purple.svg)](docs/)
 
 ---
 
-## Executive Summary
+## Clean 3-Tier Project Structure
 
-Built for the **Accel YTL Hackathon (Track A)**, **Project Udyam Digital** is an enterprise-grade AI sales platform for **Airtel Business (B2B)** designed to serve India's 6+ crore Micro, Small, and Medium Enterprises (MSMEs).
-
-It solves key telecom conversion friction points—17.6-day activation cycle times, 56% post-needs-assessment drop-offs, and 3x manual follow-ups—through an autonomous, modular Python architecture:
-
-```
-[Voice / Text Chat in Indic Languages]
-               │
-               ▼
-[11-Stage AI Discovery Agent] ──► [Deterministic Question Planner]
-               │
-               ▼
-[Hard Filtering & Bundle Engine] ──► [Top 2 Bundles + What-If Unlocks]
-               │
-               ▼
-[Smart Digital KYC & OCR Engine] ──► [AES-256-GCM + RAM Zero-Purging]
-               │
-               ▼
-[Quote Acceptance & SLA Contract] ──► [5-Milestone Order Tracker & Escalations]
-```
-
----
-
-## Clean Modular Architecture
-
-The repository is organized into dedicated, readable Python packages:
+The project has been separated into dedicated directories for **Backend**, **Frontend**, and **Documentation**:
 
 ```text
-├── agent/                             # Conversational AI & 11-Stage Pipeline
-│   ├── discovery_agent.py             # 11-stage trace generator and orchestrator
-│   ├── sarvam_llm_client.py           # Sarvam AI Indic LLM & Speech-to-Text client
-│   ├── entity_extractor.py            # Zero-temperature schema extraction agent
-│   ├── question_planner.py            # Deterministic missing field prioritized question planner
-│   ├── speech_cleaner.py              # Speech sanitizer & GSTIN/Udyam identifier protection
-│   └── session_memory.py              # Thread-safe multi-turn session store
+├── backend/                  # Python FastAPI Backend Services
+│   ├── agent/                # 11-Stage Conversational AI & Discovery Agent
+│   ├── config/               # Telephony cohorts, pricing, and scoring configs
+│   ├── data/                 # City tier mappings, business taxonomy & SQLite vault
+│   ├── database/             # Neon Cloud PostgreSQL client & connection pooling
+│   ├── data_preprocessing/   # City tier classifier, business segment mapper & ETL
+│   ├── eval/                 # Discovery pipeline evaluation harness & benchmarks
+│   ├── kyc_verification/     # Smart Digital KYC engine (Tesseract OCR, Mod-36, AES-256)
+│   ├── order_tracking/       # Order Management System (OMS) & 4-milestone stepper
+│   ├── recommendation/       # Bundle recommendation engine & toggle addons
+│   ├── schema/               # Pydantic v2 data models & API contracts
+│   ├── scripts/              # Cloud database seeding & migration scripts
+│   ├── tests/                # Pytest unit & integration test suite
+│   ├── YTL_TrackA_Udyam_Digital_Data/ # Ground-truth MSME registries & test KYC documents
+│   ├── main.py               # Main FastAPI server entry point
+│   └── requirements.txt      # Python dependencies
 │
-├── schema/                            # Pydantic v2 Data Models
-│   ├── customer_profile.py            # 23-field CustomerSchema with numeric coercion & safe merge
-│   └── api_models.py                  # Typed request/response contracts for REST endpoints
+├── frontend/                 # Interactive Web User Interface
+│   ├── index.html            # Production-grade Single-Page Application (SPA)
+│   ├── database.html         # Interactive Neon PostgreSQL table visualizer
+│   ├── style.css             # Airtel Red & Slate CSS styling
+│   ├── images/               # Airtel logos, avatar media & badges
+│   ├── vendor/               # Vendor scripts (Babel, Tailwind, etc.)
+│   └── stitch/               # Original Stitch UI screen archives & prototypes
 │
-├── data_preprocessing/                # ETL & Reference Data Mappings
-│   ├── etl_pipeline.py                # Automated parser for 11,282 synthetic records
-│   ├── city_tier_mapping.py           # Indian city to telecom network tier (Tier 1 vs 2) tool
-│   └── business_segment_mapper.py     # Deterministic 4-tier business type to segment resolver
+├── docs/                     # Project Documentation & Markdown Files
+│   ├── project_context.md    # Problem statement, MSME personas & technical requirements
+│   ├── backend.md            # Comprehensive backend API & service architecture
+│   ├── DESIGN.md             # Design tokens, color palette, and component specs
+│   ├── reccomendation.md     # 4-stage deterministic recommendation engine guide
+│   ├── kyc_eval.md           # Smart KYC OCR & DPDP Act 2023 compliance evaluation
+│   ├── preprocessing.md      # Data preprocessing & MSME taxonomy classification
+│   ├── eval_report.md        # AI Discovery Agent benchmark results
+│   ├── claude.md             # Architecture review & system specifications
+│   ├── final.md              # Hackathon submission summary
+│   ├── architecture_readme.md# Original comprehensive project README
+│   └── case_study/           # Airtel SYNC case study PDF & submission deck
 │
-├── recommendation/                    # Recommendation & Scoring
-│   └── bundle_engine.py               # Eligibility filtering, scoring formula, What-If simulator
-│
-├── kyc_verification/                  # Smart Digital KYC & Compliance
-│   ├── smart_kyc_service.py           # OCR extraction, registry cross-check, status validation
-│   └── secure_vault.py                # AES-256-GCM encryption & RAM zero-purging (DPDP Act 2023)
-│
-├── order_tracking/                    # Order Fulfillment & Sales Portal
-│   └── order_lifecycle.py             # Dynamic SLA contracts, 5-milestone tracker, lost quote log
-│
-├── database/                          # Persistence & Registries
-│   └── db_client.py                   # PostgreSQL connection + high-speed in-memory store
-│
-├── frontend/                          # Web User Interface
-│   ├── index.html                     # HTML5 single-page application mount
-│   ├── database.html                  # Interactive Database Explorer interface
-│   ├── style.css                      # Airtel Business enterprise dark theme
-│   └── app.jsx                        # React 18 UI (Live Chat + 11-Stage Pipeline Visualizer)
-│
-├── tests/                             # Automated Test Suite (14 passing tests)
-│   ├── test_agent_pipeline.py         # Pipeline trace, STT cleaner, planner tests
-│   ├── test_customer_schema.py        # Schema coercion, defaults, safe merge tests
-│   ├── test_recommendation.py         # Bundle engine, segment mapping, what-if tests
-│   ├── test_kyc_and_security.py       # AES-256-GCM, PII masking, registry validation tests
-│   └── test_api_endpoints.py          # FastAPI endpoint integration tests
-│
-├── YTL_TrackA_Udyam_Digital_Data/     # Dataset: Products, GSTIN, Udyam, Leads, Specimen KYC
-├── data/                              # Preprocessed normalized JSON caches
-├── main.py                            # Single FastAPI server entrypoint
-├── requirements.txt                   # Pure Python dependencies
-├── Dockerfile                         # Python 3.13 container definition
-└── docker-compose.yml                 # PostgreSQL container + persistent volumes
+├── run.py                    # One-command root application launcher
+├── requirements.txt          # Root Python dependencies mirror
+└── README.md                 # Project root index (this file)
 ```
 
 ---
 
-## Real-Time Live AI Pipeline Visualizer (11 Stages)
+## Quick Start Guide
 
-The split-screen user interface provides transparency for debugging, demonstrations, and hackathon judging:
-
-1. **Stage 1 · Customer Speech:** Audio byte stream, recording status, format.
-2. **Stage 2 · Speech-to-Text:** Raw Sarvam STT (`saaras:v3`) and cleaned natural transcript.
-3. **Stage 3 · Language Detection:** Dynamic Indic language badge (`English`, `Hindi`, `Telugu`, `Tamil`, `Mixed Hinglish`).
-4. **Stage 4 · Schema Extraction:** Structured JSON extracted from the latest turn (Sarvam `sarvam-105b-conversations`).
-5. **Stage 5 · Schema Diff:** Visual diff cards (`Previous Schema ➔ Current Schema`) highlighting newly updated fields.
-6. **Stage 6 · Missing Information:** Deterministic list of remaining required discovery fields.
-7. **Stage 7 · Completion Meter:** Animated progress bar and completion percentage.
-8. **Stage 8 · Question Planner:** Rationalized next question reason and canonical question formulation.
-9. **Stage 9 · Conversation Memory:** Full multi-turn context history sent to the LLM.
-10. **Stage 10 · Current Customer Schema:** Live validated customer JSON schema state.
-11. **Stage 11 · Ready Status:** Status banner (`Ready for Recommendation: NO ➔ YES`).
-
----
-
-## Security & DPDP Act 2023 Compliance
-
-1. **AES-256-GCM Cryptographic Storage:** Raw document buffers are encrypted with unique 96-bit initialization vectors (IVs) and authenticated verification tags.
-2. **Zero-Residue Memory Safety:** In-memory RAM buffers are zeroed out via `secure_purge_buffer()` immediately post-OCR to thwart memory dumps.
-3. **Data Minimization & Masking:** Identifiers are masked in public responses and UI (e.g., `27XXXXXXXX7D1ZP`, `UDYAM-00-XXXX567`), while SHA-256 hashes enable duplicate checks without storing plaintext.
-
----
-
-## Quickstart Guide
-
-### 1. Prerequisites
-- [Python 3.10+](https://www.python.org/)
-- [Sarvam AI API Key](https://www.sarvam.ai/) (optional for local mock testing)
-
-### 2. Install Dependencies
+### 1. Prerequisites & Installation
+Ensure you have **Python 3.10+** installed:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Setup Environment Variables
-Create a `.env` file in the project root:
-```ini
-SARVAM_API_KEY=your_sarvam_api_key_here
-PORT=8000
+### 2. Launch the Application
+Start both backend services and frontend UI with a single command from the project root:
+```bash
+python run.py
+```
+*Or alternatively from the `backend/` directory:*
+```bash
+cd backend
+python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 4. Run the Application
-```bash
-python main.py
-```
-Or with Uvicorn hot-reload:
-```bash
-uvicorn main:app --reload --port 8000
-```
-Open your browser at: **`http://localhost:8000`**
-
-- **Main AI Chat & Visualizer:** [`http://localhost:8000/`](http://localhost:8000/)
-- **Interactive Database Explorer:** [`http://localhost:8000/database`](http://localhost:8000/database)
-- **Interactive API Docs (Swagger):** [`http://localhost:8000/docs`](http://localhost:8000/docs)
+### 3. Open in Browser
+- **Enterprise Web App**: [http://localhost:8000/](http://localhost:8000/)
+- **Interactive API Docs (Swagger)**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Neon Cloud Database Explorer**: [http://localhost:8000/database](http://localhost:8000/database)
+- **System Health Status**: [http://localhost:8000/health](http://localhost:8000/health)
 
 ---
 
-## Automated Test Suite
+## Key Features
 
-Run all **14 automated tests**:
+1. **Enterprise Products Catalogue (`frontend/index.html` Tab 1)**:
+   - Full 25 Airtel B2B products fetched dynamically from `/api/products`.
+   - Real-time search, category filters (Connectivity, Security, Cloud, Voice), and instant quote addition.
 
-```bash
-pytest tests/ -v
-```
+2. **AI Telecom Advisor - Soumya (`frontend/index.html` Tab 2)**:
+   - 11-stage autonomous discovery agent with multi-turn conversation memory.
+   - Dynamic quote builder with interactive add-on toggles (Cisco router +₹800, 24/7 SLA +₹600, failover SIM +₹350).
+   - Instant SLA contract generation and one-click quote acceptance.
 
-### Test Coverage:
-- `test_agent_pipeline.py`: 11-stage trace execution, speech normalization, question priority planner.
-- `test_customer_schema.py`: Numeric string coercion, null protection, safe merge logic.
-- `test_recommendation.py`: Commercial eligibility rules, segment mapping, bundle formulation.
-- `test_kyc_and_security.py`: AES-256-GCM encryption/decryption, PII masking, registry checks.
-- `test_api_endpoints.py`: FastAPI routes (`/health`, `/api/products`, `/api/database/status`, `/chat`).
+3. **Smart Digital KYC Engine (`frontend/index.html` Tab 3)**:
+   - DPDP Act 2023 compliant verification with RAM zero-purging.
+   - Tesseract OCR document extraction, GSTIN Mod-36 checksum calculation, and AES-256-GCM encryption.
 
----
+4. **Live Provisioning Tracker (`frontend/index.html` Tab 4)**:
+   - 4-milestone lifecycle stepper: Commercial Contract → Feasibility → Optical Splicing → Active SLA.
+   - Lead field engineer contact, MTTR commit clock, and live progress bar.
 
-## API Endpoints Reference
+5. **Operations NOC Command Center (`frontend/index.html` Tab 5)**:
+   - Live order dispatch queue with real-time milestone stage updater.
+   - Direct PostgreSQL database synchronization and escalation resolution.
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/health` | Health check returning backend status and DB connection |
-| `POST` | `/chat` | Process customer text message and return 11-stage pipeline trace |
-| `POST` | `/voice` | Upload audio recording for Sarvam STT and discovery processing |
-| `GET` | `/database` | Interactive Database Table Explorer interface |
-| `GET` | `/api/database/status` | Database connection status and record counts |
-| `GET` | `/api/database/table/{name}` | Fetch rows from specific database table |
-| `GET` | `/api/products` | Retrieve all 25 catalogue products |
-| `GET` | `/api/lookup/gstin/{gstin}` | Cross-reference GSTIN with mock government registry |
-| `GET` | `/api/lookup/udyam/{udyam}` | Cross-reference Udyam number with mock MSME registry |
-| `POST` | `/api/orders/accept` | Accept quote, verify KYC, generate contract, start order tracker |
-| `POST` | `/api/orders/reject` | Record quote drop reason, customer feedback, and counter-offer |
-| `POST` | `/api/kyc/upload` | Securely upload KYC document for OCR extraction and registry check |
+6. **Cloud Database Table Explorer (`frontend/index.html` Tab 6)**:
+   - Live viewer for Neon PostgreSQL tables (`product_catalogue`, `gstin_registry`, `udyam_registry`, `orders`, `kyc_records`).
 
 ---
 
-## License & Disclaimer
+## Documentation Index
 
-Developed for the **Accel YTL Hackathon (Track A)**. All businesses, people, identifiers, documents, and figures in the dataset are synthetic and fictional.
+All architectural markdown files are organized in the [`docs/`](docs/) directory:
+- [Problem & Context (`docs/project_context.md`)](docs/project_context.md)
+- [Backend Architecture (`docs/backend.md`)](docs/backend.md)
+- [Design Specifications (`docs/DESIGN.md`)](docs/DESIGN.md)
+- [Recommendation Engine Guide (`docs/reccomendation.md`)](docs/reccomendation.md)
+- [KYC Engine & DPDP Act Evaluation (`docs/kyc_eval.md`)](docs/kyc_eval.md)
+- [Discovery Benchmark Report (`docs/eval_report.md`)](docs/eval_report.md)

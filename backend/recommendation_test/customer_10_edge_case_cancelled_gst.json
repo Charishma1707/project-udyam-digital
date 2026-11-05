@@ -1,0 +1,645 @@
+{
+  "customer_id": "CUST-10",
+  "company_name": "Surat Silk & Cotton Mill (Cancelled GSTIN)",
+  "industry": "Textile Trader (Regulatory Edge Case)",
+  "description": "Merchant with a suspended/cancelled GSTIN in the government registry. Tests that GST-restricted B2B leased lines are blocked and compliant broadband is offered.",
+  "input_profile": {
+    "business_name": "Surat Silk & Cotton Mill",
+    "business_type": "Textile Shop",
+    "employee_count": 10,
+    "num_sites": 1,
+    "city": "Surat",
+    "city_tier": 2,
+    "needs": [
+      "Internet",
+      "WhatsApp"
+    ],
+    "monthly_telecom_spend_inr": 4000,
+    "has_gstin": "Y",
+    "gstin": "27AAACW1234A1Z5",
+    "max_installation_days": 5
+  },
+  "customer_segment": "Micro Retail & Services",
+  "bundles_generated": [
+    {
+      "bundle_code": "BUNDLE-PRIMARY",
+      "bundle_name": "Micro Retail & Services Recommended",
+      "tagline": "Primary Growth Suite (Best Overall Match)",
+      "type": "PRIMARY_BEST_MATCH",
+      "score": 70,
+      "monthly_total_inr": 9393.0,
+      "setup_total_inr": 0.0,
+      "contract_months": 12,
+      "estimated_install_days": 7,
+      "products": [
+        {
+          "product_id": "P01",
+          "product_name": "Biz Fibre 100",
+          "category": "Connectivity",
+          "qty": 1,
+          "unit": "per site",
+          "unit_price": 1093,
+          "monthly": 1093,
+          "setup": 0.0,
+          "auto_added_for": null
+        },
+        {
+          "product_id": "P08",
+          "product_name": "Business Postpaid 599",
+          "category": "Connectivity",
+          "qty": 10,
+          "unit": "per line",
+          "unit_price": 693,
+          "monthly": 6930,
+          "setup": 0.0,
+          "auto_added_for": null
+        },
+        {
+          "product_id": "P16",
+          "product_name": "Cloud Email & Office Suite",
+          "category": "Cloud & Productivity",
+          "qty": 10,
+          "unit": "per user",
+          "unit_price": 137,
+          "monthly": 1370,
+          "setup": 0.0,
+          "auto_added_for": null
+        }
+      ],
+      "fit_reasons": [
+        "Covers your requested Connectivity requirements",
+        "Commonly chosen by 49% of similar businesses in your peer cohort (n=368)",
+        "Monthly cost \u20b99393 represents 2.35x your current spend (Within typical peer investment band)"
+      ],
+      "explanation": {
+        "text": "Recommended for your Textile Shop: this suite includes Biz Fibre 100, Business Postpaid 599, Cloud Email & Office Suite, covering your Covers your requested Connectivity requirements. Commonly chosen by 49% of similar businesses in your peer cohort (n=368). The monthly commitment is \u20b99393 with a one-time setup fee of \u20b90 on a 12-month co-termed agreement. Estimated ready for service in 7 business days.",
+        "language": "en",
+        "source": "template",
+        "grounded": true
+      },
+      "addons": {
+        "required": [],
+        "recommended": [],
+        "optional": [
+          {
+            "product_id": "P20",
+            "product_name": "Endpoint Security",
+            "category": "Security",
+            "monthly_delta": 1220.0,
+            "setup_delta": 0.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.227,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P11",
+            "product_name": "Static IP",
+            "category": "Connectivity",
+            "monthly_delta": 247.0,
+            "setup_delta": 0.0,
+            "contract_change": null,
+            "eta_change": 1,
+            "also_adds": [],
+            "score": 0.225,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P09",
+            "product_name": "Backup 4G/5G Failover",
+            "category": "Connectivity",
+            "monthly_delta": 546.0,
+            "setup_delta": 1500.0,
+            "contract_change": null,
+            "eta_change": 3,
+            "also_adds": [],
+            "score": 0.224,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P19",
+            "product_name": "Cloud POS & Billing",
+            "category": "Cloud & Productivity",
+            "monthly_delta": 740.0,
+            "setup_delta": 2500.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.224,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P23",
+            "product_name": "Cloud CCTV",
+            "category": "IoT & Physical",
+            "monthly_delta": 246.0,
+            "setup_delta": 1800.0,
+            "contract_change": null,
+            "eta_change": 4,
+            "also_adds": [],
+            "score": 0.224,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P17",
+            "product_name": "Cloud Backup 1 TB",
+            "category": "Cloud & Productivity",
+            "monthly_delta": 593.0,
+            "setup_delta": 0.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.223,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P02",
+            "product_name": "Biz Fibre 300",
+            "category": "Connectivity",
+            "monthly_delta": 1640.0,
+            "setup_delta": 0.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.218,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P25",
+            "product_name": "Fleet Tracker",
+            "category": "IoT & Physical",
+            "monthly_delta": 738.0,
+            "setup_delta": 4500.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.216,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P22",
+            "product_name": "Secure Wi-Fi with Guest Network",
+            "category": "Security",
+            "monthly_delta": 493.0,
+            "setup_delta": 1000.0,
+            "contract_change": null,
+            "eta_change": 3,
+            "also_adds": [],
+            "score": 0.214,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P04",
+            "product_name": "Biz 5G AirFiber 100",
+            "category": "Connectivity",
+            "monthly_delta": 993.0,
+            "setup_delta": 0.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.207,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P18",
+            "product_name": "Website + Domain Starter",
+            "category": "Cloud & Productivity",
+            "monthly_delta": 393.0,
+            "setup_delta": 0.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.199,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P07",
+            "product_name": "Business Postpaid 299",
+            "category": "Connectivity",
+            "monthly_delta": 3460.0,
+            "setup_delta": 0.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.184,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          }
+        ]
+      },
+      "nps_boost_applied": true,
+      "savings_vs_individual_inr": 450
+    },
+    {
+      "bundle_code": "BUNDLE-SAVER",
+      "bundle_name": "Micro Retail & Services Value Essential",
+      "tagline": "Cost-Optimized Alternative (Lower Monthly Commitment)",
+      "type": "VALUE_SAVER",
+      "score": 68,
+      "monthly_total_inr": 6930.0,
+      "setup_total_inr": 0.0,
+      "contract_months": 1,
+      "estimated_install_days": 3,
+      "products": [
+        {
+          "product_id": "P08",
+          "product_name": "Business Postpaid 599",
+          "category": "Connectivity",
+          "qty": 10,
+          "unit": "per line",
+          "unit_price": 693,
+          "monthly": 6930,
+          "setup": 0.0,
+          "auto_added_for": null
+        }
+      ],
+      "fit_reasons": [
+        "Covers your requested Connectivity requirements",
+        "Commonly chosen by 52% of similar businesses in your peer cohort (n=368)",
+        "Monthly cost \u20b96930 represents 1.73x your current spend (Within typical peer investment band)"
+      ],
+      "explanation": {
+        "text": "Recommended for your Textile Shop: this suite includes Business Postpaid 599, covering your Covers your requested Connectivity requirements. Commonly chosen by 52% of similar businesses in your peer cohort (n=368). The monthly commitment is \u20b96930 with a one-time setup fee of \u20b90 on a 1-month co-termed agreement. Estimated ready for service in 3 business days.",
+        "language": "en",
+        "source": "template",
+        "grounded": true
+      },
+      "addons": {
+        "required": [],
+        "recommended": [],
+        "optional": [
+          {
+            "product_id": "P20",
+            "product_name": "Endpoint Security",
+            "category": "Security",
+            "monthly_delta": 1220.0,
+            "setup_delta": 0.0,
+            "contract_change": 12,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.227,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P16",
+            "product_name": "Cloud Email & Office Suite",
+            "category": "Cloud & Productivity",
+            "monthly_delta": 1370.0,
+            "setup_delta": 0.0,
+            "contract_change": 12,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.225,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P02",
+            "product_name": "Biz Fibre 300",
+            "category": "Connectivity",
+            "monthly_delta": 1640.0,
+            "setup_delta": 0.0,
+            "contract_change": 12,
+            "eta_change": 4,
+            "also_adds": [],
+            "score": 0.224,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P11",
+            "product_name": "Static IP",
+            "category": "Connectivity",
+            "monthly_delta": 1340.0,
+            "setup_delta": 0.0,
+            "contract_change": 12,
+            "eta_change": 5,
+            "also_adds": [
+              "P01"
+            ],
+            "score": 0.222,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P09",
+            "product_name": "Backup 4G/5G Failover",
+            "category": "Connectivity",
+            "monthly_delta": 1639.0,
+            "setup_delta": 1500.0,
+            "contract_change": 12,
+            "eta_change": 7,
+            "also_adds": [
+              "P01"
+            ],
+            "score": 0.221,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P19",
+            "product_name": "Cloud POS & Billing",
+            "category": "Cloud & Productivity",
+            "monthly_delta": 740.0,
+            "setup_delta": 2500.0,
+            "contract_change": 12,
+            "eta_change": 2,
+            "also_adds": [],
+            "score": 0.221,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P23",
+            "product_name": "Cloud CCTV",
+            "category": "IoT & Physical",
+            "monthly_delta": 1339.0,
+            "setup_delta": 1800.0,
+            "contract_change": 12,
+            "eta_change": 4,
+            "also_adds": [
+              "P01"
+            ],
+            "score": 0.221,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P17",
+            "product_name": "Cloud Backup 1 TB",
+            "category": "Cloud & Productivity",
+            "monthly_delta": 593.0,
+            "setup_delta": 0.0,
+            "contract_change": 12,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.22,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P07",
+            "product_name": "Business Postpaid 299",
+            "category": "Connectivity",
+            "monthly_delta": 3460.0,
+            "setup_delta": 0.0,
+            "contract_change": null,
+            "eta_change": 0,
+            "also_adds": [],
+            "score": 0.217,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P01",
+            "product_name": "Biz Fibre 100",
+            "category": "Connectivity",
+            "monthly_delta": 1093.0,
+            "setup_delta": 0.0,
+            "contract_change": 12,
+            "eta_change": 4,
+            "also_adds": [],
+            "score": 0.216,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P25",
+            "product_name": "Fleet Tracker",
+            "category": "IoT & Physical",
+            "monthly_delta": 738.0,
+            "setup_delta": 4500.0,
+            "contract_change": 12,
+            "eta_change": 2,
+            "also_adds": [],
+            "score": 0.214,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P22",
+            "product_name": "Secure Wi-Fi with Guest Network",
+            "category": "Security",
+            "monthly_delta": 1586.0,
+            "setup_delta": 1000.0,
+            "contract_change": 12,
+            "eta_change": 7,
+            "also_adds": [
+              "P01"
+            ],
+            "score": 0.211,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P04",
+            "product_name": "Biz 5G AirFiber 100",
+            "category": "Connectivity",
+            "monthly_delta": 993.0,
+            "setup_delta": 0.0,
+            "contract_change": 6,
+            "eta_change": 1,
+            "also_adds": [],
+            "score": 0.204,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          },
+          {
+            "product_id": "P18",
+            "product_name": "Website + Domain Starter",
+            "category": "Cloud & Productivity",
+            "monthly_delta": 393.0,
+            "setup_delta": 0.0,
+            "contract_change": 12,
+            "eta_change": 1,
+            "also_adds": [],
+            "score": 0.196,
+            "is_recommended": false,
+            "reason": {
+              "code": "CO_PURCHASE_LIFT",
+              "text": "Complementary digital capability"
+            }
+          }
+        ]
+      },
+      "nps_boost_applied": false,
+      "savings_vs_individual_inr": 200
+    }
+  ],
+  "what_if_unlocks": [
+    {
+      "type": "GSTIN_UNLOCK",
+      "title": "Unlock 7 Enterprise Product(s) with GSTIN",
+      "description": "Providing a GSTIN unlocks dedicated internet leased lines, static IPs, and 18% Input Tax Credit.",
+      "potential_unlocks": [
+        "Internet Leased Line 20",
+        "Cloud Telephony / SIP",
+        "Toll-free Number",
+        "Business SMS 10k",
+        "WhatsApp Business API Starter",
+        "Managed Firewall",
+        "Machine Monitoring IoT"
+      ],
+      "potential_tax_benefit_inr": 1690
+    },
+    {
+      "type": "TIMELINE_ADJUSTMENT",
+      "title": "Timeline Flexibility Benefit",
+      "description": "Extending your deployment timeline beyond 5 days unlocks high-capacity optical fibre lines.",
+      "potential_unlocks": [
+        "Internet Leased Line 20",
+        "Internet Leased Line 100"
+      ]
+    }
+  ],
+  "pipeline_meta": {
+    "profile_used": {
+      "business_name": "Surat Silk & Cotton Mill",
+      "business_type": "Textile Shop",
+      "segment": "Micro Retail & Services",
+      "city": "Surat",
+      "city_tier": 2,
+      "employee_count": 10,
+      "num_sites": 1,
+      "has_gstin": true,
+      "gstin_valid_for_sale": false,
+      "monthly_telecom_spend_inr": 4000,
+      "needs": [
+        "internet",
+        "whatsapp"
+      ]
+    },
+    "missing_fields": null,
+    "warnings": [
+      "GSTIN_UNAVAILABLE_LOCKS_ENTERPRISE_PRODUCTS"
+    ],
+    "options_count": 2,
+    "options_summary": [
+      {
+        "label": "Recommended",
+        "score": 0.7048,
+        "monthly_total": 9393.0,
+        "setup_total": 0.0,
+        "eta_days": 7,
+        "product_ids": [
+          "P01",
+          "P08",
+          "P16"
+        ],
+        "reasons": [
+          "Covers your requested Connectivity requirements",
+          "Commonly chosen by 49% of similar businesses in your peer cohort (n=368)",
+          "Monthly cost \u20b99393 represents 2.35x your current spend (Within typical peer investment band)",
+          "High satisfaction tier: businesses using these services show 85% long-term retention",
+          "Biz Fibre 1G excluded: Requires: active GSTIN"
+        ]
+      },
+      {
+        "label": "Value Essential",
+        "score": 0.6857,
+        "monthly_total": 6930.0,
+        "setup_total": 0.0,
+        "eta_days": 3,
+        "product_ids": [
+          "P08"
+        ],
+        "reasons": [
+          "Covers your requested Connectivity requirements",
+          "Commonly chosen by 52% of similar businesses in your peer cohort (n=368)",
+          "Monthly cost \u20b96930 represents 1.73x your current spend (Within typical peer investment band)",
+          "High satisfaction tier: businesses using these services show 87% long-term retention",
+          "Biz Fibre 1G excluded: Requires: active GSTIN",
+          "\u20b92463.0 cheaper per month"
+        ]
+      }
+    ]
+  }
+}

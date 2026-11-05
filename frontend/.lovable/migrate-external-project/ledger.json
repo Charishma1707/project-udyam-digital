@@ -1,0 +1,7 @@
+[
+ {"capability":"code (9 static design screens)","source":"Stitch HTML export","outcome":"migrate","status":"verified","next_action":"none"},
+ {"capability":"screen interactions (tabs, add-on pricing, order tracking, status changes)","source":"inline scripts","outcome":"migrate","status":"verified","next_action":"none"},
+ {"capability":"images","source":"Google-hosted placeholders","outcome":"moved to Lovable assets","status":"verified","next_action":"none"},
+ {"capability":"database, auth, storage, payments, email, webhooks","source":"none detected","outcome":"absent","status":"verified","next_action":"none"},
+ {"capability":"cutover","source":"n/a","outcome":"publish when ready","status":"pending","next_action":"user publishes"}
+]

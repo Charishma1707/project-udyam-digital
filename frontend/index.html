@@ -1,44 +1,2565 @@
 <!DOCTYPE html>
-<!--
-===============================================================================
-AIRTEL BUSINESS AI AGENT - HTML SHELL
-===============================================================================
-
-📌 WHAT THIS FILE DOES:
-This is the root HTML template for the web application:
-1. Loads modern Google Fonts (Plus Jakarta Sans for sleek modern UI and
-   JetBrains Mono for monospace JSON/trace logs).
-2. Links to `/static/style.css` for custom responsive styles and themes.
-3. Loads React 18 and Babel Standalone for in-browser JSX compilation.
-4. Mounts the `<App />` component into `<div id="root"></div>`.
-===============================================================================
--->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Airtel Business Enterprise Conversational AI Assistant - Customer Discovery & Recommendation Pipeline">
-  <title>Airtel Business - Customer Discovery & Recommendation Agent</title>
-
-  <!-- Typography: Plus Jakarta Sans (Headings & UI) & JetBrains Mono (Trace Logs) -->
+  <title>Airtel Business Enterprise Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Core Stylesheet -->
-  <link rel="stylesheet" href="/static/style.css">
-
-  <!-- React 18, React DOM & Babel Standalone for Browser Execution -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            airtelRed: '#e40000',
+            airtelDark: '#b91c1c',
+            navyDark: '#0f172a',
+            surfaceBg: '#f8fafc'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background-color: #f8fafc; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .nav-btn.active { background-color: #e40000; color: #ffffff; font-weight: 700; box-shadow: 0 4px 12px rgba(228, 0, 0, 0.25); }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  </style>
 </head>
-<body>
-  <!-- React Mount Point -->
-  <div id="root"></div>
+<body class="min-h-screen flex flex-col antialiased">
 
-  <!-- Main Application Script -->
-  <script type="text/babel" src="/static/app.jsx"></script>
+  <!-- TOP HEADER -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#b91c1c] to-[#e40000] flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
+          a
+        </div>
+        <div>
+          <span class="font-extrabold text-base tracking-tight text-slate-900">airtel business</span>
+          <span id="roleBadge" class="text-[11px] bg-red-50 text-[#e40000] border border-red-200 font-bold px-2 py-0.5 rounded-full ml-2">Access Portal</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="cartHeaderBtn" onclick="toggleCartDrawer(true)" class="relative px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-[#e40000] border border-red-200 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+          <span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+          <span class="hidden sm:inline">Cart</span>
+          <span id="cartBadgeCount" class="w-5 h-5 rounded-full bg-[#e40000] text-white text-[10px] font-bold flex items-center justify-center">0</span>
+        </button>
+        <button id="switchRoleBtn" onclick="toggleRoleModal()" class="hidden px-3 py-1 rounded-lg border border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 transition flex items-center gap-1.5 shadow-2xs">
+          <span class="material-symbols-outlined text-[16px]">switch_account</span>
+          <span>Switch Portal</span>
+        </button>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>FastAPI Connected</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- GATEWAY / ROLE SELECTION SCREEN -->
+  <div id="roleGatewayScreen" class="flex-1 flex items-center justify-center p-4">
+    <div class="max-w-3xl w-full flex flex-col items-center">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Select Your Access Portal</h1>
+        <p class="text-sm text-slate-500 mt-1 max-w-md mx-auto">Choose your entry gateway to explore MSME telecom solutions or manage network operations.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
+        <!-- ROLE 1: ENTERPRISE CUSTOMER -->
+        <div class="bg-white rounded-2xl border-2 border-slate-200 hover:border-[#e40000] p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-red-50 text-[#e40000] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-[32px]">corporate_fare</span>
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">Enterprise Customer</h2>
+            <p class="text-xs text-slate-500 mt-1 font-medium">Business Owners, Founders &amp; Procurement Heads</p>
+          </div>
+          <button onclick="enterPortal('customer')" class="mt-8 w-full py-3 bg-[#e40000] hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md shadow-red-500/20 flex items-center justify-center gap-2 transition active:scale-[0.99]">
+            <span>Enter Customer Portal</span>
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </button>
+        </div>
+
+        <!-- ROLE 2: OPERATIONS ADMIN -->
+        <div class="bg-white rounded-2xl border-2 border-slate-200 hover:border-slate-800 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-800 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-[32px]">security</span>
+            </div>
+            <h2 class="text-lg font-bold text-slate-900">Operations &amp; Admin Console</h2>
+            <p class="text-xs text-slate-500 mt-1 font-medium">Enterprise Orders Database, Provisioning Management &amp; AI Escalations</p>
+          </div>
+          <button onclick="enterPortal('admin')" class="mt-8 w-full py-3 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-md shadow-slate-900/20 flex items-center justify-center gap-2 transition active:scale-[0.99]">
+            <span>Enter Operations Console</span>
+            <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORTAL CONTENT WRAPPER (HIDDEN INITIALLY) -->
+  <div id="portalContentWrapper" class="hidden flex-1 flex flex-col">
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-white border-b border-slate-200 shadow-xs">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-2 overflow-x-auto py-2.5" id="navTabsContainer">
+        <!-- Customer Tabs -->
+        <button onclick="switchTab('products')" id="tab-products" class="customer-tab nav-btn active px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+          <span>Products Catalogue (<span id="count-products">0</span>)</span>
+        </button>
+        <button onclick="switchTab('cart')" id="tab-cart" class="customer-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+          <span>Order Cart (<span id="navCartCount">0</span>)</span>
+        </button>
+        <button onclick="switchTab('assistant')" id="tab-assistant" class="customer-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[18px]">support_agent</span>
+          <span>AI Telecom Advisor &amp; Voice</span>
+        </button>
+        <button onclick="switchTab('kyc')" id="tab-kyc" class="customer-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[18px]">verified_user</span>
+          <span>Smart Digital KYC Engine</span>
+        </button>
+        <button onclick="switchTab('orders')" id="tab-orders" class="customer-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+          <span>Order Tracking &amp; OMS (<span id="count-orders">0</span>)</span>
+        </button>
+
+        <!-- Admin Tabs -->
+        <button onclick="switchTab('admin-orders')" id="tab-admin-orders" class="admin-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+          <span>All Orders (<span id="count-admin-orders">0</span>)</span>
+        </button>
+        <button onclick="switchTab('admin-escalations')" id="tab-admin-escalations" class="admin-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[18px]">report_problem</span>
+          <span>AI Escalations Queue (<span id="count-admin-escalations">0</span>)</span>
+        </button>
+        <button onclick="switchTab('admin-status')" id="tab-admin-status" class="admin-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap">
+          <span class="material-symbols-outlined text-[18px]">sync</span>
+          <span>Milestone Status Override</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+
+      <!-- TAB 1: PRODUCTS CATALOGUE -->
+      <section id="section-products" class="tab-section block">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">Airtel Business Enterprise Products</h1>
+            <p class="text-xs text-slate-500">Live products retrieved from PostgreSQL Catalogue</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="productSearch" oninput="filterProducts()" placeholder="Filter products by name or category..." class="px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white w-64 focus:outline-none focus:border-[#e40000]">
+            <select id="categoryFilter" onchange="filterProducts()" class="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white text-slate-700 font-semibold focus:outline-none">
+              <option value="ALL">All Categories</option>
+              <option value="Connectivity">Connectivity</option>
+              <option value="Security">Security</option>
+              <option value="Cloud">Cloud &amp; IoT</option>
+            </select>
+          </div>
+        </div>
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- TAB 2: AI ADVISOR & VOICE -->
+      <section id="section-assistant" class="tab-section hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col h-[600px]">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-100 text-[#e40000] flex items-center justify-center font-bold">
+                  <span class="material-symbols-outlined text-[20px]">smart_toy</span>
+                </div>
+                <div>
+                  <h2 class="text-sm font-bold text-slate-900">Airtel Enterprise AI Advisor</h2>
+                  <p class="text-xs text-slate-500">Sarvam Indic LLM &amp; Speech Processing</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="simulateMockRecommendation()" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">tune</span>
+                  <span>Demo Recommendation</span>
+                </button>
+                <button onclick="simulateMockEscalation()" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">warning</span>
+                  <span>Demo Escalation</span>
+                </button>
+                <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-600 ml-1">Clear</button>
+              </div>
+            </div>
+
+            <div id="chatMessages" class="flex-1 overflow-y-auto py-4 space-y-3 custom-scrollbar"></div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+              <button id="micBtn" onclick="toggleVoiceRecording()" title="Speak with Airtel Advisor" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e40000] flex items-center justify-center transition">
+                <span class="material-symbols-outlined text-[20px]">mic</span>
+              </button>
+              <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Describe your business needs (e.g., 'Need 200 Mbps for clinic in Pune')..." class="flex-1 px-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000] focus:bg-white">
+              <button onclick="sendChatMessage()" class="px-4 py-2.5 bg-[#e40000] hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                <span>Send</span>
+                <span class="material-symbols-outlined text-[16px]">send</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <!-- 1. Extracted Customer Schema -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Extracted Customer Schema</h3>
+                <span id="sch-completion-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-[#e40000] border border-red-200">0% Collected</span>
+              </div>
+              <div id="schemaContainer" class="bg-slate-50 rounded-xl p-3.5 border border-slate-100 space-y-2 text-xs">
+                <div class="flex justify-between items-center"><span class="text-slate-500">Business Type:</span><span id="sch-type" class="font-bold text-slate-900">Not identified</span></div>
+                <div class="flex justify-between items-center"><span class="text-slate-500">Location:</span><span id="sch-city" class="font-bold text-slate-900">Not identified</span></div>
+                <div class="flex justify-between items-center"><span class="text-slate-500">City Tier:</span><span id="sch-tier" class="font-bold text-slate-700">-</span></div>
+                <div class="flex justify-between items-center"><span class="text-slate-500">Headcount:</span><span id="sch-employees" class="font-bold text-slate-700">-</span></div>
+                <div class="flex justify-between items-center"><span class="text-slate-500">Locations/Sites:</span><span id="sch-sites" class="font-bold text-slate-700">-</span></div>
+                <div class="flex justify-between items-center"><span class="text-slate-500">Stated Needs:</span><span id="sch-needs" class="font-bold text-slate-700 truncate max-w-[150px]">-</span></div>
+                <div class="pt-1.5 border-t border-slate-200 flex justify-between items-center"><span class="text-slate-500">Discovery Progress:</span><span id="sch-completion" class="font-extrabold text-[#e40000]">0%</span></div>
+              </div>
+            </div>
+
+            <!-- 2. Recommended Enterprise Plan with Products & Add-ons Toggling -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+              <!-- Top Header & Badges -->
+              <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-3">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-[#e40000] animate-pulse"></span>
+                    <h3 id="rec-plan-name" class="font-extrabold text-sm text-slate-900">Healthcare Enterprise Suite</h3>
+                  </div>
+                  <p id="rec-plan-desc" class="text-xs text-slate-500 mt-0.5">Engineered for clinics, pathology &amp; diagnostic centres</p>
+                </div>
+                <div class="text-right shrink-0">
+                  <span id="rec-sla-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 block">1:1 CIR SLA</span>
+                  <span class="text-[9px] text-slate-400 font-medium">99.9% Uptime</span>
+                </div>
+              </div>
+
+              <!-- Enterprise Commercial Contract Card -->
+              <div class="bg-emerald-50/50 border border-emerald-200 rounded-xl p-3 text-xs">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-bold text-slate-800 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+                    <span>ENTERPRISE COMMERCIAL CONTRACT</span>
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Annual Agreement</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-600 pt-1 border-t border-emerald-100">
+                  <div>
+                    <span class="text-slate-400 block text-[9px] uppercase font-bold">Term</span>
+                    <span id="rec-term" class="font-bold text-slate-900">12 Mos Commitment</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 block text-[9px] uppercase font-bold">Billing</span>
+                    <span class="font-bold text-slate-900">Monthly in Advance</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 block text-[9px] uppercase font-bold">SLA Guarantee</span>
+                    <span class="font-bold text-emerald-700">99.9% • 4 Hr MTTR</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 block text-[9px] uppercase font-bold">Exit Terms</span>
+                    <span class="font-bold text-slate-900">30 Day Notice • Zero Penalty</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Products in this bundle (Full Card Rows with Toggle Switch) -->
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Primary Provisioned Stack:</span>
+                <div id="recProductsList" class="space-y-2.5">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <!-- Recommended Add-ons (Instant 1-Click Toggle Switch) -->
+              <div class="pt-2 border-t border-slate-100">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-amber-500">add_box</span>
+                    <span>Recommended Add-ons</span>
+                  </span>
+                  <span class="text-[10px] font-bold text-slate-400">Instant 1-Click Toggle</span>
+                </div>
+                <div id="recAddonsList" class="space-y-2">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <!-- Total Monthly Investment Breakdown -->
+              <div class="pt-3 border-t border-slate-200">
+                <div class="flex items-baseline justify-between mb-1">
+                  <div>
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">TOTAL MONTHLY INVESTMENT</span>
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-xl font-extrabold text-slate-900" id="rec-price">₹4,199</span>
+                      <span class="text-xs text-slate-500 font-semibold">/mo</span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">One-time Setup</span>
+                    <span class="text-sm font-bold text-slate-800" id="rec-setup">+ ₹1,000</span>
+                  </div>
+                </div>
+
+                <!-- Terms acknowledgment checkbox -->
+                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 mt-2.5 text-[11px] text-slate-600 flex items-start gap-2">
+                  <input type="checkbox" id="contractAgreeCheck" checked class="mt-0.5 rounded text-[#e40000] focus:ring-red-500">
+                  <label for="contractAgreeCheck" class="cursor-pointer leading-tight">
+                    <span class="font-semibold text-slate-800">Auto-generated Telecom Order Contract</span><br>
+                    <span id="rec-contract-summary" class="text-[10px] text-slate-500">₹4,199/mo recurring + ₹1,000 one-time • 12 Months Contract</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Call to Action Buttons -->
+              <div class="space-y-2 pt-1">
+                <button onclick="acceptCurrentQuote()" id="acceptQuoteBtn" class="w-full py-3 bg-[#e40000] hover:bg-red-700 text-white rounded-xl text-xs font-extrabold transition shadow-md flex items-center justify-center gap-1.5 active:scale-[0.99]">
+                  <span>Accept Stack &amp; Sign 12-Month Contract</span>
+                  <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </button>
+                <button onclick="addCurrentRecommendationToCart()" class="w-full py-2 bg-white border border-slate-300 hover:border-slate-800 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs">
+                  <span class="material-symbols-outlined text-[15px]">add_shopping_cart</span>
+                  <span>Add Stack to Cart</span>
+                </button>
+              </div>
+
+              <div class="text-center pt-1 border-t border-slate-100">
+                <span class="text-[10px] text-slate-400 font-medium flex items-center justify-center gap-1">
+                  <span class="material-symbols-outlined text-[13px] text-[#e40000]">mic</span>
+                  <span>Tap to speak in English / Hindi / Marathi</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB: CART & CHECKOUT -->
+      <section id="section-cart" class="tab-section hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">Enterprise Order Cart</h1>
+            <p class="text-xs text-slate-500">Configure base connectivity plans and attach compatible telecom &amp; cybersecurity add-ons</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="clearCart()" class="px-3 py-1.5 text-xs text-slate-600 hover:text-red-600 font-semibold border border-slate-200 rounded-lg hover:border-red-200 transition">
+              Clear Cart
+            </button>
+            <button onclick="switchTab('products')" class="px-3.5 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-lg transition flex items-center gap-1">
+              <span class="material-symbols-outlined text-[15px]">add</span>
+              <span>Add More Products</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Cart Items List -->
+          <div class="lg:col-span-2 space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[18px] text-[#e40000]">shopping_bag</span>
+                  <span>Configured Products in Cart (<span id="cartItemsCount">0</span>)</span>
+                </h2>
+                <span class="text-xs text-slate-400">Monthly Billing</span>
+              </div>
+              <div id="cartItemsList" class="space-y-3">
+                <!-- Dynamically populated or empty state -->
+              </div>
+            </div>
+
+            <!-- Add-ons Suggestions based on cart contents -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-amber-500">extension</span>
+                    <span>Recommended Enterprise Add-ons</span>
+                  </h3>
+                  <p class="text-[11px] text-slate-500">Attach cybersecurity, static IP and failover lines directly to your plan</p>
+                </div>
+              </div>
+              <div id="cartAddonsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <!-- Add-on cards -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Checkout & Order Summary -->
+          <div class="space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-4">Enterprise Quote Summary</h3>
+              
+              <div class="space-y-2.5 text-xs pb-4 border-b border-slate-100">
+                <div class="flex justify-between text-slate-600">
+                  <span>Base Plans Subtotal:</span>
+                  <span id="cartBaseSubtotal" class="font-bold text-slate-900">₹0</span>
+                </div>
+                <div class="flex justify-between text-slate-600">
+                  <span>Add-ons Subtotal:</span>
+                  <span id="cartAddonsSubtotal" class="font-bold text-slate-900">₹0</span>
+                </div>
+                <div class="flex justify-between text-slate-600">
+                  <span>Estimated GST (18%):</span>
+                  <span id="cartGst" class="font-bold text-slate-900">₹0</span>
+                </div>
+                <div class="flex justify-between text-slate-600">
+                  <span>Installation / Setup:</span>
+                  <span class="font-bold text-emerald-600">FREE (MSME Waiver)</span>
+                </div>
+              </div>
+
+              <div class="py-4 border-b border-slate-100 flex items-baseline justify-between">
+                <div>
+                  <span class="text-xs text-slate-500 block">Total Recurring Cost</span>
+                  <span class="text-2xl font-extrabold text-[#e40000]" id="cartGrandTotal">₹0</span>
+                  <span class="text-xs text-slate-400">/month</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] text-slate-400 block font-mono">12-Mo SLA Contract</span>
+                  <span class="text-[11px] font-bold text-emerald-600">99.9% Uptime Guarantee</span>
+                </div>
+              </div>
+
+              <!-- Customer Details for Order -->
+              <div class="mt-4 space-y-3">
+                <div>
+                  <label class="text-[11px] font-bold text-slate-700 block mb-1">Company / Entity Name</label>
+                  <input type="text" id="cartCustomerName" value="Balaji Healthcare Diagnostics" placeholder="Your Business Name" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000]">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[11px] font-bold text-slate-700 block mb-1">City / Location</label>
+                    <input type="text" id="cartCustomerCity" value="Pune" placeholder="City" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000]">
+                  </div>
+                  <div>
+                    <label class="text-[11px] font-bold text-slate-700 block mb-1">Segment</label>
+                    <input type="text" id="cartCustomerType" value="Healthcare" placeholder="Industry" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000]">
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="checkoutCartOrder()" id="cartCheckoutBtn" class="mt-5 w-full py-3 bg-[#e40000] hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md shadow-red-500/20 flex items-center justify-center gap-2 transition active:scale-[0.99]">
+                <span>Submit Order &amp; Generate Circuit</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+              <p class="text-[10px] text-slate-400 text-center mt-2">Initializes live circuit tracking across all 5 provisioning milestones</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: SMART DIGITAL KYC ENGINE -->
+      <section id="section-kyc" class="tab-section hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">DPDP Act 2023 Digital KYC Verification</h1>
+            <p class="text-xs text-slate-500">Live OCR document ingestion, GSTIN Mod-36 checksum, legal name matching &amp; zero RAM retention</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Mode Switcher -->
+            <div class="inline-flex p-1 bg-slate-200/80 rounded-xl text-xs font-semibold">
+              <button id="kycModeUploadBtn" onclick="switchKycMode('upload')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition">
+                Upload My Documents
+              </button>
+              <button id="kycModeSampleBtn" onclick="switchKycMode('sample')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+                Preloaded Datasets
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE 1: LIVE DOCUMENT UPLOAD (DEFAULT) -->
+        <div id="kycUploadModePanel" class="space-y-6">
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+              <div>
+                <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#e40000] text-[20px]">upload_file</span>
+                  <span>Upload Enterprise Verification Documents</span>
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">Upload your GST certificate, Udyam MSME document, address proof, or signatory ID (PNG, JPG, PDF)</p>
+              </div>
+              <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">lock</span>
+                <span>DPDP Encrypted &amp; Purged</span>
+              </span>
+            </div>
+
+            <!-- Upload Dropzones Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- GST Certificate -->
+              <div class="border-2 border-dashed border-slate-200 hover:border-[#e40000] rounded-xl p-4 text-center transition bg-slate-50/50 hover:bg-white flex flex-col justify-between">
+                <div>
+                  <div class="w-10 h-10 rounded-full bg-red-50 text-[#e40000] mx-auto flex items-center justify-center mb-2">
+                    <span class="material-symbols-outlined text-[20px]">badge</span>
+                  </div>
+                  <h3 class="text-xs font-bold text-slate-900">GST Certificate</h3>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Form GST REG-06</p>
+                </div>
+                <div class="mt-3">
+                  <input type="file" id="uploadGstFile" accept="image/*,.pdf" onchange="handleFileSelected('gst', this)" class="hidden">
+                  <label for="uploadGstFile" class="cursor-pointer block px-3 py-1.5 bg-white border border-slate-300 hover:border-[#e40000] rounded-lg text-xs font-semibold text-slate-700 hover:text-[#e40000] transition">
+                    <span id="labelGst">Choose File</span>
+                  </label>
+                  <span id="fileGstName" class="block text-[10px] text-slate-500 font-mono mt-1 truncate">No file chosen</span>
+                </div>
+              </div>
+
+              <!-- MSME Udyam Certificate -->
+              <div class="border-2 border-dashed border-slate-200 hover:border-[#e40000] rounded-xl p-4 text-center transition bg-slate-50/50 hover:bg-white flex flex-col justify-between">
+                <div>
+                  <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 mx-auto flex items-center justify-center mb-2">
+                    <span class="material-symbols-outlined text-[20px]">verified</span>
+                  </div>
+                  <h3 class="text-xs font-bold text-slate-900">Udyam Registration</h3>
+                  <p class="text-[10px] text-slate-400 mt-0.5">MSME Ministry certificate</p>
+                </div>
+                <div class="mt-3">
+                  <input type="file" id="uploadUdyamFile" accept="image/*,.pdf" onchange="handleFileSelected('udyam', this)" class="hidden">
+                  <label for="uploadUdyamFile" class="cursor-pointer block px-3 py-1.5 bg-white border border-slate-300 hover:border-[#e40000] rounded-lg text-xs font-semibold text-slate-700 hover:text-[#e40000] transition">
+                    <span id="labelUdyam">Choose File</span>
+                  </label>
+                  <span id="fileUdyamName" class="block text-[10px] text-slate-500 font-mono mt-1 truncate">No file chosen</span>
+                </div>
+              </div>
+
+              <!-- Address Proof -->
+              <div class="border-2 border-dashed border-slate-200 hover:border-[#e40000] rounded-xl p-4 text-center transition bg-slate-50/50 hover:bg-white flex flex-col justify-between">
+                <div>
+                  <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-600 mx-auto flex items-center justify-center mb-2">
+                    <span class="material-symbols-outlined text-[20px]">home_work</span>
+                  </div>
+                  <h3 class="text-xs font-bold text-slate-900">Electricity / Utility Bill</h3>
+                  <p class="text-[10px] text-slate-400 mt-0.5">Issued within 90 days</p>
+                </div>
+                <div class="mt-3">
+                  <input type="file" id="uploadAddressFile" accept="image/*,.pdf" onchange="handleFileSelected('address', this)" class="hidden">
+                  <label for="uploadAddressFile" class="cursor-pointer block px-3 py-1.5 bg-white border border-slate-300 hover:border-[#e40000] rounded-lg text-xs font-semibold text-slate-700 hover:text-[#e40000] transition">
+                    <span id="labelAddress">Choose File</span>
+                  </label>
+                  <span id="fileAddressName" class="block text-[10px] text-slate-500 font-mono mt-1 truncate">No file chosen</span>
+                </div>
+              </div>
+
+              <!-- Signatory ID -->
+              <div class="border-2 border-dashed border-slate-200 hover:border-[#e40000] rounded-xl p-4 text-center transition bg-slate-50/50 hover:bg-white flex flex-col justify-between">
+                <div>
+                  <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 mx-auto flex items-center justify-center mb-2">
+                    <span class="material-symbols-outlined text-[20px]">person</span>
+                  </div>
+                  <h3 class="text-xs font-bold text-slate-900">Authorized Signatory ID</h3>
+                  <p class="text-[10px] text-slate-400 mt-0.5">PAN Card or Passport</p>
+                </div>
+                <div class="mt-3">
+                  <input type="file" id="uploadSignatoryFile" accept="image/*,.pdf" onchange="handleFileSelected('signatory', this)" class="hidden">
+                  <label for="uploadSignatoryFile" class="cursor-pointer block px-3 py-1.5 bg-white border border-slate-300 hover:border-[#e40000] rounded-lg text-xs font-semibold text-slate-700 hover:text-[#e40000] transition">
+                    <span id="labelSignatory">Choose File</span>
+                  </label>
+                  <span id="fileSignatoryName" class="block text-[10px] text-slate-500 font-mono mt-1 truncate">No file chosen</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Optional Trade Name cross-match & Verify Action -->
+            <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="w-full sm:w-auto flex-1 max-w-md">
+                <label class="text-[11px] font-bold text-slate-700 block mb-1">Expected Enterprise Legal Name (Optional verification cross-check):</label>
+                <input type="text" id="uploadExpectedName" placeholder="e.g. Balaji Dental Care LLP" class="w-full px-3.5 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000]">
+              </div>
+              <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button onclick="resetUploadedFiles()" class="px-4 py-2.5 text-xs text-slate-600 hover:text-slate-900 font-bold border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+                  Reset
+                </button>
+                <button id="verifyUploadBtn" onclick="submitKycUploadVerification()" class="px-6 py-2.5 bg-[#e40000] hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md shadow-red-500/20 flex items-center justify-center gap-2 transition active:scale-[0.99]">
+                  <span class="material-symbols-outlined text-[18px]">verified_user</span>
+                  <span>Upload &amp; Run KYC Verification</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE 2: PRELOADED DATASET APPLICANT SELECTOR (HIDDEN BY DEFAULT) -->
+        <div id="kycSampleModePanel" class="hidden mb-6 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold text-slate-900">Preloaded Indian MSME Applicants (K01 - K12)</span>
+              <p class="text-[11px] text-slate-500">Benchmark datasets covering all 11 KYC edge cases</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <label class="text-xs font-bold text-slate-700">Select Test Applicant:</label>
+              <select id="kycApplicantSelect" onchange="runKycVerification(this.value)" class="px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 focus:outline-none"></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- VERIFICATION RESULTS SECTION -->
+        <div class="mt-6 space-y-5">
+          <!-- TOP STATUS HERO -->
+          <div id="kycHeroStatus" class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-center gap-3.5">
+                <div id="kycVerdictIcon" class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold">
+                  <span class="material-symbols-outlined text-[28px]">pending</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 id="kycStatusHeadline" class="text-base font-bold text-slate-900">Awaiting 4-Document Upload</h2>
+                    <span id="kycVerdictBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-100 text-slate-700 border-slate-200">READY</span>
+                  </div>
+                  <p id="kycStatusSubtext" class="text-xs text-slate-500 mt-0.5">Upload GST, Udyam, Electricity Bill, and Signatory ID to initiate full pipeline verification.</p>
+                </div>
+              </div>
+              <div id="kycVerifiedBadgePill" class="hidden shrink-0">
+                <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
+                  <span class="material-symbols-outlined text-[16px] text-emerald-600">verified</span>
+                  <span>KYC Verified &amp; Synced</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- VERIFICATION BREAKDOWN GRID (NO TESSERACT RAW JSON) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- 1. GST Status -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">GST Registration</span>
+                  <span id="gstStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">PENDING</span>
+                </div>
+                <div id="kycGstin" class="font-mono text-xs font-bold text-slate-900 truncate">-</div>
+                <div id="kycLegalName" class="text-[11px] text-slate-600 mt-1 font-medium truncate">Legal Trade Name: -</div>
+              </div>
+              <p id="gstDetails" class="text-[10px] text-slate-400 mt-3 border-t border-slate-100 pt-2">Mod-36 check &amp; Active GST status</p>
+            </div>
+
+            <!-- 2. Udyam MSME Status -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">MSME Udyam</span>
+                  <span id="udyamStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">PENDING</span>
+                </div>
+                <div id="kycUdyam" class="font-mono text-xs font-bold text-slate-900 truncate">-</div>
+                <div id="kycUdyamName" class="text-[11px] text-slate-600 mt-1 font-medium truncate">Enterprise: -</div>
+              </div>
+              <p id="udyamDetails" class="text-[10px] text-slate-400 mt-3 border-t border-slate-100 pt-2">Official MSME Registry Match</p>
+            </div>
+
+            <!-- 3. Address Proof Status -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Address Proof</span>
+                  <span id="addressStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">PENDING</span>
+                </div>
+                <div id="kycAddressCity" class="text-xs font-bold text-slate-900 truncate">-</div>
+                <div id="kycAddressDate" class="text-[11px] text-slate-600 mt-1 font-medium truncate">Bill Age: -</div>
+              </div>
+              <p id="addressDetails" class="text-[10px] text-slate-400 mt-3 border-t border-slate-100 pt-2">90-Day Utility Freshness Rule</p>
+            </div>
+
+            <!-- 4. Signatory PAN Status -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Signatory Auth</span>
+                  <span id="signatoryStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">PENDING</span>
+                </div>
+                <div id="kycSignatoryName" class="text-xs font-bold text-slate-900 truncate">-</div>
+                <div id="kycSignatoryPan" class="text-[11px] font-mono text-slate-600 mt-1 font-medium truncate">PAN: -</div>
+              </div>
+              <p id="signatoryDetails" class="text-[10px] text-slate-400 mt-3 border-t border-slate-100 pt-2">Signatory Match with GST Entity</p>
+            </div>
+          </div>
+
+          <!-- DETAILED ACTIONABLE GUIDANCE: WHAT IS WRONG & UPLOAD AGAIN -->
+          <div id="kycIssuesContainer" class="hidden bg-red-50/90 border border-red-200 rounded-2xl p-5">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[20px]">warning</span>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-sm font-bold text-red-900">Verification Issues Detected in Uploaded Documents</h3>
+                <p class="text-xs text-red-700 mt-0.5">Please review the specific errors below, re-upload the affected files, and run verification again:</p>
+                <ul id="kycIssuesList" class="mt-3 space-y-2 text-xs text-red-800"></ul>
+                <div class="mt-4 pt-3 border-t border-red-200/60 flex items-center gap-3">
+                  <button onclick="scrollToUploadSection()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                    <span class="material-symbols-outlined text-[16px]">upload</span>
+                    <span>Re-upload Affected Document</span>
+                  </button>
+                  <button onclick="resetUploadedFiles()" class="px-3.5 py-2 bg-white text-red-700 border border-red-300 rounded-xl text-xs font-bold hover:bg-red-50 transition">
+                    Clear &amp; Start Over
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUCCESS: CROSS-PAGE APPLICATION SYNC BANNER -->
+          <div id="kycSuccessSyncBanner" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-sm font-bold text-emerald-900">KYC Verified &amp; Synchronized Across Entire Application!</h3>
+                <p class="text-xs text-emerald-700 mt-0.5">
+                  Your business identity is now permanently validated. Verified enterprise profile has been updated in your <strong class="underline cursor-pointer" onclick="switchTab('assistant')">AI Advisor &amp; Recommendations</strong> and <strong class="underline cursor-pointer" onclick="switchTab('cart')">Order Cart</strong>.
+                </p>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                  <button onclick="switchTab('assistant')" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg transition flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[15px]">smart_toy</span>
+                    <span>View AI Tailored Recommendations</span>
+                  </button>
+                  <button onclick="switchTab('cart')" class="px-3.5 py-1.5 bg-white text-emerald-800 border border-emerald-300 text-xs font-bold rounded-lg hover:bg-emerald-100 transition flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[15px]">shopping_cart</span>
+                    <span>Checkout Verified Order</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: ORDER TRACKING & OMS -->
+      <section id="section-orders" class="tab-section hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">Provisioning Lifecycle &amp; OMS Tracker</h1>
+            <p class="text-xs text-slate-500">Live order milestone execution backed by PostgreSQL</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm h-[550px] flex flex-col">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Placed Enterprise Orders</h2>
+            <div id="ordersListContainer" class="flex-1 overflow-y-auto space-y-2.5 custom-scrollbar"></div>
+          </div>
+
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col">
+            <div class="border-b border-slate-100 pb-4 mb-4 flex items-center justify-between">
+              <div>
+                <span id="detailOrderId" class="text-xs font-mono font-bold text-[#e40000] bg-red-50 border border-red-100 px-2 py-0.5 rounded">#S00060</span>
+                <h2 id="detailCustomerName" class="text-base font-bold text-slate-900 mt-1">Balaji Clinic</h2>
+                <p id="detailBundleName" class="text-xs text-slate-500">Healthcare Enterprise Suite</p>
+              </div>
+              <div class="text-right">
+                <span id="detailPrice" class="text-base font-bold text-slate-900">₹4,199 / mo</span>
+                <span id="detailUptime" class="block text-[11px] text-emerald-700 font-semibold">99.5% SLA Committed</span>
+              </div>
+            </div>
+
+            <div id="timelineContainer" class="flex-1 space-y-4"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMIN TAB 1: ALL ORDERS QUEUE -->
+      <section id="section-admin-orders" class="tab-section hidden">
+        <div class="flex items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">Enterprise Orders Database</h1>
+            <p class="text-xs text-slate-500">Live customer provisioning records persisted in Neon PostgreSQL</p>
+          </div>
+        </div>
+        <div id="adminOrdersQueueList" class="space-y-3"></div>
+      </section>
+
+      <!-- ADMIN TAB 2: AI ESCALATIONS QUEUE WITH DETAILED CARDS -->
+      <section id="section-admin-escalations" class="tab-section hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">AI Discovery Escalations Queue</h1>
+            <p class="text-xs text-slate-500">Cases flagged by Sarvam AI Indic LLM with confidence scores and unextracted parameters</p>
+          </div>
+          <button onclick="fetchSalesDashboard()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">refresh</span>
+            <span>Refresh Queue</span>
+          </button>
+        </div>
+
+        <!-- Escalation Cards Grid -->
+        <div id="adminEscalationsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- ADMIN TAB 3: MILESTONE STATUS OVERRIDE -->
+      <section id="section-admin-status" class="tab-section hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 class="text-xl font-bold text-slate-900">Order Milestone Management</h1>
+            <p class="text-xs text-slate-500">Update order status and sync directly to PostgreSQL</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm max-w-2xl">
+          <h2 class="text-sm font-bold text-slate-900 mb-4">Advance Order Milestone</h2>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Target Order</label>
+              <select id="adminOrderSelect" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">New Provisioning Stage</label>
+              <select id="adminStageSelect" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
+                <option value="Confirmed">1. Confirmed (Commercial Signed)</option>
+                <option value="Hardware Dispatched">2. CPE Hardware Dispatched</option>
+                <option value="Optical Splicing">3. Out for Splicing (Field Team Onsite)</option>
+                <option value="Delivered & Live">4. Delivered &amp; Circuit Live</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Field Engineer Remark</label>
+              <input type="text" id="adminRemarkInput" value="Optical patch terminated. Signal level benchmarked." class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-xl">
+            </div>
+            <button onclick="submitAdminStatusUpdate()" class="w-full py-3 bg-[#e40000] hover:bg-red-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-[16px]">sync</span>
+              <span>Update &amp; Sync PostgreSQL Database</span>
+            </button>
+            <div id="adminSuccessToast" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold text-center">
+              Database synchronized successfully!
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+    let allProducts = [];
+    let allOrders = [];
+    let cart = []; // Array of { product: Object, quantity: number, isAddon: boolean }
+    let currentSessionId = 'cust-' + Math.random().toString(36).substring(2, 9);
+    let currentRole = null;
+
+    // 0. ROLE PORTAL ROUTING
+    function enterPortal(role) {
+      currentRole = role;
+      document.getElementById('roleGatewayScreen').classList.add('hidden');
+      document.getElementById('portalContentWrapper').classList.remove('hidden');
+      document.getElementById('switchRoleBtn').classList.remove('hidden');
+
+      const roleBadge = document.getElementById('roleBadge');
+
+      if (role === 'customer') {
+        roleBadge.textContent = 'Customer Portal';
+        roleBadge.className = 'text-[11px] bg-red-50 text-[#e40000] border border-red-200 font-bold px-2 py-0.5 rounded-full ml-2';
+        document.querySelectorAll('.customer-tab').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
+        switchTab('products');
+      } else {
+        roleBadge.textContent = 'Admin Console';
+        roleBadge.className = 'text-[11px] bg-slate-100 text-slate-800 border border-slate-300 font-bold px-2 py-0.5 rounded-full ml-2';
+        document.querySelectorAll('.customer-tab').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('hidden'));
+        fetchSalesDashboard();
+        switchTab('admin-orders');
+      }
+    }
+
+    function toggleRoleModal() {
+      document.getElementById('roleGatewayScreen').classList.remove('hidden');
+      document.getElementById('portalContentWrapper').classList.add('hidden');
+      document.getElementById('switchRoleBtn').classList.add('hidden');
+      document.getElementById('roleBadge').textContent = 'Access Portal';
+    }
+
+    // TAB SWITCHING
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      const sec = document.getElementById('section-' + tabId);
+      const btn = document.getElementById('tab-' + tabId);
+      if (sec) sec.classList.remove('hidden');
+      if (btn) btn.classList.add('active');
+    }
+
+    // 1. PRODUCTS
+    async function fetchProducts() {
+      try {
+        const res = await fetch(`${API_BASE}/api/products`);
+        const data = await res.json();
+        allProducts = data.products || [];
+        document.getElementById('count-products').textContent = allProducts.length;
+        renderProducts(allProducts);
+      } catch (err) {
+        console.error('Failed to load products:', err);
+      }
+    }
+
+    function renderProducts(list) {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = '';
+      list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-slate-200 p-4 shadow-sm hover:border-[#e40000]/60 transition flex flex-col justify-between gap-3';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">${p.category || 'Enterprise'}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.requires_gstin === 'Y' ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}">
+                ${p.requires_gstin === 'Y' ? 'Requires GSTIN' : 'No GST Needed'}
+              </span>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400">${p.product_id}</div>
+            <h3 class="text-sm font-bold text-slate-900 leading-snug mt-0.5">${p.product_name}</h3>
+            <p class="text-xs text-slate-600 mt-1 line-clamp-2">${p.description || 'Enterprise grade solution'}</p>
+          </div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <div>
+              <span class="text-base font-bold text-slate-900">₹${Number(p.monthly_price_inr || p.price_min_inr_per_month || 0).toLocaleString('en-IN')}</span>
+              <span class="text-xs text-slate-500">/mo</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="addToCart('${p.product_id}')" class="px-3 py-1.5 bg-[#e40000] hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+                <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span>
+                <span>Add to Cart</span>
+              </button>
+              <button onclick="selectProductForQuote('${p.product_name}', ${p.monthly_price_inr || p.price_min_inr_per_month || 0})" title="Ask Airtel Advisor about this plan" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center justify-center">
+                <span class="material-symbols-outlined text-[16px]">support_agent</span>
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterProducts() {
+      const q = document.getElementById('productSearch').value.toLowerCase();
+      const cat = document.getElementById('categoryFilter').value;
+      const filtered = allProducts.filter(p => {
+        const matchesQ = p.product_name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q);
+        const matchesCat = cat === 'ALL' || p.category === cat;
+        return matchesQ && matchesCat;
+      });
+      renderProducts(filtered);
+    }
+
+    function selectProductForQuote(name, price) {
+      document.getElementById('rec-plan-name').textContent = name;
+      document.getElementById('rec-price').textContent = '₹' + Number(price).toLocaleString('en-IN');
+      switchTab('assistant');
+    }
+
+    // --- CART FUNCTIONALITY ---
+    function toggleCartDrawer(open) {
+      if (open) {
+        switchTab('cart');
+      }
+    }
+
+    function addToCart(productId) {
+      const prod = allProducts.find(p => p.product_id === productId);
+      if (!prod) return;
+
+      const isAddon = Boolean(prod.requires_one_of);
+      const existing = cart.find(item => item.product.product_id === productId);
+
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ product: prod, quantity: 1, isAddon: isAddon });
+      }
+
+      updateCartUI();
+      showAddedToast(prod.product_name + ' added to cart!');
+    }
+
+    function addAddonToCart(productId) {
+      addToCart(productId);
+    }
+
+    function addCurrentRecommendationToCart() {
+      const planName = document.getElementById('rec-plan-name').textContent;
+      const priceText = document.getElementById('rec-price').textContent;
+      const price = parseInt(priceText.replace(/[^0-9]/g, '')) || 1340;
+      const setupText = document.getElementById('rec-setup')?.textContent || '₹0';
+      const setupPrice = parseInt(setupText.replace(/[^0-9]/g, '')) || 0;
+
+      // Primary bundle base
+      const planItem = {
+        product_id: 'BUNDLE-PLAN',
+        product_name: planName,
+        category: 'Enterprise Bundle',
+        description: document.getElementById('rec-plan-desc')?.textContent || 'Configured Airtel Suite',
+        monthly_price_inr: price,
+        one_time_setup_inr: setupPrice,
+        price_min_inr_per_month: price,
+        requires_gstin: 'Y'
+      };
+
+      const existing = cart.find(item => item.product.product_id === planItem.product_id);
+      if (existing) {
+        existing.quantity += 1;
+        existing.product.monthly_price_inr = price;
+      } else {
+        cart.push({ product: planItem, quantity: 1, isAddon: false });
+      }
+
+      // Also add any explicitly toggled add-ons to the cart
+      if (currentRecommendationData && currentRecommendationData.optional_addons) {
+        toggledAddonIds.forEach(id => {
+          const addonObj = currentRecommendationData.optional_addons.find(a => a.product_id === id) || allProducts.find(p => p.product_id === id);
+          if (addonObj) {
+            const addonItem = {
+              product_id: addonObj.product_id,
+              product_name: addonObj.product_name,
+              category: addonObj.category || 'Add-on',
+              description: addonObj.reason?.text || 'Attached Enterprise Add-on',
+              monthly_price_inr: Number(addonObj.monthly_delta || addonObj.monthly_price_inr || 499),
+              price_min_inr_per_month: Number(addonObj.monthly_delta || addonObj.monthly_price_inr || 499),
+              one_time_setup_inr: Number(addonObj.setup_delta || 0)
+            };
+            const exAddon = cart.find(i => i.product.product_id === addonItem.product_id);
+            if (!exAddon) {
+              cart.push({ product: addonItem, quantity: 1, isAddon: true });
+            }
+          }
+        });
+      }
+
+      updateCartUI();
+      showAddedToast(planName + ' with add-ons added to cart!');
+      switchTab('cart');
+    }
+
+    function updateCartItemQty(productId, delta) {
+      const item = cart.find(i => i.product.product_id === productId);
+      if (!item) return;
+
+      item.quantity += delta;
+      if (item.quantity <= 0) {
+        removeFromCart(productId);
+      } else {
+        updateCartUI();
+      }
+    }
+
+    function removeFromCart(productId) {
+      cart = cart.filter(i => i.product.product_id !== productId);
+      updateCartUI();
+    }
+
+    function clearCart() {
+      cart = [];
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
+      document.getElementById('cartBadgeCount').textContent = totalItems;
+      document.getElementById('navCartCount').textContent = totalItems;
+      const cartItemsCountEl = document.getElementById('cartItemsCount');
+      if (cartItemsCountEl) cartItemsCountEl.textContent = totalItems;
+
+      // Calculate totals
+      let baseSubtotal = 0;
+      let addonSubtotal = 0;
+
+      cart.forEach(item => {
+        const p = item.product;
+        const price = Number(p.monthly_price_inr || p.price_min_inr_per_month || 0);
+        if (item.isAddon) {
+          addonSubtotal += price * item.quantity;
+        } else {
+          baseSubtotal += price * item.quantity;
+        }
+      });
+
+      const subtotal = baseSubtotal + addonSubtotal;
+      const gst = Math.round(subtotal * 0.18);
+      const grandTotal = subtotal + gst;
+
+      const baseSubEl = document.getElementById('cartBaseSubtotal');
+      const addonSubEl = document.getElementById('cartAddonsSubtotal');
+      const gstEl = document.getElementById('cartGst');
+      const grandTotalEl = document.getElementById('cartGrandTotal');
+
+      if (baseSubEl) baseSubEl.textContent = '₹' + baseSubtotal.toLocaleString('en-IN');
+      if (addonSubEl) addonSubEl.textContent = '₹' + addonSubtotal.toLocaleString('en-IN');
+      if (gstEl) gstEl.textContent = '₹' + gst.toLocaleString('en-IN');
+      if (grandTotalEl) grandTotalEl.textContent = '₹' + grandTotal.toLocaleString('en-IN');
+
+      renderCartList();
+      renderCartAddons();
+    }
+
+    function renderCartList() {
+      const listEl = document.getElementById('cartItemsList');
+      if (!listEl) return;
+
+      if (cart.length === 0) {
+        listEl.innerHTML = `
+          <div class="text-center py-12 text-slate-400">
+            <span class="material-symbols-outlined text-[48px] text-slate-300">shopping_cart</span>
+            <p class="text-sm font-semibold text-slate-600 mt-2">Your enterprise cart is empty</p>
+            <p class="text-xs text-slate-400 mt-0.5">Explore our products catalogue or get an AI tailored plan to get started.</p>
+            <button onclick="switchTab('products')" class="mt-4 px-4 py-2 bg-[#e40000] text-white text-xs font-bold rounded-xl shadow-xs hover:bg-red-700 transition">
+              Browse Products
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = '';
+      cart.forEach(item => {
+        const p = item.product;
+        const price = Number(p.monthly_price_inr || p.price_min_inr_per_month || 0);
+        const itemTotal = price * item.quantity;
+
+        const row = document.createElement('div');
+        row.className = 'flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-xl gap-3';
+        row.innerHTML = `
+          <div class="flex items-start gap-3">
+            <div class="w-9 h-9 rounded-lg ${item.isAddon ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-[#e40000]'} flex items-center justify-center shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[20px]">${item.isAddon ? 'extension' : 'network_check'}</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-900">${p.product_name}</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${item.isAddon ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-[#e40000]'}">
+                  ${item.isAddon ? 'Add-on' : 'Base Plan'}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5">${p.description || 'Airtel Enterprise solution'}</p>
+              <span class="text-[11px] font-mono text-slate-400">₹${price.toLocaleString('en-IN')}/mo each</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end gap-4">
+            <div class="flex items-center border border-slate-300 rounded-lg bg-white overflow-hidden">
+              <button onclick="updateCartItemQty('${p.product_id}', -1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs font-bold transition">−</button>
+              <span class="px-3 py-1 text-xs font-bold text-slate-800">${item.quantity}</span>
+              <button onclick="updateCartItemQty('${p.product_id}', 1)" class="px-2 py-1 text-slate-600 hover:bg-slate-100 text-xs font-bold transition">+</button>
+            </div>
+            <div class="text-right min-w-[70px]">
+              <span class="text-xs font-bold text-slate-900 block">₹${itemTotal.toLocaleString('en-IN')}</span>
+              <span class="text-[10px] text-slate-400">/mo</span>
+            </div>
+            <button onclick="removeFromCart('${p.product_id}')" title="Remove" class="text-slate-400 hover:text-red-600 p-1 rounded transition">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+
+    function renderCartAddons() {
+      const grid = document.getElementById('cartAddonsGrid');
+      if (!grid) return;
+
+      // Filter products marked as add-ons (requires_one_of present) or relevant add-ons
+      const addons = allProducts.filter(p => Boolean(p.requires_one_of) || ['P09', 'P10', 'P11', 'P20', 'P21', 'P22'].includes(p.product_id));
+
+      grid.innerHTML = '';
+      addons.slice(0, 6).forEach(addon => {
+        const isAlreadyInCart = cart.some(i => i.product.product_id === addon.product_id);
+        const card = document.createElement('div');
+        card.className = 'p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between gap-2';
+        card.innerHTML = `
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-amber-600">extension</span>
+              <span class="text-xs font-bold text-slate-900 truncate">${addon.product_name}</span>
+            </div>
+            <div class="text-[11px] text-slate-500 mt-0.5">
+              <span class="font-bold text-slate-800">₹${Number(addon.monthly_price_inr || addon.price_min_inr_per_month || 0).toLocaleString('en-IN')}</span>/mo
+            </div>
+          </div>
+          <button onclick="addAddonToCart('${addon.product_id}')" class="px-2.5 py-1 text-[11px] font-bold rounded-lg transition shrink-0 ${isAlreadyInCart ? 'bg-emerald-100 text-emerald-800 cursor-default' : 'bg-slate-900 text-white hover:bg-black'}">
+            ${isAlreadyInCart ? '✓ Added' : '+ Add'}
+          </button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function checkoutCartOrder() {
+      if (cart.length === 0) {
+        alert('Your cart is empty. Please add a plan or product before submitting.');
+        return;
+      }
+
+      const companyName = document.getElementById('cartCustomerName')?.value.trim() || 'Balaji Healthcare Diagnostics';
+      const city = document.getElementById('cartCustomerCity')?.value.trim() || 'Pune';
+      const segment = document.getElementById('cartCustomerType')?.value.trim() || 'Healthcare';
+
+      // Compute total
+      let subtotal = 0;
+      cart.forEach(item => {
+        const price = Number(item.product.monthly_price_inr || item.product.price_min_inr_per_month || 0);
+        subtotal += price * item.quantity;
+      });
+      const grandTotal = Math.round(subtotal * 1.18);
+
+      // Create primary plan description
+      const planNames = cart.map(i => `${i.product.product_name} (x${i.quantity})`).join(', ');
+
+      const payload = {
+        sessionId: currentSessionId,
+        bundleCode: 'CART-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        bundleName: planNames.length > 50 ? planNames.substring(0, 47) + '...' : planNames,
+        monthlyCost: grandTotal,
+        contractMonths: 12,
+        customerSchema: {
+          business_name: companyName,
+          business_type: segment,
+          city: city,
+          cart_items: cart.map(i => ({ id: i.product.product_id, name: i.product.product_name, qty: i.quantity, price: i.product.monthly_price_inr }))
+        }
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/orders/accept`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        alert('Order generated successfully! Circuit ID created. Redirecting to Order Tracker...');
+        clearCart();
+        await fetchOrders();
+        switchTab('orders');
+      } catch (err) {
+        alert('Failed to place order: ' + err.message);
+      }
+    }
+
+    function showAddedToast(msg) {
+      let toast = document.getElementById('cartMiniToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'cartMiniToast';
+        toast.className = 'fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl z-50 flex items-center gap-2 transition-opacity duration-300';
+        document.body.appendChild(toast);
+      }
+      toast.innerHTML = `<span class="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span><span>${msg}</span>`;
+      toast.style.opacity = '1';
+      setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+    }
+
+    // 2. CHAT & VOICE
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+
+      appendMessage(msg, 'user');
+      const pendingEl = appendMessage('Analyzing your requirements...', 'bot');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, session_id: currentSessionId })
+        });
+        const data = await res.json();
+        pendingEl.remove();
+        appendMessage(data.reply || 'Thank you. I have logged your preferences.', 'bot');
+
+        // Update extracted customer schema
+        updateCustomerSchemaUI(data.customer_schema, data.completion_percentage);
+
+        // Update recommendation package live
+        updateRecommendedPlanUI(data.recommended_plan, data.customer_schema);
+
+        // If the AI has generated a proposal, also append the interactive proposal card into the chat flow
+        if (data.recommended_plan && (data.completion_percentage >= 40 || data.recommended_plan.products?.length > 0)) {
+          appendRecommendationCardToChat(data.recommended_plan, data.customer_schema);
+        }
+      } catch (err) {
+        pendingEl.remove();
+        appendMessage('Connection error with assistant server.', 'bot');
+      }
+    }
+
+    let currentRecommendationData = null;
+    let toggledAddonIds = new Set();
+
+    function updateCustomerSchemaUI(s, completion) {
+      if (!s) return;
+      if (s.business_type) document.getElementById('sch-type').textContent = s.business_type;
+      if (s.city) document.getElementById('sch-city').textContent = s.city;
+      if (s.city_tier) document.getElementById('sch-tier').textContent = 'Tier ' + s.city_tier;
+      if (s.employee_count) document.getElementById('sch-employees').textContent = s.employee_count + ' staff';
+      if (s.num_sites) document.getElementById('sch-sites').textContent = s.num_sites + ' location(s)';
+      if (s.needs && s.needs.length) document.getElementById('sch-needs').textContent = s.needs.join(', ');
+
+      if (completion !== undefined) {
+        document.getElementById('sch-completion').textContent = completion + '%';
+        const badge = document.getElementById('sch-completion-badge');
+        if (badge) {
+          badge.textContent = completion + '% Collected';
+          badge.className = `text-[10px] font-bold px-2 py-0.5 rounded-full border ${completion >= 60 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-[#e40000] border-red-200'}`;
+        }
+      }
+    }
+
+    function updateRecommendedPlanUI(plan, schema) {
+      if (!plan) return;
+      currentRecommendationData = plan;
+
+      const nameEl = document.getElementById('rec-plan-name');
+      const descEl = document.getElementById('rec-plan-desc');
+      const priceEl = document.getElementById('rec-price');
+      const setupEl = document.getElementById('rec-setup');
+      const contractEl = document.getElementById('rec-contract');
+
+      const bName = (schema && (schema.business_name || schema.business_type)) ? `${schema.business_type || schema.business_name} Growth Suite` : 'Enterprise Growth Suite';
+      
+      const rawProducts = plan.products || [];
+      const prodNames = rawProducts.map(p => typeof p === 'object' ? p.product_name : p);
+
+      if (nameEl) nameEl.textContent = `${bName} (${prodNames[0] || 'Biz Fibre 100'})`;
+      if (descEl) descEl.textContent = plan.explanation || `Includes ${prodNames.join(', ')} with guaranteed 99.9% uptime SLA.`;
+      
+      // Render Included Products
+      renderPlanIncludedProducts(rawProducts);
+
+      // Render Add-ons with Toggles
+      renderPlanAddons(plan.optional_addons || []);
+
+      // Calculate totals including any toggled add-ons
+      recalculatePlanTotals();
+    }
+
+    function renderPlanIncludedProducts(products) {
+      const listEl = document.getElementById('recProductsList');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      // Standard telecom provisioned stack if raw products is empty or simple array
+      const productItems = [
+        {
+          name: '300 Mbps Symmetric Optical Fibre',
+          tag: '99.9% Uptime',
+          tagClass: 'bg-blue-100 text-blue-700',
+          desc: 'Dedicated 1:1 Bandwidth with strict SLA',
+          price: '₹2,699/mo',
+          period: 'Annual Contract',
+          icon: 'speed',
+          iconBg: 'bg-blue-600 text-white',
+          cardBg: 'bg-blue-50/40 border-blue-100',
+          checked: true,
+          setup: ''
+        },
+        {
+          name: '4 HD Cloud CCTV Cameras',
+          tag: '30-Day Cloud',
+          tagClass: 'bg-amber-100 text-amber-800',
+          desc: 'Encrypted cloud secure archive & audit trail',
+          price: '+ ₹1,200/mo',
+          period: 'NABH Compliant',
+          icon: 'videocam',
+          iconBg: 'bg-amber-600 text-white',
+          cardBg: 'bg-amber-50/40 border-amber-100',
+          checked: true,
+          setup: ''
+        },
+        {
+          name: 'Static IPv4 Subnet Pool',
+          tag: '/29 Public Subnet',
+          tagClass: 'bg-purple-100 text-purple-700',
+          desc: 'Secure Tele-Radiology & PACS hospital servers',
+          price: '+ ₹300/mo',
+          period: 'Smart Routing',
+          icon: 'dns',
+          iconBg: 'bg-purple-600 text-white',
+          cardBg: 'bg-purple-50/40 border-purple-100',
+          checked: true,
+          setup: ''
+        },
+        {
+          name: 'Enterprise Splicing & Setup',
+          tag: 'Zero Pkts Loss',
+          tagClass: 'bg-emerald-100 text-emerald-800',
+          desc: 'OTDR tested zero loss optical patch termination',
+          price: '₹1,000 One-time',
+          period: 'Cisco Router Config',
+          icon: 'handyman',
+          iconBg: 'bg-emerald-600 text-white',
+          cardBg: 'bg-emerald-50/40 border-emerald-100',
+          checked: true,
+          setup: ''
+        }
+      ];
+
+      // If backend passed specific products, customize the first card
+      if (products && products.length > 0) {
+        const first = products[0];
+        const firstName = typeof first === 'object' ? first.product_name : first;
+        const firstPrice = typeof first === 'object' ? (first.monthly || first.monthly_price_inr || 2699) : 2699;
+        productItems[0].name = firstName;
+        productItems[0].price = `₹${Number(firstPrice).toLocaleString('en-IN')}/mo`;
+      }
+
+      productItems.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl border ${item.cardBg} transition flex items-start justify-between gap-3`;
+        card.innerHTML = `
+          <div class="flex items-start gap-2.5 flex-1 min-w-0">
+            <div class="w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[18px]">${item.icon}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-bold text-xs text-slate-900">${item.name}</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${item.tagClass}">${item.tag}</span>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-0.5 leading-tight">${item.desc}</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="font-extrabold text-xs text-slate-900">${item.price}</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-white border border-slate-200 text-slate-600 font-medium">${item.period}</span>
+              </div>
+            </div>
+          </div>
+          <div class="shrink-0 pt-0.5">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="recalculatePlanTotals()" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#e40000]"></div>
+            </label>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    function renderPlanAddons(addons) {
+      const listEl = document.getElementById('recAddonsList');
+      if (!listEl) return;
+      listEl.innerHTML = '';
+
+      const curatedAddons = [
+        {
+          id: 'ADDON-CISCO',
+          name: 'Cisco Dual-WAN Router',
+          tag: 'Gigabit VPN',
+          tagClass: 'bg-cyan-100 text-cyan-800',
+          desc: 'Hardware lease + proactive lifetime replacement',
+          price: '+ ₹550/mo',
+          meta: 'Managed Device',
+          icon: 'router',
+          iconBg: 'bg-cyan-600 text-white',
+          monthly: 550,
+          setup: 0
+        },
+        {
+          id: 'ADDON-SLA',
+          name: 'Platinum 24/7 Operations SLA',
+          tag: '2-Hour MTTR',
+          tagClass: 'bg-indigo-100 text-indigo-800',
+          desc: 'Dedicated enterprise engineer L3 desk',
+          price: '+ ₹600/mo',
+          meta: 'Priority Queue',
+          icon: 'headset_mic',
+          iconBg: 'bg-indigo-600 text-white',
+          monthly: 600,
+          setup: 0
+        },
+        {
+          id: 'ADDON-FAILOVER',
+          name: 'Secondary 4G/5G Failover',
+          tag: 'Auto-Switch',
+          tagClass: 'bg-rose-100 text-rose-800',
+          desc: 'Uninterrupted card swipes & patient telemetry',
+          price: '+ ₹350/mo',
+          meta: 'Seamless Sync',
+          icon: 'cell_tower',
+          iconBg: 'bg-rose-600 text-white',
+          monthly: 350,
+          setup: 0
+        }
+      ];
+
+      curatedAddons.forEach(addon => {
+        const isToggled = toggledAddonIds.has(addon.id);
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl border transition flex items-start justify-between gap-3 ${isToggled ? 'bg-red-50/60 border-red-200' : 'bg-slate-50/50 border-slate-200 hover:border-slate-300'}`;
+        card.innerHTML = `
+          <div class="flex items-start gap-2.5 flex-1 min-w-0">
+            <div class="w-8 h-8 rounded-lg ${addon.iconBg} flex items-center justify-center shrink-0 mt-0.5">
+              <span class="material-symbols-outlined text-[18px]">${addon.icon}</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-bold text-xs text-slate-900">${addon.name}</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${addon.tagClass}">${addon.tag}</span>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-0.5 leading-tight">${addon.desc}</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <span class="font-extrabold text-xs text-slate-900">${addon.price}</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-white border border-slate-200 text-slate-600 font-medium">${addon.meta}</span>
+              </div>
+            </div>
+          </div>
+          <div class="shrink-0 pt-0.5">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" ${isToggled ? 'checked' : ''} onchange="toggleRecommendationAddon('${addon.id}', ${addon.monthly})" class="sr-only peer">
+              <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#e40000]"></div>
+            </label>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    function toggleRecommendationAddon(addonId, monthlyAmount = 500) {
+      if (toggledAddonIds.has(addonId)) {
+        toggledAddonIds.delete(addonId);
+      } else {
+        toggledAddonIds.add(addonId);
+      }
+      recalculatePlanTotals();
+    }
+
+    function recalculatePlanTotals() {
+      // Base plan monthly is 4,199 (Healthcare Enterprise Suite) or custom
+      let baseMonthly = (currentRecommendationData && currentRecommendationData.monthly_cost) ? Number(currentRecommendationData.monthly_cost) : 4199;
+      let baseSetup = 1000;
+
+      const addonPrices = {
+        'ADDON-CISCO': 550,
+        'ADDON-SLA': 600,
+        'ADDON-FAILOVER': 350
+      };
+
+      toggledAddonIds.forEach(id => {
+        if (addonPrices[id]) {
+          baseMonthly += addonPrices[id];
+        }
+      });
+
+      const priceEl = document.getElementById('rec-price');
+      const setupEl = document.getElementById('rec-setup');
+      const summaryEl = document.getElementById('rec-contract-summary');
+
+      if (priceEl) priceEl.textContent = '₹' + Math.round(baseMonthly).toLocaleString('en-IN');
+      if (setupEl) setupEl.textContent = '+ ₹' + Math.round(baseSetup).toLocaleString('en-IN');
+      if (summaryEl) {
+        summaryEl.textContent = `₹${Math.round(baseMonthly).toLocaleString('en-IN')}/mo recurring + ₹${Math.round(baseSetup).toLocaleString('en-IN')} one-time • 12 Months Contract`;
+      }
+    }
+
+    function appendMessage(text, role) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.className = role === 'user'
+        ? 'self-end bg-[#e40000] text-white px-3.5 py-2 rounded-xl text-xs max-w-[80%] ml-auto'
+        : 'self-start bg-slate-100 text-slate-800 px-3.5 py-2 rounded-xl text-xs max-w-[85%]';
+      
+      // If html string passed with formatting
+      if (text.includes('<') && text.includes('>')) {
+        div.innerHTML = text;
+      } else {
+        div.textContent = text;
+      }
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return div;
+    }
+
+    function appendRecommendationCardToChat(plan, schema) {
+      if (!plan) return;
+      const container = document.getElementById('chatMessages');
+      const cardWrapper = document.createElement('div');
+      cardWrapper.className = 'self-start w-full max-w-[92%] my-2 rounded-2xl bg-white border border-red-100 p-4 shadow-sm';
+
+      const tradeName = (schema && (schema.business_name || schema.business_type))
+        ? `${schema.business_name || schema.business_type}`
+        : 'Enterprise Client';
+      const city = (schema && schema.city) ? schema.city : 'India';
+      const monthly = Math.round(plan.monthly_cost || 4199);
+      const setup = plan.setup_cost ? `+ ₹${Math.round(plan.setup_cost).toLocaleString('en-IN')}` : '+ ₹1,000';
+      const contract = plan.contract_months || 12;
+
+      const rawProducts = plan.products || [];
+      const prodName = rawProducts[0] ? (typeof rawProducts[0] === 'object' ? rawProducts[0].product_name : rawProducts[0]) : 'Biz Fibre 300 Optical Leased Line';
+
+      cardWrapper.innerHTML = `
+        <div class="border-b border-slate-100 pb-3 mb-3">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">AI Tailored Proposal</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">1:1 CIR • 99.9% SLA</span>
+          </div>
+          <h4 class="text-sm font-bold text-slate-900 mt-1">${tradeName} Secure Enterprise Suite</h4>
+          <p class="text-xs text-slate-500 mt-0.5 leading-snug">${plan.explanation || `Configured dedicated symmetric optical line with commercial SLA for ${tradeName} in ${city}.`}</p>
+        </div>
+
+        <!-- Contract terms snippet -->
+        <div class="bg-emerald-50/60 border border-emerald-200 rounded-xl p-2.5 mb-3 text-[11px] grid grid-cols-2 gap-2 text-slate-700">
+          <div><span class="text-[9px] uppercase font-bold text-slate-400 block">Term</span><strong>${contract} Mos Commitment</strong></div>
+          <div><span class="text-[9px] uppercase font-bold text-slate-400 block">Billing</span><strong>Monthly in Advance</strong></div>
+          <div><span class="text-[9px] uppercase font-bold text-slate-400 block">SLA</span><strong class="text-emerald-700">99.9% Uptime (4-Hr MTTR)</strong></div>
+          <div><span class="text-[9px] uppercase font-bold text-slate-400 block">Notice</span><strong>30-Day Zero Penalty</strong></div>
+        </div>
+
+        <!-- Interactive toggles directly in chat message -->
+        <div class="space-y-2 mb-3">
+          <!-- Item 1: Base Leased Line -->
+          <div class="p-2.5 rounded-xl border bg-blue-50/40 border-blue-100 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-blue-600">speed</span>
+              <div>
+                <span class="text-xs font-bold text-slate-900">${prodName}</span>
+                <span class="text-[10px] text-slate-500 block">Dedicated 1:1 Bandwidth</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs font-bold text-slate-900">₹${monthly.toLocaleString('en-IN')}/mo</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked disabled class="sr-only peer">
+                <div class="w-8 h-4.5 bg-[#e40000] rounded-full after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3.5 after:w-3.5"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Item 2: Add-on Cisco Router -->
+          <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-cyan-600">router</span>
+              <div>
+                <span class="text-xs font-bold text-slate-900">Cisco Dual-WAN Router</span>
+                <span class="text-[10px] text-slate-500 block">Gigabit VPN + Lifetime swap</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs font-bold text-slate-900">+ ₹550/mo</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" onchange="toggleRecommendationAddon('ADDON-CISCO', 550)" class="sr-only peer">
+                <div class="w-8 h-4.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-[#e40000]"></div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Item 3: Add-on Failover 4G/5G -->
+          <div class="p-2.5 rounded-xl border bg-slate-50 border-slate-200 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-rose-600">cell_tower</span>
+              <div>
+                <span class="text-xs font-bold text-slate-900">Secondary 4G/5G Failover</span>
+                <span class="text-[10px] text-slate-500 block">Zero downtime seamless failover</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs font-bold text-slate-900">+ ₹350/mo</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" onchange="toggleRecommendationAddon('ADDON-FAILOVER', 350)" class="sr-only peer">
+                <div class="w-8 h-4.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-[#e40000]"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Investment & Order Action in Chat -->
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+          <div>
+            <span class="text-[9px] uppercase font-bold tracking-wider text-slate-400 block">TOTAL INVESTMENT</span>
+            <div class="text-sm font-extrabold text-slate-900">
+              ₹${monthly.toLocaleString('en-IN')}<span class="text-xs text-slate-500 font-normal">/mo</span>
+              <span class="text-[10px] text-slate-400 font-semibold ml-1">(${setup} setup)</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="addCurrentRecommendationToCart()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition">
+              + Add to Cart
+            </button>
+            <button onclick="acceptCurrentQuote()" class="px-3 py-1.5 bg-[#e40000] hover:bg-red-700 text-white text-xs font-bold rounded-lg transition shadow-xs flex items-center gap-1">
+              <span>Sign Contract</span>
+              <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(cardWrapper);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendEscalationCardToChat(esc) {
+      if (!esc) return;
+      const container = document.getElementById('chatMessages');
+      const card = document.createElement('div');
+      card.className = 'self-start w-full max-w-[92%] my-2 rounded-2xl bg-amber-50/70 border border-amber-200 p-4 shadow-sm';
+
+      const scorePct = Math.round((esc.ai_confidence_score || 0.42) * 100);
+      const unextracted = esc.what_ai_could_not_extract || [];
+      const unextractedHtml = unextracted.map(item => `
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-semibold">
+          <span class="material-symbols-outlined text-[12px]">help_outline</span>
+          <span>${item}</span>
+        </span>
+      `).join(' ');
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between border-b border-amber-200 pb-2.5 mb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-600 text-[20px]">warning_amber</span>
+            <span class="text-xs font-extrabold text-amber-950">AI Lead Escalation Notice</span>
+          </div>
+          <span class="text-[10px] font-mono font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded">${esc.escalation_id}</span>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">Trigger Reason</span>
+            <span class="font-bold text-slate-900">${esc.trigger_reason}</span>
+          </div>
+
+          <!-- Confidence meter -->
+          <div class="bg-white/80 p-2 rounded-xl border border-amber-200">
+            <div class="flex items-center justify-between text-[11px] mb-1">
+              <span class="font-semibold text-slate-600">AI Confidence Score:</span>
+              <span class="font-bold font-mono text-red-600">${esc.ai_confidence_score} (${scorePct}%) • ${esc.confidence_band}</span>
+            </div>
+            <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+              <div class="bg-amber-500 h-1.5 rounded-full" style="width: ${scorePct}%"></div>
+            </div>
+          </div>
+
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-red-600 block mb-1">What AI Could Not Extract</span>
+            <div class="flex flex-wrap gap-1">
+              ${unextractedHtml}
+            </div>
+          </div>
+
+          <div class="bg-white/80 p-2 rounded-xl border border-amber-200 text-slate-700">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-0.5">AI Discovery Context</span>
+            <p class="text-[11px] leading-relaxed text-slate-600">${esc.ai_discovery_summary}</p>
+          </div>
+
+          <div class="bg-emerald-50 border border-emerald-200 p-2 rounded-xl text-emerald-900">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block mb-0.5">Recommended Human Action</span>
+            <p class="text-[11px] leading-relaxed">${esc.recommended_action}</p>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2.5 border-t border-amber-200 flex items-center justify-between">
+          <span class="text-[10px] text-amber-800 font-medium">Flagged to Operations Admin Console</span>
+          <button onclick="handleTakeOverLead('${esc.escalation_id}', '${esc.customer_name}')" class="px-3 py-1.5 bg-[#e40000] hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+            <span class="material-symbols-outlined text-[14px]">support_agent</span>
+            <span>Assign Human Specialist</span>
+          </button>
+        </div>
+      `;
+
+      container.appendChild(card);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // Mock Demonstrations for Visualization
+    function simulateMockRecommendation() {
+      const mockSchema = {
+        business_name: 'Balaji Dental & Maxillofacial Care',
+        business_type: 'Healthcare Clinic',
+        city: 'Pune',
+        city_tier: 1,
+        employee_count: 35,
+        num_sites: 2,
+        needs: ['300M Optical Leased Line', 'Tele-Radiology PACS Server', 'CCTV Cloud Surveillance']
+      };
+
+      const mockPlan = {
+        products: [
+          { product_name: '300 Mbps Symmetric Optical Fibre (1:1 CIR)', monthly: 2699 },
+          { product_name: '4 HD Cloud CCTV Cameras (NABH Compliant)', monthly: 1200 },
+          { product_name: 'Static IPv4 Subnet Pool (/29 Public IP)', monthly: 300 }
+        ],
+        monthly_cost: 4199,
+        setup_cost: 1000,
+        contract_months: 12,
+        explanation: 'Engineered for Balaji Dental & Maxillofacial Care in Pune. Features dedicated 1:1 CIR optical line with PACS server routing, zero packet loss SLA, and encrypted cloud CCTV.'
+      };
+
+      appendMessage('I need a high-speed dedicated leased line for my multi-specialty dental clinic in Pune, with cloud CCTV and static IP for hospital PACS imaging.', 'user');
+      appendMessage('Understood! We have noted your business as <strong>Healthcare Clinic</strong> in Pune with 2 locations and tele-radiology imaging needs. Here is your enterprise proposal package:', 'bot');
+
+      // Update right-hand side panels
+      updateCustomerSchemaUI(mockSchema, 90);
+      updateRecommendedPlanUI(mockPlan, mockSchema);
+
+      // Append interactive card directly into chat
+      appendRecommendationCardToChat(mockPlan, mockSchema);
+    }
+
+    function simulateMockEscalation() {
+      const mockEscalation = {
+        escalation_id: 'ESC-AI-201',
+        customer_name: 'Balaji Dental Care LLP',
+        session_id: 'cust-balaji-01',
+        priority: 'HIGH',
+        status: 'AWAITING_AGENT',
+        ai_confidence_score: 0.42,
+        confidence_band: 'LOW_CONFIDENCE',
+        trigger_reason: 'Ambiguous Bandwidth & Complex Multi-Site Topology',
+        what_ai_could_not_extract: [
+          'Exact intra-site latency requirement',
+          'Private MPLS vs Internet Leased Line preference',
+          'On-premise firewall hardware vendor'
+        ],
+        ai_discovery_summary: 'Customer operates clinic with dental imaging units across Kochi and Pune. Stated need for 200 Mbps with failover, but did not confirm if branches need direct Layer-2 bridging or IPsec overlay.',
+        recommended_action: 'Enterprise Sales Specialist consultation required to size dedicated symmetric leased line and configure SD-WAN controller.'
+      };
+
+      appendMessage('We have two dental branch clinics in Kochi and Pune. We transfer heavy 3D scans between them, but our budget is flexible depending on whether we need MPLS or SD-WAN.', 'user');
+      appendMessage('Thank you. Because your multi-site architecture involves inter-city clinical scan transfers and custom routing, our AI confidence threshold flagged this for enterprise engineering assistance.', 'bot');
+
+      // Append escalation card directly into chat
+      appendEscalationCardToChat(mockEscalation);
+    }
+
+    function clearChat() {
+      document.getElementById('chatMessages').innerHTML = '';
+      appendMessage('Namaste! Welcome to Airtel Business. Tell me about your enterprise needs.', 'bot');
+    }
+
+    // Voice recording
+    let mediaRecorder = null;
+    let audioChunks = [];
+    async function toggleVoiceRecording() {
+      const btn = document.getElementById('micBtn');
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        btn.classList.remove('bg-red-500', 'text-white', 'animate-pulse');
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        mediaRecorder.onstop = async () => {
+          stream.getTracks().forEach(t => t.stop());
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const formData = new FormData();
+          formData.append('audio', blob, 'recording.webm');
+          formData.append('session_id', currentSessionId);
+
+          appendMessage('🎤 Voice note received. Transcribing with Sarvam Saaras...', 'user');
+          const pending = appendMessage('Processing your speech...', 'bot');
+
+          const res = await fetch(`${API_BASE}/api/voice`, { method: 'POST', body: formData });
+          const data = await res.json();
+          pending.remove();
+          appendMessage(data.reply || 'Voice processed successfully.', 'bot');
+
+          // Update customer schema & recommendations live from voice
+          updateCustomerSchemaUI(data.customer_schema, data.completion_percentage);
+          updateRecommendedPlanUI(data.recommended_plan, data.customer_schema);
+
+          if (data.recommended_plan && (data.completion_percentage >= 40 || data.recommended_plan.products?.length > 0)) {
+            appendRecommendationCardToChat(data.recommended_plan, data.customer_schema);
+          }
+        };
+
+        mediaRecorder.start();
+        btn.classList.add('bg-red-500', 'text-white', 'animate-pulse');
+      } catch (err) {
+        alert('Microphone access denied or unavailable: ' + err.message);
+      }
+    }
+
+    async function acceptCurrentQuote() {
+      const planName = document.getElementById('rec-plan-name').textContent;
+      const price = parseInt(document.getElementById('rec-price').textContent.replace(/[^0-9]/g, '')) || 4199;
+
+      const payload = {
+        sessionId: currentSessionId,
+        bundleCode: 'BUNDLE-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        bundleName: planName,
+        monthlyCost: price,
+        contractMonths: 12,
+        customerSchema: {
+          business_name: 'Balaji Healthcare Diagnostics',
+          business_type: 'Healthcare',
+          city: 'Pune'
+        }
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/api/orders/accept`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        alert('Order generated successfully! Redirecting to tracker...');
+        await fetchOrders();
+        switchTab('orders');
+      } catch (err) {
+        alert('Failed to place order: ' + err.message);
+      }
+    }
+
+    // 3. KYC ENGINE: UPLOAD & VERIFICATION
+    let uploadedFiles = { gst: null, udyam: null, address: null, signatory: null };
+
+    function switchKycMode(mode) {
+      const uploadPanel = document.getElementById('kycUploadModePanel');
+      const samplePanel = document.getElementById('kycSampleModePanel');
+      const uploadBtn = document.getElementById('kycModeUploadBtn');
+      const sampleBtn = document.getElementById('kycModeSampleBtn');
+
+      if (mode === 'upload') {
+        uploadPanel.classList.remove('hidden');
+        samplePanel.classList.add('hidden');
+        uploadBtn.className = 'px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition';
+        sampleBtn.className = 'px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
+      } else {
+        uploadPanel.classList.add('hidden');
+        samplePanel.classList.remove('hidden');
+        uploadBtn.className = 'px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
+        sampleBtn.className = 'px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition';
+      }
+    }
+
+    function handleFileSelected(type, input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        uploadedFiles[type] = file;
+        const nameEl = document.getElementById(`file${capitalize(type)}Name`);
+        const labelEl = document.getElementById(`label${capitalize(type)}`);
+        if (nameEl) nameEl.textContent = file.name;
+        if (labelEl) labelEl.textContent = 'Change File';
+      }
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function scrollToUploadSection() {
+      const panel = document.getElementById('kycUploadModePanel');
+      if (panel) {
+        switchKycMode('upload');
+        panel.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
+    function resetUploadedFiles() {
+      uploadedFiles = { gst: null, udyam: null, address: null, signatory: null };
+      ['Gst', 'Udyam', 'Address', 'Signatory'].forEach(slot => {
+        const input = document.getElementById(`upload${slot}File`);
+        const nameEl = document.getElementById(`file${slot}Name`);
+        const labelEl = document.getElementById(`label${slot}`);
+        if (input) input.value = '';
+        if (nameEl) nameEl.textContent = 'No file chosen';
+        if (labelEl) labelEl.textContent = 'Choose File';
+      });
+
+      // Reset verdicts
+      document.getElementById('kycVerdictBadge').textContent = 'READY';
+      document.getElementById('kycVerdictBadge').className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-100 text-slate-700 border-slate-200';
+      document.getElementById('kycStatusHeadline').textContent = 'Awaiting 4-Document Upload';
+      document.getElementById('kycStatusSubtext').textContent = 'Upload GST, Udyam, Electricity Bill, and Signatory ID to initiate full pipeline verification.';
+      document.getElementById('kycVerdictIcon').className = 'w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold';
+      document.getElementById('kycVerdictIcon').innerHTML = '<span class="material-symbols-outlined text-[28px]">pending</span>';
+      
+      document.getElementById('kycVerifiedBadgePill').classList.add('hidden');
+      document.getElementById('kycSuccessSyncBanner').classList.add('hidden');
+      document.getElementById('kycIssuesContainer').classList.add('hidden');
+
+      // Reset 4 cards
+      ['gst', 'udyam', 'address', 'signatory'].forEach(slot => {
+        const b = document.getElementById(`${slot}StatusBadge`);
+        if (b) {
+          b.textContent = 'PENDING';
+          b.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500';
+        }
+      });
+      document.getElementById('kycGstin').textContent = '-';
+      document.getElementById('kycLegalName').textContent = 'Legal Trade Name: -';
+      document.getElementById('kycUdyam').textContent = '-';
+      document.getElementById('kycUdyamName').textContent = 'Enterprise: -';
+      document.getElementById('kycAddressCity').textContent = '-';
+      document.getElementById('kycAddressDate').textContent = 'Bill Age: -';
+      document.getElementById('kycSignatoryName').textContent = '-';
+      document.getElementById('kycSignatoryPan').textContent = 'PAN: -';
+    }
+
+    async function submitKycUploadVerification() {
+      // Validate all 4 documents are present
+      const missing = [];
+      if (!uploadedFiles.gst) missing.push('GST Certificate');
+      if (!uploadedFiles.udyam) missing.push('Udyam MSME Certificate');
+      if (!uploadedFiles.address) missing.push('Electricity / Utility Bill');
+      if (!uploadedFiles.signatory) missing.push('Authorized Signatory ID');
+
+      if (missing.length > 0) {
+        alert(`Please upload all 4 required KYC documents to initiate verification.\n\nMissing:\n• ${missing.join('\n• ')}`);
+        return;
+      }
+
+      const verifyBtn = document.getElementById('verifyUploadBtn');
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Verifying 4 Documents in Pipeline...</span>`;
+
+      document.getElementById('kycStatusHeadline').textContent = 'Verifying All 4 Documents in Pipeline...';
+      document.getElementById('kycStatusSubtext').textContent = 'Running OCR extraction, Mod-36 checksum, cross-document name & PAN reconciliation...';
+      document.getElementById('kycVerdictBadge').textContent = 'PROCESSING';
+      document.getElementById('kycVerdictBadge').className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200';
+
+      const formData = new FormData();
+      formData.append('gst_file', uploadedFiles.gst);
+      formData.append('udyam_file', uploadedFiles.udyam);
+      formData.append('address_file', uploadedFiles.address);
+      formData.append('signatory_file', uploadedFiles.signatory);
+      formData.append('session_id', currentSessionId);
+
+      const expectedName = document.getElementById('uploadExpectedName')?.value.trim();
+      if (expectedName) formData.append('company_name', expectedName);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/kyc/verify-upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        renderKycResults(data);
+      } catch (err) {
+        alert('Verification request failed: ' + err.message);
+      } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">verified_user</span><span>Upload &amp; Run KYC Verification</span>`;
+      }
+    }
+
+    function renderKycResults(data) {
+      const isApproved = data.kyc_approved === true || data.status === 'APPROVED';
+      const ext = data.extracted_data || {};
+      const gst = ext.gst || {};
+      const udyam = ext.udyam || {};
+      const address = ext.address || {};
+      const signatory = ext.signatory || {};
+      const issues = data.issues || [];
+
+      // 1. Update Hero Status
+      const badge = document.getElementById('kycVerdictBadge');
+      const headline = document.getElementById('kycStatusHeadline');
+      const subtext = document.getElementById('kycStatusSubtext');
+      const icon = document.getElementById('kycVerdictIcon');
+      const pill = document.getElementById('kycVerifiedBadgePill');
+      const successBanner = document.getElementById('kycSuccessSyncBanner');
+      const issuesContainer = document.getElementById('kycIssuesContainer');
+      const issuesList = document.getElementById('kycIssuesList');
+
+      if (isApproved) {
+        badge.textContent = 'APPROVED';
+        badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200';
+        headline.textContent = 'All 4 Documents Verified & Reconciled Successfully!';
+        subtext.textContent = 'Legal entity match, Mod-36 checksum, and government registry checks passed. Synchronized across customer profile and recommendations.';
+        icon.className = 'w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold';
+        icon.innerHTML = '<span class="material-symbols-outlined text-[28px]">verified</span>';
+        pill.classList.remove('hidden');
+        successBanner.classList.remove('hidden');
+        issuesContainer.classList.add('hidden');
+
+        // SYNC ACROSS ENTIRE APPLICATION:
+        syncVerifiedKycToEntireApp(data);
+
+      } else {
+        badge.textContent = data.status || 'REJECTED';
+        badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-red-50 text-red-700 border-red-200';
+        headline.textContent = 'KYC Pipeline Verification Failed — Action Required';
+        subtext.textContent = `Found ${issues.length} discrepancies or unreadable scans in your uploaded documents. Review the guidance below to re-upload.`;
+        icon.className = 'w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-bold';
+        icon.innerHTML = '<span class="material-symbols-outlined text-[28px]">error</span>';
+        pill.classList.add('hidden');
+        successBanner.classList.add('hidden');
+        issuesContainer.classList.remove('hidden');
+
+        // Populate issues with clear human guidance on what is wrong and what to re-upload
+        issuesList.innerHTML = '';
+        if (issues.length === 0) {
+          const li = document.createElement('li');
+          li.className = 'flex items-start gap-2 bg-white/70 p-2.5 rounded-xl border border-red-200/60';
+          li.innerHTML = `
+            <span class="material-symbols-outlined text-red-600 text-[18px] shrink-0 mt-0.5">help</span>
+            <div>
+              <strong class="font-bold text-red-900 block">Document Cross-Match Failure</strong>
+              <span>Extracted identifiers or business names do not match official registry records. Please re-upload clear color scans of your GST and Udyam certificates.</span>
+            </div>
+          `;
+          issuesList.appendChild(li);
+        } else {
+          issues.forEach(iss => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start gap-2.5 bg-white/70 p-3 rounded-xl border border-red-200/60';
+            
+            // Format friendly guidance
+            let docTarget = 'Document';
+            let actionText = 'Please upload a clearer, unblurred scan.';
+            const code = iss.code || '';
+            const msg = iss.message || '';
+
+            if (code.includes('GST') || msg.toLowerCase().includes('gst')) {
+              docTarget = 'GST Certificate (Slot 1)';
+              actionText = 'Check that your 15-digit GSTIN is Active in the GST portal and the image has no blur or glare.';
+            } else if (code.includes('UDYAM') || msg.toLowerCase().includes('udyam')) {
+              docTarget = 'MSME Udyam Certificate (Slot 2)';
+              actionText = 'Ensure the Udyam number format is UDYAM-XX-00-XXXXXXX and the enterprise name matches your GST certificate.';
+            } else if (code.includes('ADDRESS') || msg.toLowerCase().includes('bill') || code.includes('EXPIRED')) {
+              docTarget = 'Electricity / Utility Bill (Slot 3)';
+              actionText = 'Upload a recent utility bill dated within the last 90 days matching the business premises.';
+            } else if (code.includes('SIGNATORY') || code.includes('PAN')) {
+              docTarget = 'Authorized Signatory ID (Slot 4)';
+              actionText = 'Upload a clear PAN card of the authorized partner/director matching the name registered on GST.';
+            }
+
+            li.innerHTML = `
+              <span class="material-symbols-outlined text-red-600 text-[18px] shrink-0 mt-0.5">cancel</span>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-red-900">${docTarget}</span>
+                  <span class="text-[10px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-semibold">${iss.code || 'VALIDATION_ERROR'}</span>
+                </div>
+                <p class="mt-0.5 text-slate-700 font-medium">${msg}</p>
+                <div class="mt-1 text-[11px] text-[#e40000] font-semibold flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">arrow_circle_right</span>
+                  <span>How to fix: ${actionText}</span>
+                </div>
+              </div>
+            `;
+            issuesList.appendChild(li);
+          });
+        }
+      }
+
+      // 2. Populate the 4 Cards
+      // GST Card
+      const gstApproved = Boolean(gst.gstin && !issues.some(i => (i.code || '').includes('GST') || (i.document || '') === 'gst'));
+      document.getElementById('gstStatusBadge').textContent = gstApproved ? 'VERIFIED' : (gst.gstin ? 'FLAGGED' : 'FAILED');
+      document.getElementById('gstStatusBadge').className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${gstApproved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`;
+      document.getElementById('kycGstin').textContent = gst.gstin || 'Not Detected';
+      document.getElementById('kycLegalName').textContent = 'Legal: ' + (gst.legal_name || gst.trade_name || 'Not Detected');
+
+      // Udyam Card
+      const udyamApproved = Boolean(udyam.udyam_number && !issues.some(i => (i.code || '').includes('UDYAM') || (i.document || '') === 'udyam'));
+      document.getElementById('udyamStatusBadge').textContent = udyamApproved ? 'VERIFIED' : (udyam.udyam_number ? 'FLAGGED' : 'FAILED');
+      document.getElementById('udyamStatusBadge').className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${udyamApproved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`;
+      document.getElementById('kycUdyam').textContent = udyam.udyam_number || 'Not Detected';
+      document.getElementById('kycUdyamName').textContent = 'Enterprise: ' + (udyam.enterprise_name || 'Not Detected');
+
+      // Address Card
+      const addrApproved = Boolean(address.pin_code || address.state) && !issues.some(i => (i.code || '').includes('ADDRESS') || (i.code || '').includes('EXPIRED'));
+      document.getElementById('addressStatusBadge').textContent = addrApproved ? 'VERIFIED' : 'FLAGGED';
+      document.getElementById('addressStatusBadge').className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${addrApproved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`;
+      document.getElementById('kycAddressCity').textContent = address.state ? `${address.state} (PIN: ${address.pin_code || '-'})` : 'Address Inspected';
+      document.getElementById('kycAddressDate').textContent = 'Bill Date: ' + (address.bill_date || 'Within 90 days');
+
+      // Signatory Card
+      const sigApproved = Boolean(signatory.name) && !issues.some(i => (i.code || '').includes('SIGNATORY') || (i.code || '').includes('PAN'));
+      document.getElementById('signatoryStatusBadge').textContent = sigApproved ? 'VERIFIED' : 'FLAGGED';
+      document.getElementById('signatoryStatusBadge').className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${sigApproved ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`;
+      document.getElementById('kycSignatoryName').textContent = signatory.name || 'Signatory Verified';
+      document.getElementById('kycSignatoryPan').textContent = signatory.pan ? `PAN: ${signatory.pan}` : (signatory.designation ? `Role: ${signatory.designation}` : 'Identity Checked');
+    }
+
+    // SYNC VERIFIED KYC DATA ACROSS CUSTOMER DISCOVERY & CART
+    function syncVerifiedKycToEntireApp(kycData) {
+      const ext = kycData.extracted_data || {};
+      const gst = ext.gst || {};
+      const udyam = ext.udyam || {};
+      const address = ext.address || {};
+
+      const verifiedTradeName = gst.legal_name || gst.trade_name || udyam.enterprise_name || 'Verified Enterprise';
+      const verifiedCity = address.state || gst.state || udyam.city || 'Kochi';
+      const verifiedType = gst.constitution || udyam.major_activity || 'Enterprise MSME';
+
+      // 1. Update AI Telecom Advisor Schema Panel
+      const schType = document.getElementById('sch-type');
+      const schCity = document.getElementById('sch-city');
+      const schTier = document.getElementById('sch-tier');
+      const schComp = document.getElementById('sch-completion');
+
+      if (schType) schType.textContent = verifiedType;
+      if (schCity) schCity.textContent = verifiedCity;
+      if (schTier) schTier.textContent = 'Tier 1 (Metro-Class)';
+      if (schComp) {
+        schComp.textContent = '100% (KYC Verified)';
+        schComp.className = 'font-bold text-emerald-600';
+      }
+
+      // 2. Update Recommended Plan to match the verified entity
+      const planNameEl = document.getElementById('rec-plan-name');
+      const planDescEl = document.getElementById('rec-plan-desc');
+      if (planNameEl) {
+        planNameEl.textContent = `${verifiedTradeName} Secure Fibre Growth Suite`;
+      }
+      if (planDescEl) {
+        planDescEl.textContent = `Tailored for ${verifiedType} at ${verifiedCity} with active GSTIN (${gst.gstin || '32TTNXB7384T1ZW'}) & 99.9% SLA.`;
+      }
+
+      // 3. Update Order Cart Customer Fields
+      const cartCustName = document.getElementById('cartCustomerName');
+      const cartCustCity = document.getElementById('cartCustomerCity');
+      const cartCustType = document.getElementById('cartCustomerType');
+
+      if (cartCustName) cartCustName.value = verifiedTradeName;
+      if (cartCustCity) cartCustCity.value = verifiedCity;
+      if (cartCustType) cartCustType.value = verifiedType;
+
+      // 4. Inject a friendly confirmation bot message in chat
+      appendMessage(`✅ <strong>KYC Verification Complete:</strong> Verified <em>${verifiedTradeName}</em> with GSTIN <code>${gst.gstin || 'Active'}</code> in ${verifiedCity}. All tailored plans and cart configurations have been upgraded to your verified enterprise profile.`, 'bot');
+
+      showAddedToast('✓ KYC successfully verified & synced across all tabs!');
+    }
+
+    async function loadKycApplicants() {
+      try {
+        const res = await fetch(`${API_BASE}/api/kyc/applicants`);
+        const data = await res.json();
+        const sel = document.getElementById('kycApplicantSelect');
+        if (sel) {
+          sel.innerHTML = '';
+          (data.applicants || []).forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a.applicant_id;
+            opt.textContent = `Applicant ${a.applicant_id} (${a.document_count} files)`;
+            sel.appendChild(opt);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load KYC applicants:', err);
+      }
+    }
+
+    async function runKycVerification(appId) {
+      document.getElementById('kycRawPayload').textContent = `Running OCR & GSTIN Mod-36 validation for ${appId}...`;
+      try {
+        const res = await fetch(`${API_BASE}/api/kyc/verify-applicant/${appId}`, { method: 'POST' });
+        const data = await res.json();
+        renderKycResults(data);
+      } catch (err) {
+        document.getElementById('kycRawPayload').textContent = 'Error: ' + err.message;
+      }
+    }
+
+    // 4. ORDERS & TRACKING
+    async function fetchOrders() {
+      try {
+        const res = await fetch(`${API_BASE}/api/orders`);
+        const data = await res.json();
+        allOrders = data.orders || [];
+        document.getElementById('count-orders').textContent = allOrders.length;
+        document.getElementById('count-admin-orders').textContent = allOrders.length;
+        renderOrdersList(allOrders);
+        renderAdminOrdersQueue(allOrders);
+
+        // Populate admin select
+        const admSel = document.getElementById('adminOrderSelect');
+        admSel.innerHTML = '';
+        allOrders.forEach(o => {
+          const opt = document.createElement('option');
+          opt.value = o.order_id;
+          opt.textContent = `#${o.order_id} - ${o.customer_name} (${o.status})`;
+          admSel.appendChild(opt);
+        });
+
+        if (allOrders.length) {
+          showOrderDetail(allOrders[0].order_id);
+        }
+      } catch (err) {
+        console.error('Failed to load orders:', err);
+      }
+    }
+
+    function renderOrdersList(list) {
+      const container = document.getElementById('ordersListContainer');
+      container.innerHTML = '';
+      list.forEach((o, idx) => {
+        const item = document.createElement('div');
+        item.className = 'p-3 rounded-xl bg-slate-50 hover:bg-red-50/50 border border-slate-200 cursor-pointer transition';
+        item.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-xs font-bold text-[#e40000]">#${o.order_id}</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">${o.status || 'In Progress'}</span>
+          </div>
+          <div class="text-xs font-bold text-slate-800 mt-1">${o.customer_name || 'Client'}</div>
+          <div class="text-[11px] text-slate-500">${o.bundle_name || 'Enterprise Suite'} • ₹${Number(o.monthly_cost || 0).toLocaleString('en-IN')}/mo</div>
+        `;
+        item.onclick = () => showOrderDetail(o.order_id);
+        container.appendChild(item);
+      });
+    }
+
+    function renderAdminOrdersQueue(list) {
+      const container = document.getElementById('adminOrdersQueueList');
+      if (!container) return;
+      container.innerHTML = '';
+      list.forEach(o => {
+        const card = document.createElement('div');
+        card.className = 'p-4 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-between';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-xs font-bold text-[#e40000]">#${o.order_id}</span>
+              <span class="text-xs font-bold text-slate-900">${o.customer_name || 'Client'}</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">${o.business_type || 'MSME'}</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">${o.bundle_name || 'Enterprise Plan'} • ₹${Number(o.monthly_cost || 0).toLocaleString('en-IN')}/mo</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">${o.status || 'Active'}</span>
+            <button onclick="goToUpdateStatus('${o.order_id}')" class="px-3 py-1.5 bg-slate-100 hover:bg-[#e40000] hover:text-white rounded-lg text-xs font-bold transition">
+              Override
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function goToUpdateStatus(orderId) {
+      const sel = document.getElementById('adminOrderSelect');
+      if (sel) sel.value = orderId;
+      switchTab('admin-status');
+    }
+
+    async function showOrderDetail(orderId) {
+      try {
+        const res = await fetch(`${API_BASE}/api/orders/${orderId}`);
+        const o = await res.json();
+
+        document.getElementById('detailOrderId').textContent = '#' + o.order_id;
+        document.getElementById('detailCustomerName').textContent = o.customer_name || 'Enterprise Customer';
+        document.getElementById('detailBundleName').textContent = o.bundle_name || 'Enterprise Solution';
+        document.getElementById('detailPrice').textContent = '₹' + Number(o.monthly_cost || 0).toLocaleString('en-IN') + ' / mo';
+
+        const container = document.getElementById('timelineContainer');
+        container.innerHTML = '';
+
+        const stages = [
+          { title: 'Commercial Contract & KYC Sign-off', desc: 'MSA contract generated with GSTIN validation' },
+          { title: 'CPE Router & SIM Kit Dispatched', desc: 'Allocated from regional warehouse' },
+          { title: 'Optical Splicing & Premise Drop', desc: 'Field technician onsite for optical power termination' },
+          { title: 'Circuit Activated & 99.9% SLA Live', desc: 'BGP peering and static IP binding confirmed' }
+        ];
+
+        const currentStage = o.current_stage_index ?? 0;
+
+        stages.forEach((s, idx) => {
+          const isDone = idx <= currentStage;
+          const isCurrent = idx === currentStage;
+          const row = document.createElement('div');
+          row.className = 'flex items-start gap-3 relative';
+          row.innerHTML = `
+            <div class="w-8 h-8 rounded-full ${isDone ? 'bg-emerald-100 text-emerald-700 font-bold' : 'bg-slate-100 text-slate-400'} flex items-center justify-center text-xs shrink-0 z-10">
+              ${isDone ? '✓' : idx + 1}
+            </div>
+            <div class="flex-1 pb-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold ${isCurrent ? 'text-[#e40000]' : 'text-slate-800'}">${s.title}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${isDone ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}">
+                  ${isDone ? (isCurrent ? 'Current Stage' : 'Completed') : 'Pending'}
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">${s.desc}</p>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+      } catch (err) {
+        console.error('Failed to load order detail:', err);
+      }
+    }
+
+    // 5. ADMIN & OPERATIONS CONSOLE
+    async function fetchSalesDashboard() {
+      try {
+        const res = await fetch(`${API_BASE}/api/sales/dashboard`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        
+        // Update escalation count in tab header
+        const escalations = data.active_escalations || [];
+        const escCountEl = document.getElementById('count-admin-escalations');
+        if (escCountEl) escCountEl.textContent = escalations.length;
+        
+        // Render escalation cards
+        renderAdminEscalations(escalations);
+      } catch (err) {
+        console.error('Failed to fetch sales dashboard escalations:', err);
+      }
+    }
+
+    function renderAdminEscalations(escalations) {
+      const container = document.getElementById('adminEscalationsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!escalations || escalations.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-200">
+            <span class="material-symbols-outlined text-[48px] text-emerald-500 mb-2">check_circle</span>
+            <h3 class="text-sm font-bold text-slate-800">No Pending AI Escalations</h3>
+            <p class="text-xs text-slate-500 mt-1">All discovery chats have high confidence and complete customer schemas.</p>
+          </div>
+        `;
+        return;
+      }
+
+      escalations.forEach(esc => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between';
+        
+        const scorePct = Math.round((esc.ai_confidence_score || 0.45) * 100);
+        let bandColor = 'bg-red-50 text-red-700 border-red-200';
+        let barColor = 'bg-red-500';
+        if (scorePct >= 70) {
+          bandColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+          barColor = 'bg-emerald-500';
+        } else if (scorePct >= 50) {
+          bandColor = 'bg-amber-50 text-amber-700 border-amber-200';
+          barColor = 'bg-amber-500';
+        }
+
+        const unextracted = esc.what_ai_could_not_extract || [];
+        const unextractedHtml = unextracted.length > 0
+          ? unextracted.map(item => `
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 text-[11px] font-semibold">
+                <span class="material-symbols-outlined text-[13px]">help_outline</span>
+                <span>${item}</span>
+              </span>
+            `).join(' ')
+          : '<span class="text-xs text-slate-400 italic">None</span>';
+
+        card.innerHTML = `
+          <div>
+            <!-- Header Row -->
+            <div class="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 mb-3">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-bold text-[#e40000] bg-red-50 border border-red-100 px-2 py-0.5 rounded">${esc.escalation_id}</span>
+                  <span class="text-xs font-bold text-slate-900">${esc.customer_name}</span>
+                </div>
+                <div class="text-[11px] text-slate-400 mt-0.5">Session: <code class="font-mono text-slate-600">${esc.session_id}</code> • ${esc.timestamp || 'Recent'}</div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded border ${bandColor}">${esc.priority || 'HIGH'}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">${esc.status || 'OPEN'}</span>
+              </div>
+            </div>
+
+            <!-- Trigger Reason -->
+            <div class="mb-3">
+              <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Trigger Reason</label>
+              <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-amber-500 text-[16px]">warning</span>
+                <span>${esc.trigger_reason || esc.issue || 'Discovery Uncertainty'}</span>
+              </div>
+            </div>
+
+            <!-- AI Confidence Score Meter -->
+            <div class="mb-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <div class="flex items-center justify-between text-xs mb-1">
+                <span class="font-semibold text-slate-600">AI Confidence Score:</span>
+                <span class="font-bold font-mono ${scorePct < 50 ? 'text-red-600' : 'text-amber-600'}">${esc.ai_confidence_score} (${scorePct}%) • ${esc.confidence_band || 'LOW_CONFIDENCE'}</span>
+              </div>
+              <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                <div class="${barColor} h-2 rounded-full transition-all" style="width: ${scorePct}%"></div>
+              </div>
+            </div>
+
+            <!-- What AI Could Not Extract -->
+            <div class="mb-3">
+              <label class="text-[10px] font-bold uppercase tracking-wider text-red-600 block mb-1">What AI Could Not Extract / Clarify</label>
+              <div class="flex flex-wrap gap-1.5">
+                ${unextractedHtml}
+              </div>
+            </div>
+
+            <!-- AI Discovery Summary -->
+            <div class="mb-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs text-slate-700">
+              <span class="font-bold text-slate-900 block mb-0.5">AI Discovery Summary:</span>
+              <p class="leading-relaxed text-slate-600">${esc.ai_discovery_summary || 'Customer provided ambiguous enterprise bandwidth requirements and budget figures.'}</p>
+            </div>
+
+            <!-- Recommended Human Action -->
+            <div class="mb-4 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl text-xs">
+              <span class="font-bold text-emerald-900 block mb-0.5">Recommended Human Specialist Action:</span>
+              <p class="text-emerald-800 leading-relaxed">${esc.recommended_action || 'Contact customer to confirm exact static IP count and multi-site leased line requirements.'}</p>
+            </div>
+          </div>
+
+          <!-- Card Footer Action -->
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-[11px] text-slate-500 font-medium">Auto-synced to PostgreSQL</span>
+            <button onclick="handleTakeOverLead('${esc.escalation_id}', '${esc.customer_name}')" class="px-3 py-1.5 bg-[#e40000] hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+              <span class="material-symbols-outlined text-[15px]">support_agent</span>
+              <span>Take Over Lead</span>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function handleTakeOverLead(escId, custName) {
+      alert(`Lead ${custName} (${escId}) assigned to your human specialist queue. Connecting live sales bridge...`);
+    }
+
+    // 6. ORDER MILESTONE MANAGEMENT
+    async function submitAdminStatusUpdate() {
+      const orderId = document.getElementById('adminOrderSelect').value;
+      const status = document.getElementById('adminStageSelect').value;
+      const remark = document.getElementById('adminRemarkInput').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: status, remark: remark })
+        });
+        const data = await res.json();
+        const toast = document.getElementById('adminSuccessToast');
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+        await fetchOrders();
+      } catch (err) {
+        alert('Update failed: ' + err.message);
+      }
+    }
+
+    // INIT
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchProducts();
+      loadKycApplicants();
+      fetchOrders();
+      clearChat();
+      updateCartUI();
+    });
+  </script>
 </body>
 </html>
-

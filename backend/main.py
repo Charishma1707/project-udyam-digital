@@ -15,6 +15,7 @@ Or with uvicorn:
 
 import sys
 import os
+import json
 from pathlib import Path
 from typing import Optional, Dict, Any
 
@@ -818,12 +819,34 @@ async def health_check():
     }
 
 
+@app.get("/api/config")
+async def get_frontend_config():
+    """Returns dynamic frontend configuration derived from environment variables."""
+    backend_url = os.getenv("BACKEND_URL") or os.getenv("API_BASE_URL") or os.getenv("RENDER_EXTERNAL_URL") or ""
+    return {
+        "api_base": backend_url,
+        "environment": os.getenv("ENVIRONMENT", "production"),
+        "telecom_brand": "Airtel Business Enterprise"
+    }
+
+
 @app.get("/")
 async def serve_index():
-    """Serves the complete end-to-end working Airtel Enterprise prototype."""
+    """Serves the complete end-to-end working Airtel Enterprise prototype with injected env config."""
     index_file = FRONTEND_DIR / "index.html"
     if index_file.exists():
-        return FileResponse(str(index_file))
+        with open(index_file, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Inject runtime environment variable into HTML <head>
+        backend_env_url = os.getenv("BACKEND_URL") or os.getenv("API_BASE_URL") or os.getenv("RENDER_EXTERNAL_URL") or ""
+        injection = f"""<script>
+    window.ENV_API_BASE = {json.dumps(backend_env_url)};
+  </script>"""
+        if "</head>" in content:
+            content = content.replace("</head>", f"{injection}\n</head>", 1)
+
+        return HTMLResponse(content=content)
     return HTMLResponse("<h1>Airtel Business Discovery Agent</h1>")
 
 

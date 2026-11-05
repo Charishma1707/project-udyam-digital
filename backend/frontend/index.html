@@ -845,8 +845,13 @@
   </div>
 
   <script>
-    // Dynamically resolves to current origin (localhost:8000 locally, or https://<app>.onrender.com on Render)
-    const API_BASE = window.location.origin.includes('http') ? window.location.origin : 'http://127.0.0.1:8000';
+    // Priority order: 
+    // 1. Injected environment variable (window.ENV_API_BASE from BACKEND_URL / API_BASE_URL)
+    // 2. Active browser origin (e.g., https://your-app.onrender.com)
+    // 3. Localhost fallback
+    const API_BASE = (window.ENV_API_BASE && window.ENV_API_BASE.trim() !== '')
+      ? window.ENV_API_BASE.trim().replace(/\/+$/, '')
+      : (window.location.origin.includes('http') ? window.location.origin : 'http://127.0.0.1:8000');
     let allProducts = [];
     let allOrders = [];
     let cart = []; // Array of { product: Object, quantity: number, isAddon: boolean }

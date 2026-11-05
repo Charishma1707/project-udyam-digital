@@ -171,6 +171,24 @@ class OrderLifecycleService:
         }
 
         saved = db_client.save_order(order)
+
+        # Record customer decision as ACCEPTED in PostgreSQL analytics table
+        db_client.save_customer_decision(
+            session_id=session_id,
+            customer_name=b_name,
+            business_type=b_type,
+            decision_type="ACCEPTED",
+            bundle_code=bundle_code,
+            bundle_name=bundle_name,
+            monthly_cost=monthly_cost,
+            ai_response_insights={
+                "order_id": order_num,
+                "contract_months": contract_months,
+                "sla_uptime": sla_uptime,
+                "status": "Commercial Contract Signed"
+            }
+        )
+
         return {"success": True, "order": saved}
 
     def reject_quote(
@@ -181,7 +199,7 @@ class OrderLifecycleService:
         customer_feedback: str = "",
         budget_offered: Optional[float] = None
     ) -> Dict[str, Any]:
-        """Records structured rejection feedback."""
+        """Records structured rejection feedback in memory and Cloud PostgreSQL."""
         record = {
             "rejection_id": f"REJ-{uuid.uuid4().hex[:6].upper()}",
             "session_id": session_id,
@@ -192,6 +210,24 @@ class OrderLifecycleService:
             "created_at": datetime.now().isoformat()
         }
         self.rejections.append(record)
+
+        # Record customer decision as REJECTED in PostgreSQL analytics table
+        db_client.save_customer_decision(
+            session_id=session_id,
+            customer_name="Customer",
+            decision_type="REJECTED",
+            bundle_code=bundle_code,
+            rejection_reason=rejection_reason,
+            customer_feedback=customer_feedback,
+            budget_offered=budget_offered,
+            ai_response_insights={
+                "rejection_id": record["rejection_id"],
+                "reason": rejection_reason,
+                "feedback": customer_feedback,
+                "budget_offered": budget_offered
+            }
+        )
+
         return {"success": True, "record": record}
 
     def get_order(self, order_id: str) -> Optional[Dict[str, Any]]:
@@ -205,14 +241,11 @@ class OrderLifecycleService:
     def get_sales_dashboard(self) -> Dict[str, Any]:
         """Returns aggregated sales metrics, active AI escalations, and orders."""
         all_orders = db_client.get_all_orders()
-        return {
-            "total_leads": 5000,
-            "activated_leads": 368 + len(all_orders),
-            "conversion_rate_percent": 7.4,
-            "avg_lead_to_activation_days": 17.6,
-            "recent_orders": all_orders[:10],
-            "rejections": self.rejections[-10:],
-            "active_escalations": [
+        db_escalations = db_client.get_all_ai_escalations()
+
+        # Seed default realistic escalations if table is empty
+        if not db_escalations:
+            default_seeds = [
                 {
                     "escalation_id": "ESC-AI-201",
                     "customer_name": "Balaji Dental Care LLP",
@@ -256,6 +289,18 @@ class OrderLifecycleService:
                     "timestamp": "Today at 06:28 PM"
                 }
             ]
+            for s in default_seeds:
+                db_client.save_ai_escalation(s)
+            db_escalations = default_seeds
+
+        return {
+            "total_leads": 5000,
+            "activated_leads": 368 + len(all_orders),
+            "conversion_rate_percent": 7.4,
+            "avg_lead_to_activation_days": 17.6,
+            "recent_orders": all_orders[:10],
+            "rejections": self.rejections[-10:],
+            "active_escalations": db_escalations
         }
 
     def send_admin_message(

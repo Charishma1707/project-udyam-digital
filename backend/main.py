@@ -137,6 +137,24 @@ async def chat_endpoint(request: ChatRequest):
             }
             result["escalation"] = esc_obj
 
+            # Persist directly into Neon Cloud PostgreSQL ai_escalations table
+            db_client.save_ai_escalation(esc_obj)
+
+            # Record customer decision audit log with Foreign Key link to this escalation
+            db_client.save_customer_decision(
+                session_id=esc_obj["session_id"],
+                customer_name=esc_obj["customer_name"],
+                business_type=schema.business_type,
+                decision_type="ESCALATED",
+                ai_response_insights={
+                    "stage": "Customer Discovery Chat",
+                    "trigger": esc_obj["trigger_reason"],
+                    "ai_confidence": esc_obj["ai_confidence_score"],
+                    "action_required": esc_obj["recommended_action"]
+                },
+                escalation_id=esc_obj["escalation_id"]
+            )
+
         recs = bundle_engine.generate_recommendations(schema)
         result["recommendations_data"] = recs
         result["recommendations_data"] = recs
@@ -664,6 +682,34 @@ async def get_all_orders():
 async def get_sales_dashboard():
     """Returns Sales Command Center KPIs, active escalations, and lost quote log."""
     return order_lifecycle_service.get_sales_dashboard()
+
+
+@app.get("/api/escalations")
+async def get_ai_escalations():
+    """
+    Returns all AI-flagged customer leads from the `ai_escalations` table.
+    Includes why AI escalated (trigger reason), confidence score, and what parameters could not be extracted.
+    """
+    escalations = db_client.get_all_ai_escalations()
+    return {
+        "count": len(escalations),
+        "source": "Neon Cloud PostgreSQL (ai_escalations table)",
+        "escalations": escalations
+    }
+
+
+@app.get("/api/customer/decisions")
+async def get_customer_decisions(limit: int = 50):
+    """
+    Returns all customer acceptance/rejection decisions and AI response insights from PostgreSQL.
+    If the case was flagged by AI, it links directly to the `ai_escalations` record via foreign key.
+    """
+    decisions = db_client.get_customer_decisions(limit=limit)
+    return {
+        "count": len(decisions),
+        "source": "Neon Cloud PostgreSQL (customer_decisions table with FK to ai_escalations)",
+        "decisions": decisions
+    }
 
 
 @app.post("/api/sales/orders/{order_id}/status")

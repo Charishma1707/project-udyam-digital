@@ -161,6 +161,45 @@ class DatabaseClient:
                     timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                 );
                 """)
+
+                # 5. AI Escalated Leads Table (Stores all AI escalated cases & unextracted parameters)
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS ai_escalations (
+                    escalation_id VARCHAR(64) PRIMARY KEY,
+                    session_id VARCHAR(128) NOT NULL,
+                    customer_name VARCHAR(255) NOT NULL,
+                    priority VARCHAR(32) DEFAULT 'HIGH',
+                    status VARCHAR(32) DEFAULT 'AWAITING_AGENT',
+                    ai_confidence_score NUMERIC(5, 2) NOT NULL,
+                    confidence_band VARCHAR(64) NOT NULL,
+                    trigger_reason TEXT NOT NULL,
+                    what_ai_could_not_extract_json TEXT,
+                    ai_discovery_summary TEXT,
+                    recommended_action TEXT,
+                    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                );
+                """)
+
+                # 6. Customer Decisions & AI Response Insights Table
+                # Tracks whether customer accepted/rejected quote, with foreign key to ai_escalations if escalated
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS customer_decisions (
+                    decision_id VARCHAR(64) PRIMARY KEY,
+                    session_id VARCHAR(128) NOT NULL,
+                    customer_name VARCHAR(255) NOT NULL,
+                    business_type VARCHAR(255),
+                    decision_type VARCHAR(32) NOT NULL,
+                    bundle_code VARCHAR(64),
+                    bundle_name VARCHAR(255),
+                    monthly_cost NUMERIC(12, 2),
+                    ai_response_insights_json TEXT,
+                    rejection_reason TEXT,
+                    customer_feedback TEXT,
+                    budget_offered NUMERIC(12, 2),
+                    escalation_id VARCHAR(64) REFERENCES ai_escalations(escalation_id) ON DELETE SET NULL,
+                    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                );
+                """)
             self.is_connected = True
             conn.close()
         except Exception as e:
@@ -803,6 +842,263 @@ class DatabaseClient:
                 "leads": len(self.leads)
             }
         }
+
+    # =========================================================================
+    # AI ESCALATIONS & CUSTOMER DECISIONS DATABASE OPERATIONS
+    # =========================================================================
+
+    def save_ai_escalation(self, esc: Dict[str, Any]) -> Dict[str, Any]:
+        """Persists AI-escalated discovery record to Cloud PostgreSQL."""
+        esc_id = esc.get("escalation_id") or f"ESC-{uuid.uuid4().hex[:6].upper()}"
+        session_id = esc.get("session_id") or "session-unknown"
+        customer_name = esc.get("customer_name") or "Valued Enterprise"
+        priority = esc.get("priority") or "HIGH"
+        status = esc.get("status") or "AWAITING_AGENT"
+        score = float(esc.get("ai_confidence_score") or 0.42)
+        band = esc.get("confidence_band") or "LOW_CONFIDENCE"
+        trigger = esc.get("trigger_reason") or "Discovery Uncertainty"
+        unextracted = json.dumps(esc.get("what_ai_could_not_extract") or [])
+        summary = esc.get("ai_discovery_summary") or ""
+        rec_action = esc.get("recommended_action") or ""
+
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                    INSERT INTO ai_escalations (
+                        escalation_id, session_id, customer_name, priority, status,
+                        ai_confidence_score, confidence_band, trigger_reason,
+                        what_ai_could_not_extract_json, ai_discovery_summary, recommended_action, created_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    ON CONFLICT (escalation_id) DO UPDATE SET
+                        status = EXCLUDED.status,
+                        priority = EXCLUDED.priority,
+                        ai_confidence_score = EXCLUDED.ai_confidence_score,
+                        confidence_band = EXCLUDED.confidence_band,
+                        trigger_reason = EXCLUDED.trigger_reason,
+                        what_ai_could_not_extract_json = EXCLUDED.what_ai_could_not_extract_json,
+                        ai_discovery_summary = EXCLUDED.ai_discovery_summary,
+                        recommended_action = EXCLUDED.recommended_action;
+                    """, (
+                        esc_id, session_id, customer_name, priority, status,
+                        score, band, trigger, unextracted, summary, rec_action
+                    ))
+                conn.close()
+                return esc
+            except Exception as e:
+                print(f"Error saving AI escalation to PostgreSQL: {e}")
+                conn.close()
+
+        # Fallback SQLite
+        fb = self.get_sqlite_fallback_conn()
+        cur = fb.cursor()
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS ai_escalations (
+            escalation_id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            customer_name TEXT NOT NULL,
+            priority TEXT DEFAULT 'HIGH',
+            status TEXT DEFAULT 'AWAITING_AGENT',
+            ai_confidence_score REAL NOT NULL,
+            confidence_band TEXT NOT NULL,
+            trigger_reason TEXT NOT NULL,
+            what_ai_could_not_extract_json TEXT,
+            ai_discovery_summary TEXT,
+            recommended_action TEXT,
+            created_at TEXT
+        );
+        """)
+        cur.execute("""
+        INSERT OR REPLACE INTO ai_escalations (
+            escalation_id, session_id, customer_name, priority, status,
+            ai_confidence_score, confidence_band, trigger_reason,
+            what_ai_could_not_extract_json, ai_discovery_summary, recommended_action, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """, (
+            esc_id, session_id, customer_name, priority, status,
+            score, band, trigger, unextracted, summary, rec_action, datetime.now().isoformat()
+        ))
+        fb.commit()
+        fb.close()
+        return esc
+
+    def get_all_ai_escalations(self) -> List[Dict[str, Any]]:
+        """Queries all AI escalations from PostgreSQL."""
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("SELECT * FROM ai_escalations ORDER BY created_at DESC;")
+                    rows = cur.fetchall()
+                    result = []
+                    for r in rows:
+                        d = dict(r)
+                        if d.get("ai_confidence_score") is not None:
+                            d["ai_confidence_score"] = float(d["ai_confidence_score"])
+                        if d.get("created_at") and hasattr(d["created_at"], "isoformat"):
+                            d["timestamp"] = d["created_at"].strftime("%a, %b %d, %Y, %I:%M %p")
+                        if d.get("what_ai_could_not_extract_json"):
+                            try:
+                                d["what_ai_could_not_extract"] = json.loads(d["what_ai_could_not_extract_json"])
+                            except Exception:
+                                d["what_ai_could_not_extract"] = []
+                        result.append(d)
+                    conn.close()
+                    return result
+            except Exception as e:
+                print(f"Error querying AI escalations from PostgreSQL: {e}")
+                conn.close()
+
+        # Fallback
+        fb = self.get_sqlite_fallback_conn()
+        cur = fb.cursor()
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='ai_escalations';")
+        if not cur.fetchone():
+            fb.close()
+            return []
+        cur.execute("SELECT * FROM ai_escalations ORDER BY escalation_id DESC;")
+        rows = cur.fetchall()
+        fb.close()
+        result = []
+        for r in rows:
+            d = dict(r)
+            if d.get("what_ai_could_not_extract_json"):
+                try:
+                    d["what_ai_could_not_extract"] = json.loads(d["what_ai_could_not_extract_json"])
+                except Exception:
+                    d["what_ai_could_not_extract"] = []
+            result.append(d)
+        return result
+
+    def save_customer_decision(
+        self,
+        session_id: str,
+        customer_name: str,
+        decision_type: str,
+        business_type: Optional[str] = None,
+        bundle_code: Optional[str] = None,
+        bundle_name: Optional[str] = None,
+        monthly_cost: Optional[float] = None,
+        ai_response_insights: Optional[Dict[str, Any]] = None,
+        rejection_reason: Optional[str] = None,
+        customer_feedback: Optional[str] = None,
+        budget_offered: Optional[float] = None,
+        escalation_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Stores AI response insights and customer decision (ACCEPTED / REJECTED / ESCALATED) in PostgreSQL.
+        Maintains Foreign Key link to `ai_escalations` table if an escalation occurred.
+        """
+        dec_id = f"DEC-{uuid.uuid4().hex[:6].upper()}"
+        insights_json = json.dumps(ai_response_insights or {})
+
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                    INSERT INTO customer_decisions (
+                        decision_id, session_id, customer_name, business_type, decision_type,
+                        bundle_code, bundle_name, monthly_cost, ai_response_insights_json,
+                        rejection_reason, customer_feedback, budget_offered, escalation_id, created_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP);
+                    """, (
+                        dec_id, session_id, customer_name, business_type, decision_type,
+                        bundle_code, bundle_name, monthly_cost, insights_json,
+                        rejection_reason, customer_feedback, budget_offered, escalation_id
+                    ))
+                conn.close()
+                return {"decision_id": dec_id, "status": "SAVED_TO_POSTGRES"}
+            except Exception as e:
+                print(f"Error saving customer decision to PostgreSQL: {e}")
+                conn.close()
+
+        # Fallback SQLite
+        fb = self.get_sqlite_fallback_conn()
+        cur = fb.cursor()
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS customer_decisions (
+            decision_id TEXT PRIMARY KEY,
+            session_id TEXT NOT NULL,
+            customer_name TEXT NOT NULL,
+            business_type TEXT,
+            decision_type TEXT NOT NULL,
+            bundle_code TEXT,
+            bundle_name TEXT,
+            monthly_cost REAL,
+            ai_response_insights_json TEXT,
+            rejection_reason TEXT,
+            customer_feedback TEXT,
+            budget_offered REAL,
+            escalation_id TEXT,
+            created_at TEXT
+        );
+        """)
+        cur.execute("""
+        INSERT INTO customer_decisions (
+            decision_id, session_id, customer_name, business_type, decision_type,
+            bundle_code, bundle_name, monthly_cost, ai_response_insights_json,
+            rejection_reason, customer_feedback, budget_offered, escalation_id, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """, (
+            dec_id, session_id, customer_name, business_type, decision_type,
+            bundle_code, bundle_name, monthly_cost, insights_json,
+            rejection_reason, customer_feedback, budget_offered, escalation_id, datetime.now().isoformat()
+        ))
+        fb.commit()
+        fb.close()
+        return {"decision_id": dec_id, "status": "SAVED_TO_SQLITE"}
+
+    def get_customer_decisions(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Queries customer decisions with linked AI escalation details."""
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("""
+                    SELECT cd.*, 
+                           ae.trigger_reason, 
+                           ae.ai_confidence_score, 
+                           ae.what_ai_could_not_extract_json
+                    FROM customer_decisions cd
+                    LEFT JOIN ai_escalations ae ON cd.escalation_id = ae.escalation_id
+                    ORDER BY cd.created_at DESC
+                    LIMIT %s;
+                    """, (limit,))
+                    rows = cur.fetchall()
+                    result = []
+                    for r in rows:
+                        d = dict(r)
+                        if d.get("monthly_cost") is not None:
+                            d["monthly_cost"] = float(d["monthly_cost"])
+                        if d.get("ai_response_insights_json"):
+                            try:
+                                d["ai_response_insights"] = json.loads(d["ai_response_insights_json"])
+                            except Exception:
+                                d["ai_response_insights"] = {}
+                        if d.get("what_ai_could_not_extract_json"):
+                            try:
+                                d["what_ai_could_not_extract"] = json.loads(d["what_ai_could_not_extract_json"])
+                            except Exception:
+                                d["what_ai_could_not_extract"] = []
+                        result.append(d)
+                    conn.close()
+                    return result
+            except Exception as e:
+                print(f"Error querying customer decisions: {e}")
+                conn.close()
+
+        fb = self.get_sqlite_fallback_conn()
+        cur = fb.cursor()
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='customer_decisions';")
+        if not cur.fetchone():
+            fb.close()
+            return []
+        cur.execute("SELECT * FROM customer_decisions ORDER BY created_at DESC LIMIT ?;", (limit,))
+        rows = cur.fetchall()
+        fb.close()
+        return [dict(r) for r in rows]
 
 
 db_client = DatabaseClient()

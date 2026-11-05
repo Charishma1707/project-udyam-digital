@@ -50,7 +50,7 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button id="cartHeaderBtn" onclick="toggleCartDrawer(true)" class="relative px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-[#e40000] border border-red-200 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+        <button id="cartHeaderBtn" onclick="toggleCartDrawer(true)" class="hidden relative px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-[#e40000] border border-red-200 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
           <span class="material-symbols-outlined text-[18px]">shopping_cart</span>
           <span class="hidden sm:inline">Cart</span>
           <span id="cartBadgeCount" class="w-5 h-5 rounded-full bg-[#e40000] text-white text-[10px] font-bold flex items-center justify-center">0</span>
@@ -843,12 +843,14 @@
       if (role === 'customer') {
         roleBadge.textContent = 'Customer Portal';
         roleBadge.className = 'text-[11px] bg-red-50 text-[#e40000] border border-red-200 font-bold px-2 py-0.5 rounded-full ml-2';
+        document.getElementById('cartHeaderBtn')?.classList.remove('hidden');
         document.querySelectorAll('.customer-tab').forEach(el => el.classList.remove('hidden'));
         document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
         switchTab('products');
       } else {
         roleBadge.textContent = 'Admin Console';
         roleBadge.className = 'text-[11px] bg-slate-100 text-slate-800 border border-slate-300 font-bold px-2 py-0.5 rounded-full ml-2';
+        document.getElementById('cartHeaderBtn')?.classList.add('hidden');
         document.querySelectorAll('.customer-tab').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('hidden'));
         fetchSalesDashboard();
@@ -860,6 +862,7 @@
       document.getElementById('roleGatewayScreen').classList.remove('hidden');
       document.getElementById('portalContentWrapper').classList.add('hidden');
       document.getElementById('switchRoleBtn').classList.add('hidden');
+      document.getElementById('cartHeaderBtn')?.classList.add('hidden');
       document.getElementById('roleBadge').textContent = 'Access Portal';
     }
 

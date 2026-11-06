@@ -24,6 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+# Uniform Single Source of Truth for Environment Configuration (.env)
+from dotenv import load_dotenv
+ENV_FILE = BASE_DIR / ".env" if (BASE_DIR / ".env").exists() else BASE_DIR.parent / ".env"
+load_dotenv(ENV_FILE, override=False)
+
 # Ensure stdout uses UTF-8 on Windows
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')

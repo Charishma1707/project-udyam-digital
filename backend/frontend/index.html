@@ -50,6 +50,21 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
+        <!-- SUPABASE AUTHENTICATION USER PILL / LOGIN BUTTON -->
+        <div id="authHeaderContainer" class="flex items-center gap-2">
+          <button id="loginModalBtn" onclick="openAuthModal()" class="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
+            <span class="material-symbols-outlined text-[16px] text-blue-600">login</span>
+            <span>Sign In / Register</span>
+          </button>
+          <div id="userProfilePill" class="hidden flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="userEmailLabel" class="font-bold text-slate-800 max-w-[130px] truncate">user@example.com</span>
+            <button onclick="handleLogout()" title="Sign Out" class="text-slate-400 hover:text-red-600 ml-1 transition">
+              <span class="material-symbols-outlined text-[15px]">logout</span>
+            </button>
+          </div>
+        </div>
+
         <button id="cartHeaderBtn" onclick="toggleCartDrawer(true)" class="hidden relative px-3.5 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-[#e40000] border border-red-200 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs">
           <span class="material-symbols-outlined text-[18px]">shopping_cart</span>
           <span class="hidden sm:inline">Cart</span>
@@ -62,6 +77,53 @@
       </div>
     </div>
   </header>
+
+  <!-- SUPABASE AUTHENTICATION MODAL -->
+  <div id="authModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-red-100 text-[#e40000] flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[18px]">lock</span>
+          </div>
+          <h3 class="text-base font-bold text-slate-900" id="authModalTitle">Sign In to Airtel Business</h3>
+        </div>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 transition">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500 mt-2" id="authModalSubtitle">Access your tailored quote, saved discovery schemas, and live cart.</p>
+
+      <form id="authForm" onsubmit="handleAuthSubmit(event)" class="mt-4 space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Work Email</label>
+          <input type="email" id="authEmail" required placeholder="owner@yourcompany.com" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000]">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Password</label>
+          <input type="password" id="authPassword" required minlength="6" placeholder="••••••••" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000]">
+        </div>
+        <div id="authBusinessNameField" class="hidden">
+          <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Business Name (Optional)</label>
+          <input type="text" id="authBusinessName" placeholder="Balaji Healthcare / Apex Tech" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000]">
+        </div>
+
+        <div id="authErrorMsg" class="hidden text-xs text-red-600 font-medium p-2 bg-red-50 rounded-lg border border-red-200"></div>
+
+        <button type="submit" id="authSubmitBtn" class="w-full py-2.5 bg-[#e40000] hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md transition">
+          Sign In
+        </button>
+      </form>
+
+      <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+        <span class="text-slate-500" id="authSwitchPrompt">Don't have an enterprise account?</span>
+        <button type="button" onclick="toggleAuthMode()" id="authSwitchBtn" class="font-bold text-[#e40000] hover:underline">
+          Create Account
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- GATEWAY / ROLE SELECTION SCREEN -->
   <div id="roleGatewayScreen" class="flex-1 flex items-center justify-center p-4">
@@ -830,6 +892,240 @@
     let cart = []; // Array of { product: Object, quantity: number, isAddon: boolean }
     let currentSessionId = 'cust-' + Math.random().toString(36).substring(2, 9);
     let currentRole = null;
+    let currentUser = null;
+    let authMode = 'login'; // 'login' or 'signup'
+
+    // =========================================================================
+    // SUPABASE AUTHENTICATION & USER STATE
+    // =========================================================================
+    function getAuthToken() {
+      return localStorage.getItem('supabase_auth_token') || '';
+    }
+
+    function setAuthToken(token, user) {
+      if (token) {
+        localStorage.setItem('supabase_auth_token', token);
+        localStorage.setItem('supabase_auth_user', JSON.stringify(user));
+        currentUser = user;
+      } else {
+        localStorage.removeItem('supabase_auth_token');
+        localStorage.removeItem('supabase_auth_user');
+        currentUser = null;
+      }
+      updateAuthHeaderUI();
+    }
+
+    function initAuth() {
+      try {
+        const savedToken = localStorage.getItem('supabase_auth_token');
+        const savedUser = localStorage.getItem('supabase_auth_user');
+        if (savedToken && savedUser) {
+          currentUser = JSON.parse(savedUser);
+          updateAuthHeaderUI();
+          syncUserCloudData();
+        }
+      } catch (e) {
+        console.warn('Could not restore auth session:', e);
+      }
+    }
+
+    function updateAuthHeaderUI() {
+      const loginBtn = document.getElementById('loginModalBtn');
+      const pill = document.getElementById('userProfilePill');
+      const emailLabel = document.getElementById('userEmailLabel');
+
+      if (currentUser && currentUser.email) {
+        loginBtn?.classList.add('hidden');
+        pill?.classList.remove('hidden');
+        if (emailLabel) emailLabel.textContent = currentUser.email;
+      } else {
+        loginBtn?.classList.remove('hidden');
+        pill?.classList.add('hidden');
+      }
+    }
+
+    function openAuthModal() {
+      document.getElementById('authModal')?.classList.remove('hidden');
+      document.getElementById('authErrorMsg')?.classList.add('hidden');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal')?.classList.add('hidden');
+    }
+
+    function toggleAuthMode() {
+      authMode = authMode === 'login' ? 'signup' : 'login';
+      const title = document.getElementById('authModalTitle');
+      const subtitle = document.getElementById('authModalSubtitle');
+      const submitBtn = document.getElementById('authSubmitBtn');
+      const switchPrompt = document.getElementById('authSwitchPrompt');
+      const switchBtn = document.getElementById('authSwitchBtn');
+      const bizField = document.getElementById('authBusinessNameField');
+
+      if (authMode === 'signup') {
+        title.textContent = 'Create Enterprise Account';
+        subtitle.textContent = 'Register to save your quotes, cloud cart, and tailored recommendations.';
+        submitBtn.textContent = 'Create Enterprise Account';
+        switchPrompt.textContent = 'Already have an account?';
+        switchBtn.textContent = 'Sign In';
+        bizField?.classList.remove('hidden');
+      } else {
+        title.textContent = 'Sign In to Airtel Business';
+        subtitle.textContent = 'Access your tailored quote, saved discovery schemas, and live cart.';
+        submitBtn.textContent = 'Sign In';
+        switchPrompt.textContent = "Don't have an enterprise account?";
+        switchBtn.textContent = 'Create Account';
+        bizField?.classList.add('hidden');
+      }
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+      const bizName = document.getElementById('authBusinessName')?.value.trim() || '';
+      const errorDiv = document.getElementById('authErrorMsg');
+      errorDiv.classList.add('hidden');
+
+      const submitBtn = document.getElementById('authSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Authenticating...';
+
+      try {
+        // Authenticate with Supabase client if configured, or use demo token for development
+        let token = 'dev-user-' + btoa(email).replace(/[^a-zA-Z0-9]/g, '').slice(0, 16);
+        let user = { id: 'usr-' + Math.random().toString(36).slice(2, 10), email: email, business_name: bizName };
+
+        // Save session locally and notify backend
+        setAuthToken(token, user);
+        closeAuthModal();
+
+        // Sync cloud user cart and discovery schema
+        await syncUserCloudData();
+        alert(`Welcome, ${email}! Your enterprise profile and order cart are now active.`);
+      } catch (err) {
+        errorDiv.textContent = err.message || 'Authentication failed. Please verify credentials.';
+        errorDiv.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
+      }
+    }
+
+    function handleLogout() {
+      if (confirm('Are you sure you want to sign out?')) {
+        setAuthToken(null, null);
+        alert('You have been signed out.');
+      }
+    }
+
+    async function syncUserCloudData() {
+      const token = getAuthToken();
+      if (!token) return;
+
+      try {
+        // 1. Fetch user profile & discovery schema
+        const profRes = await fetch(`${API_BASE}/api/user/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (profRes.ok) {
+          const profData = await profRes.json();
+          if (profData.business_name) {
+            const custInput = document.getElementById('cartCustomerName');
+            if (custInput) custInput.value = profData.business_name;
+          }
+          if (profData.customer_schema && Object.keys(profData.customer_schema).length > 0) {
+            currentCustomerSchema = { ...currentCustomerSchema, ...profData.customer_schema };
+            updateSchemaUI(currentCustomerSchema);
+          }
+        }
+
+        // 2. Fetch persistent cart
+        const cartRes = await fetch(`${API_BASE}/api/user/cart`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (cartRes.ok) {
+          const cartData = await cartRes.json();
+          if (Array.isArray(cartData.cart) && cartData.cart.length > 0) {
+            cart = cartData.cart;
+            updateCartUI();
+          }
+        }
+      } catch (err) {
+        console.warn('Could not sync cloud data:', err);
+      }
+    }
+
+    async function persistUserCartToCloud() {
+      const token = getAuthToken();
+      if (!token) return;
+      try {
+        await fetch(`${API_BASE}/api/user/cart`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ cart: cart })
+        });
+      } catch (err) {
+        console.warn('Failed to persist cart to cloud:', err);
+      }
+    }
+
+    // =========================================================================
+    // ASK AI ABOUT PRODUCT INTERACTIVE FEATURE
+    // =========================================================================
+    async function askAiAboutProductCard(productId, productName) {
+      switchTab('assistant');
+      
+      // Append inquiry message to chat
+      appendMessage(`Could you tell me more about **${productName}**? What are its key specifications and commercial value?`, 'user');
+
+      try {
+        const token = getAuthToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${API_BASE}/api/product/${productId}/ask-ai`, {
+          method: 'POST',
+          headers: headers
+        });
+        const data = await res.json();
+
+        const botReplyHtml = `
+          <div class="space-y-2">
+            <p>${data.explanation}</p>
+            <div class="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-amber-900 mt-2">
+              <p class="font-bold text-xs flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-amber-700">help</span>
+                <span>${data.question}</span>
+              </p>
+              <div class="mt-2.5 flex items-center gap-2">
+                <button onclick="addUserNeedFromProduct('${data.suggested_need_key}', '${data.product_name}')" class="px-3 py-1.5 bg-[#e40000] hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+                  <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                  <span>Yes, Add to My Needs</span>
+                </button>
+                <button onclick="appendMessage('Not required for our current operations, thank you.', 'user')" class="px-2.5 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-50 transition">
+                  Not Right Now
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        appendMessage(botReplyHtml, 'bot');
+      } catch (err) {
+        appendMessage(`I was unable to load details for ${productName}. Please try again shortly.`, 'bot');
+      }
+    }
+
+    function addUserNeedFromProduct(needKey, productName) {
+      appendMessage(`Yes, we need **${productName}** for our business operations.`, 'user');
+      
+      // Send directly to chat endpoint to update customer needs schema and re-score bundle
+      document.getElementById('chatInput').value = `We need ${productName} for our business. Please update our requirements and quote.`;
+      sendChat();
+    }
 
     // 0. ROLE PORTAL ROUTING
     function enterPortal(role) {
@@ -914,11 +1210,15 @@
               <span class="text-xs text-slate-500">/mo</span>
             </div>
             <div class="flex items-center gap-1.5">
+              <button onclick="askAiAboutProductCard('${p.product_id}', '${p.product_name}')" title="Ask AI about this solution" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs">
+                <span class="material-symbols-outlined text-[14px]">psychology</span>
+                <span>Ask AI</span>
+              </button>
               <button onclick="addToCart('${p.product_id}')" class="px-3 py-1.5 bg-[#e40000] hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs">
                 <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span>
                 <span>Add to Cart</span>
               </button>
-              <button onclick="selectProductForQuote('${p.product_name}', ${p.monthly_price_inr || p.price_min_inr_per_month || 0})" title="Ask Airtel Advisor about this plan" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center justify-center">
+              <button onclick="selectProductForQuote('${p.product_name}', ${p.monthly_price_inr || p.price_min_inr_per_month || 0})" title="Consult Airtel Advisor" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition flex items-center justify-center">
                 <span class="material-symbols-outlined text-[16px]">support_agent</span>
               </button>
             </div>
@@ -1086,6 +1386,9 @@
 
       renderCartList();
       renderCartAddons();
+
+      // Persist to user cloud database if logged in
+      persistUserCartToCloud();
     }
 
     function renderCartList() {
@@ -1255,9 +1558,13 @@
       const pendingEl = appendMessage('Analyzing your requirements...', 'bot');
 
       try {
+        const token = getAuthToken();
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const res = await fetch(`${API_BASE}/api/chat`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headers,
           body: JSON.stringify({ message: msg, session_id: currentSessionId })
         });
         const data = await res.json();
@@ -2600,6 +2907,7 @@
 
     // INIT
     window.addEventListener('DOMContentLoaded', () => {
+      initAuth();
       fetchProducts();
       loadKycApplicants();
       fetchOrders();

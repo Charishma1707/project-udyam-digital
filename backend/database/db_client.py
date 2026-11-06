@@ -200,6 +200,39 @@ class DatabaseClient:
                     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                 );
                 """)
+
+                # 7. User Profiles & Needs Schemas (Scoped to Supabase user_id)
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS user_profiles (
+                    user_id VARCHAR(128) PRIMARY KEY,
+                    email VARCHAR(255),
+                    business_name VARCHAR(255),
+                    customer_schema_json TEXT DEFAULT '{}',
+                    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                );
+                """)
+
+                # 8. User Persistent Carts
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS user_carts (
+                    user_id VARCHAR(128) PRIMARY KEY,
+                    cart_items_json TEXT DEFAULT '[]',
+                    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                );
+                """)
+
+                # 9. User AI Conversations & Voice History
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS user_conversations (
+                    id SERIAL PRIMARY KEY,
+                    user_id VARCHAR(128) NOT NULL,
+                    session_id VARCHAR(128) NOT NULL,
+                    sender VARCHAR(32) NOT NULL,
+                    message TEXT NOT NULL,
+                    pipeline_trace_json TEXT,
+                    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                );
+                """)
             self.is_connected = True
             conn.close()
         except Exception as e:
@@ -1099,6 +1132,138 @@ class DatabaseClient:
         rows = cur.fetchall()
         fb.close()
         return [dict(r) for r in rows]
+
+    # =========================================================================
+    # USER-SCOPED PERSISTENCE (SUPABASE AUTHENTICATION)
+    # =========================================================================
+
+    def get_user_profile(self, user_id: str) -> Dict[str, Any]:
+        """Fetches the user's saved discovery profile and schema."""
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("SELECT * FROM user_profiles WHERE user_id = %s;", (user_id,))
+                    row = cur.fetchone()
+                    conn.close()
+                    if row:
+                        d = dict(row)
+                        if d.get("customer_schema_json"):
+                            try:
+                                d["customer_schema"] = json.loads(d["customer_schema_json"])
+                            except Exception:
+                                d["customer_schema"] = {}
+                        return d
+            except Exception as e:
+                print(f"Error fetching user profile: {e}")
+                conn.close()
+        return {"user_id": user_id, "customer_schema": {}}
+
+    def save_user_profile(self, user_id: str, email: str = "", business_name: str = "", schema_dict: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Saves or updates the user discovery schema."""
+        schema_json = json.dumps(schema_dict or {})
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                    INSERT INTO user_profiles (user_id, email, business_name, customer_schema_json, updated_at)
+                    VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    ON CONFLICT (user_id) DO UPDATE SET
+                        email = EXCLUDED.email,
+                        business_name = COALESCE(NULLIF(EXCLUDED.business_name, ''), user_profiles.business_name),
+                        customer_schema_json = EXCLUDED.customer_schema_json,
+                        updated_at = CURRENT_TIMESTAMP;
+                    """, (user_id, email, business_name, schema_json))
+                conn.close()
+                return self.get_user_profile(user_id)
+            except Exception as e:
+                print(f"Error saving user profile: {e}")
+                conn.close()
+        return {"user_id": user_id, "customer_schema": schema_dict or {}}
+
+    def get_user_cart(self, user_id: str) -> List[Dict[str, Any]]:
+        """Retrieves user's persistent cart items."""
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("SELECT cart_items_json FROM user_carts WHERE user_id = %s;", (user_id,))
+                    row = cur.fetchone()
+                    conn.close()
+                    if row and row.get("cart_items_json"):
+                        return json.loads(row["cart_items_json"])
+            except Exception as e:
+                print(f"Error getting user cart: {e}")
+                conn.close()
+        return []
+
+    def save_user_cart(self, user_id: str, cart_items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Saves user's persistent cart."""
+        cart_json = json.dumps(cart_items)
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                    INSERT INTO user_carts (user_id, cart_items_json, updated_at)
+                    VALUES (%s, %s, CURRENT_TIMESTAMP)
+                    ON CONFLICT (user_id) DO UPDATE SET
+                        cart_items_json = EXCLUDED.cart_items_json,
+                        updated_at = CURRENT_TIMESTAMP;
+                    """, (user_id, cart_json))
+                conn.close()
+                return cart_items
+            except Exception as e:
+                print(f"Error saving user cart: {e}")
+                conn.close()
+        return cart_items
+
+    def save_user_conversation(self, user_id: str, session_id: str, sender: str, message: str, pipeline_trace: Any = None):
+        """Stores chat and voice interaction for user history."""
+        trace_json = json.dumps(pipeline_trace or {})
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                    INSERT INTO user_conversations (user_id, session_id, sender, message, pipeline_trace_json, created_at)
+                    VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP);
+                    """, (user_id, session_id, sender, message, trace_json))
+                conn.close()
+            except Exception as e:
+                print(f"Error saving user conversation: {e}")
+                conn.close()
+
+    def get_user_conversations(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Retrieves user conversation history."""
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("""
+                    SELECT id, session_id, sender, message, pipeline_trace_json, created_at
+                    FROM user_conversations
+                    WHERE user_id = %s
+                    ORDER BY id ASC
+                    LIMIT %s;
+                    """, (user_id, limit))
+                    rows = cur.fetchall()
+                    conn.close()
+                    res = []
+                    for r in rows:
+                        d = dict(r)
+                        if d.get("pipeline_trace_json"):
+                            try:
+                                d["pipeline_trace"] = json.loads(d["pipeline_trace_json"])
+                            except Exception:
+                                d["pipeline_trace"] = None
+                        res.append(d)
+                    return res
+            except Exception as e:
+                print(f"Error fetching user conversations: {e}")
+                conn.close()
+        return []
 
 
 db_client = DatabaseClient()

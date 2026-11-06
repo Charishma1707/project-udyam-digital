@@ -28,7 +28,7 @@ if str(BASE_DIR) not in sys.path:
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -58,6 +58,7 @@ from kyc_verification.smart_kyc_service import smart_kyc_service
 from kyc_verification.smart_kyc_verifier import smart_kyc_verifier, find_applicant_files
 from order_tracking.order_lifecycle import order_lifecycle_service
 from database.db_client import db_client
+from auth.supabase_auth import get_current_user, get_optional_user
 
 app = FastAPI(
     title="Airtel Business Customer Discovery & Smart KYC Platform",
@@ -111,7 +112,7 @@ def log_ai_interaction(event_type: str, request_data: Any, response_data: Any):
 
 @app.post("/chat")
 @app.post("/api/chat")
-async def chat_endpoint(request: ChatRequest):
+async def chat_endpoint(request: ChatRequest, user: Optional[Dict[str, Any]] = Depends(get_optional_user)):
     """
     Receives customer text message, runs the 11-stage discovery pipeline,
     and attaches tailored live recommendation packages based on identified requirements.
@@ -120,6 +121,26 @@ async def chat_endpoint(request: ChatRequest):
         message=request.message,
         session_id=request.session_id
     )
+
+    # If user is authenticated, save chat turns and update user profile in PostgreSQL
+    user_id = user.get("sub") or user.get("id") if user else None
+    if user_id:
+        try:
+            db_client.save_user_conversation(
+                user_id=user_id,
+                session_id=request.session_id or "session-1",
+                sender="user",
+                message=request.message
+            )
+            db_client.save_user_conversation(
+                user_id=user_id,
+                session_id=request.session_id or "session-1",
+                sender="bot",
+                message=result.get("reply", ""),
+                pipeline_trace=result.get("pipeline_trace")
+            )
+        except Exception as e:
+            print(f"Warning: Failed to save user conversation: {e}")
 
     # Attach live recommendation quote if schema has minimum profile or needs
     try:
@@ -196,6 +217,19 @@ async def chat_endpoint(request: ChatRequest):
     except Exception as e:
         result["recommendation_error"] = str(e)
 
+    # If user is authenticated, save voice interaction
+    user_id = user.get("sub") or user.get("id") if user else None
+    if user_id and schema:
+        try:
+            db_client.save_user_profile(
+                user_id=user_id,
+                email=user.get("email", ""),
+                business_name=schema.business_name or "",
+                schema_dict=schema.to_dict()
+            )
+        except Exception as e:
+            print(f"Warning: Failed to save user schema: {e}")
+
     # Real-time log to ai_interaction_log.jsonl in workspace folder
     log_ai_interaction(
         event_type="CHAT_REQUEST",
@@ -248,6 +282,19 @@ async def voice_endpoint(
             }
     except Exception as e:
         result["recommendation_error"] = str(e)
+
+    # If user is authenticated, save voice interaction
+    user_id = user.get("sub") or user.get("id") if user else None
+    if user_id and schema:
+        try:
+            db_client.save_user_profile(
+                user_id=user_id,
+                email=user.get("email", ""),
+                business_name=schema.business_name or "",
+                schema_dict=schema.to_dict()
+            )
+        except Exception as e:
+            print(f"Warning: Failed to save user schema: {e}")
 
     # Real-time log to ai_interaction_log.jsonl in workspace folder
     log_ai_interaction(
@@ -435,6 +482,104 @@ async def lookup_udyam(udyam: str):
     return {"found": True, "record": record}
 
 
+# =============================================================================
+# USER-SCOPED PERSISTENCE (SUPABASE AUTHENTICATED ENDPOINTS)
+# =============================================================================
+
+@app.get("/api/user/profile")
+async def get_user_profile_endpoint(user: Dict[str, Any] = Depends(get_current_user)):
+    """Fetches user profile, business name, and saved customer discovery schema."""
+    user_id = user.get("sub") or user.get("id")
+    profile = db_client.get_user_profile(user_id)
+    return {"user_id": user_id, "email": user.get("email"), **profile}
+
+
+@app.post("/api/user/profile")
+async def save_user_profile_endpoint(payload: Dict[str, Any], user: Dict[str, Any] = Depends(get_current_user)):
+    """Saves user business profile and discovery schema."""
+    user_id = user.get("sub") or user.get("id")
+    email = user.get("email", "")
+    business_name = payload.get("business_name", "")
+    schema_dict = payload.get("customer_schema", {})
+    saved = db_client.save_user_profile(user_id, email, business_name, schema_dict)
+    return {"status": "success", "profile": saved}
+
+
+@app.get("/api/user/cart")
+async def get_user_cart_endpoint(user: Dict[str, Any] = Depends(get_current_user)):
+    """Fetches user persistent order cart."""
+    user_id = user.get("sub") or user.get("id")
+    cart_items = db_client.get_user_cart(user_id)
+    return {"user_id": user_id, "cart": cart_items}
+
+
+@app.post("/api/user/cart")
+async def save_user_cart_endpoint(payload: Dict[str, Any], user: Dict[str, Any] = Depends(get_current_user)):
+    """Saves user persistent order cart items."""
+    user_id = user.get("sub") or user.get("id")
+    items = payload.get("cart", [])
+    saved = db_client.save_user_cart(user_id, items)
+    return {"status": "success", "cart": saved}
+
+
+@app.get("/api/user/conversations")
+async def get_user_conversations_endpoint(user: Dict[str, Any] = Depends(get_current_user)):
+    """Fetches user chat & voice conversation history."""
+    user_id = user.get("sub") or user.get("id")
+    history = db_client.get_user_conversations(user_id)
+    return {"user_id": user_id, "conversations": history}
+
+
+# =============================================================================
+# ASK AI ABOUT PRODUCT (INTERACTIVE CATALOG INQUIRY)
+# =============================================================================
+
+@app.post("/api/product/{product_id}/ask-ai")
+async def ask_ai_about_product(
+    product_id: str,
+    payload: Optional[Dict[str, Any]] = None,
+    user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+):
+    """
+    Gives a conversational explanation of a telecom product, explains its business benefits,
+    and asks the customer: 'Do you need this for your business?'.
+    """
+    prods = db_client.get_products()
+    prod = next((p for p in prods if p.get("product_id") == product_id), None)
+    if not prod:
+        raise HTTPException(status_code=404, detail="Product not found in catalog")
+
+    name = prod.get("product_name")
+    category = prod.get("category")
+    monthly = prod.get("monthly_price_inr", 0)
+    setup = prod.get("one_time_price_inr", 0)
+    sla = prod.get("sla_level") or "Standard SLA"
+    features = prod.get("features", [])
+
+    feat_bullets = ", ".join(features[:3]) if isinstance(features, list) else str(features)
+    explanation = (
+        f"**{name}** ({category}) is an enterprise-grade solution priced at ₹{monthly:,}/mo (One-time setup: ₹{setup:,}). "
+        f"It provides **{sla}** commercial reliability with key capabilities including: {feat_bullets}."
+    )
+    
+    question = (
+        f"Would this {category.lower()} capability benefit your business operations? "
+        f"If yes, I can add it to your requirements to customize your overall connectivity bundle."
+    )
+
+    return {
+        "product_id": product_id,
+        "product_name": name,
+        "category": category,
+        "monthly_price_inr": monthly,
+        "one_time_price_inr": setup,
+        "explanation": explanation,
+        "question": question,
+        "suggested_need_key": name.lower(),
+        "prompt_action": f"Yes, add {name} to my business needs"
+    }
+
+
 @app.get("/api/products")
 async def get_products():
     """Returns all 25 normalized Airtel Business catalogue products."""
@@ -566,7 +711,7 @@ async def verify_uploaded_kyc(
                 suffix = os.path.splitext(ufile.filename)[1] or ".png"
                 content = await ufile.read()
                 
-                # 1. Store in S3 with Client-Side & Server-Side AES-256 Encryption FIRST
+                # 1. Store in client-side AES-256 encrypted vault FIRST
                 try:
                     from kyc_verification.s3_storage import secure_s3_service
                     s3_res = secure_s3_service.upload_encrypted_file(
@@ -577,7 +722,7 @@ async def verify_uploaded_kyc(
                     )
                     s3_records[slot] = s3_res
                 except Exception as s3_err:
-                    print(f"Warning: S3 storage exception for {slot}: {s3_err}")
+                    print(f"Warning: Encrypted vault storage exception for {slot}: {s3_err}")
 
                 # 2. Ephemeral buffer for AI verification
                 with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:

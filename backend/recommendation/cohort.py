@@ -28,6 +28,9 @@ def load_thresholds() -> Dict[str, Any]:
 
 
 def get_employee_band(emp: int) -> str:
+    # Standard MSME & SMB workforce sizing brackets according to Indian enterprise telecom tiers:
+    # 1-5 (Micro / Sole Proprietor), 6-10 (Small Office), 11-25 (Mid-tier SMB),
+    # 26-50 (Emerging Enterprise), 51+ (Large Enterprise / Multi-department)
     if emp <= 5:
         return "1-5"
     elif emp <= 10:

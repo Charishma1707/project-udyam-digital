@@ -96,7 +96,7 @@ def normalise_profile(raw_profile: Dict[str, Any]) -> Dict[str, Any]:
     profile["gstin_valid_for_sale"] = gstin_valid_for_sale
     profile["gstin_issue"] = gstin_issue
 
-    # 5. Need mapping
+    # 5. High-Accuracy Need Mapping (Exact + Fuzzy Semantic Keyword Resolution)
     raw_needs = profile.get("needs") or []
     if isinstance(raw_needs, str):
         raw_needs = [n.strip() for n in raw_needs.split(";") if n.strip()]
@@ -109,28 +109,70 @@ def normalise_profile(raw_profile: Dict[str, Any]) -> Dict[str, Any]:
     mapped_product_ids = set()
     stated_needs_clean = []
 
+    all_catalog_prods = db_client.get_products()
+    catalog_pid_map = {p["product_id"].upper(): p for p in all_catalog_prods}
+
     for item in raw_needs:
         token = str(item).strip().lower()
         if not token:
             continue
         stated_needs_clean.append(token)
 
-        # Direct category or product ID match
+        # Direct category or product ID match (e.g. 'P01', 'P14')
         token_upper = token.upper()
-        if token_upper in [p["product_id"] for p in db_client.get_products()]:
+        if token_upper in catalog_pid_map:
             mapped_product_ids.add(token_upper)
-            for p in db_client.get_products():
-                if p["product_id"] == token_upper:
-                    mapped_categories.add(p["category"])
+            mapped_categories.add(catalog_pid_map[token_upper].get("category", "Connectivity"))
 
-        # Keyword mapping
+        # Exact keyword & substring mapping
+        matched_any_kw = False
         for kw, cat in kw_to_cat.items():
             if kw in token:
                 mapped_categories.add(cat)
+                matched_any_kw = True
         for kw, p_ids in kw_to_prods.items():
             if kw in token:
                 for pid in p_ids:
                     mapped_product_ids.add(pid)
+                matched_any_kw = True
+
+        # Step 3: Fuzzy token matching against catalog keywords (typo tolerance)
+        matched_fuzzy = False
+        if not matched_any_kw:
+            try:
+                from rapidfuzz import process, fuzz
+                best_kw = process.extractOne(token, list(kw_to_cat.keys()), scorer=fuzz.partial_ratio, score_cutoff=80.0)
+                if best_kw:
+                    matched_kw, score, _ = best_kw
+                    cat = kw_to_cat[matched_kw]
+                    mapped_categories.add(cat)
+                    matched_fuzzy = True
+                    if matched_kw in kw_to_prods:
+                        for pid in kw_to_prods[matched_kw]:
+                            mapped_product_ids.add(pid)
+            except Exception:
+                pass
+
+        # Step 4: Semantic Vector Cosine Similarity Search (Intent matching for natural language problems)
+        if not matched_any_kw and not matched_fuzzy:
+            try:
+                from recommendation.hybrid_matcher import product_vector_matcher, category_vector_matcher
+                
+                # Check semantic product matches
+                prod_sims = product_vector_matcher.compute_similarity(token)
+                if prod_sims and prod_sims[0][1] >= 0.18:
+                    top_pid, p_score = prod_sims[0]
+                    mapped_product_ids.add(top_pid)
+                    if top_pid in catalog_pid_map:
+                        mapped_categories.add(catalog_pid_map[top_pid].get("category", "Connectivity"))
+                
+                # Check semantic category matches
+                cat_sims = category_vector_matcher.compute_similarity(token)
+                if cat_sims and cat_sims[0][1] >= 0.18:
+                    top_cat, c_score = cat_sims[0]
+                    mapped_categories.add(top_cat)
+            except Exception:
+                pass
 
     # Fallback: if no specific category matched, default to Connectivity
     if not mapped_categories and not mapped_product_ids:

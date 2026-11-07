@@ -247,6 +247,11 @@
           <span class="material-symbols-outlined text-[18px]">sync</span>
           <span>Milestone Status Override</span>
         </button>
+        <button onclick="switchTab('admin-agent-debugger')" id="tab-admin-agent-debugger" class="admin-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap border border-indigo-200 bg-indigo-50/60 text-indigo-700 hover:bg-indigo-100">
+          <span class="material-symbols-outlined text-[18px] text-indigo-600">psychology</span>
+          <span>AI Agent Working Dashboard</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        </button>
       </div>
     </nav>
 
@@ -288,15 +293,7 @@
                 </div>
               </div>
               <div class="flex items-center gap-2">
-                <button onclick="simulateMockRecommendation()" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition flex items-center gap-1">
-                  <span class="material-symbols-outlined text-[14px]">tune</span>
-                  <span>Demo Recommendation</span>
-                </button>
-                <button onclick="simulateMockEscalation()" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 transition flex items-center gap-1">
-                  <span class="material-symbols-outlined text-[14px]">warning</span>
-                  <span>Demo Escalation</span>
-                </button>
-                <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-600 ml-1">Clear</button>
+                <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-600 ml-1 px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition">Clear Chat</button>
               </div>
             </div>
 
@@ -916,6 +913,157 @@
         </div>
       </section>
 
+      <!-- ADMIN TAB 4: DEVELOPER AI AGENT WORKING DASHBOARD (SPLIT SCREEN SIMULATION) -->
+      <section id="section-admin-agent-debugger" class="tab-section hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl font-bold text-slate-900">AI Agent Working &amp; Developer Live Lab</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Split-Screen Live View</span>
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Left: Customer experience (how AI behaves &amp; converses) • Right: Developer deep telemetry (request &amp; response of all 11 stages evolving live)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="fetchAiAgentTelemetryLogs()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">refresh</span>
+              <span>Sync Telemetry</span>
+            </button>
+            <label class="flex items-center gap-1.5 text-xs text-slate-600 font-semibold cursor-pointer bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+              <input type="checkbox" id="autoRefreshAiDebugger" onchange="toggleAutoRefreshAiDebugger()" checked class="rounded text-indigo-600 focus:ring-0">
+              <span>Live Auto-Poll (2s)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- SPLIT SCREEN: LEFT CUSTOMER AI EXPERIENCE | RIGHT STAGE-BY-STAGE EVOLUTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- LEFT SIDE: HOW AI BEHAVES FOR CUSTOMER (LIVE CHAT & RECOMMENDED PLAN) -->
+          <div class="lg:col-span-5 flex flex-col gap-4">
+            
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col h-[520px]">
+              <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-red-100 text-[#e40000] flex items-center justify-center font-bold">
+                    <span class="material-symbols-outlined text-[18px]">smart_toy</span>
+                  </div>
+                  <div>
+                    <h2 class="text-xs font-bold text-slate-900">Customer Facing AI Advisor</h2>
+                    <p class="text-[10px] text-slate-400">Live conversation simulation</p>
+                  </div>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Active Session</span>
+              </div>
+
+              <!-- Chat messages mirror container -->
+              <div id="aiDevChatLog" class="flex-1 overflow-y-auto py-3 space-y-2.5 custom-scrollbar text-xs">
+                <div class="p-4 text-center text-slate-400">Loading conversation history...</div>
+              </div>
+
+              <!-- Interactive testing chat box -->
+              <div class="pt-2.5 border-t border-slate-100 flex items-center gap-2">
+                <input type="text" id="aiDevChatInput" onkeydown="if(event.key==='Enter') sendDevSimChatMessage()" placeholder="Type as customer to test AI stages live..." class="flex-1 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000] focus:bg-white">
+                <button onclick="sendDevSimChatMessage()" class="px-3 py-2 bg-[#e40000] hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                  <span>Send</span>
+                  <span class="material-symbols-outlined text-[14px]">send</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Customer Stated Needs & Extracted Schema Badge Preview -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm text-xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-bold text-slate-700 uppercase tracking-wider text-[11px] flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[15px] text-emerald-600">fact_check</span> Customer Discovered Schema
+                </span>
+                <span id="aiDevCompletionBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-[#e40000] border border-red-200">0% Collected</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px]">
+                <div><span class="text-slate-400 block">Business Type:</span><span id="aiDevSchType" class="font-bold text-slate-800">Not identified</span></div>
+                <div><span class="text-slate-400 block">City / Tier:</span><span id="aiDevSchCity" class="font-bold text-slate-800">Not identified</span></div>
+                <div><span class="text-slate-400 block">Sites / Staff:</span><span id="aiDevSchStaff" class="font-bold text-slate-800">-</span></div>
+                <div><span class="text-slate-400 block">Stated Needs:</span><span id="aiDevSchNeeds" class="font-bold text-slate-800 truncate block">-</span></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT SIDE: DEVELOPER STAGE-BY-STAGE REQUEST/RESPONSE EVOLVER -->
+          <div class="lg:col-span-7 flex flex-col gap-4">
+            
+            <!-- TURN CONTROLS & TIMESTAMPS -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col gap-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-mono font-bold text-xs">AI</span>
+                  <span class="font-bold text-xs text-indigo-950 uppercase tracking-wider">Stages Pipeline Evolver</span>
+                  <span id="aiDevTurnSelectorBadge" class="text-[10px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200">Turn #1</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="prevAiDevTurn()" class="p-1 rounded-lg hover:bg-slate-100 text-slate-600 transition" title="Previous turn">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                  </button>
+                  <span id="aiDevTurnPageLabel" class="text-xs font-semibold text-slate-600">1 of 1</span>
+                  <button onclick="nextAiDevTurn()" class="p-1 rounded-lg hover:bg-slate-100 text-slate-600 transition" title="Next turn">
+                    <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- REQUEST & RESPONSE PAIR -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 text-xs">
+                  <span class="font-bold text-blue-900 uppercase text-[10px] block mb-1 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-blue-600">login</span> Incoming Request Turn
+                  </span>
+                  <p id="aiDevUserReqText" class="text-slate-900 font-semibold break-words">-</p>
+                </div>
+                <div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-xs">
+                  <span class="font-bold text-emerald-900 uppercase text-[10px] block mb-1 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-emerald-600">output</span> Outgoing AI Answer
+                  </span>
+                  <p id="aiDevBotResText" class="text-slate-900 break-words">-</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 11 STAGES PROGRESSIVE FLOW -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col gap-3">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <span class="font-bold text-xs text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-indigo-600">account_tree</span>
+                  <span>11 Pipeline Stages Evolution (Input ➔ STT ➔ Schema ➔ Recs)</span>
+                </span>
+                <span class="text-[10px] text-slate-400 font-medium">Click any stage to expand JSON payload</span>
+              </div>
+
+              <!-- Progressive Stages Container -->
+              <div id="aiDevStagesProgressContainer" class="flex flex-col gap-2 max-h-[380px] overflow-y-auto custom-scrollbar pr-1">
+                <div class="p-6 text-center text-slate-400 text-xs">Waiting for conversation pipeline trace...</div>
+              </div>
+            </div>
+
+            <!-- FINAL RECOMMENDATION & AUDIT STATE -->
+            <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-sm flex flex-col gap-2.5 text-xs">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span class="font-bold text-emerald-400 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[16px]">stars</span> Tailored Recommendation Engine Output
+                </span>
+                <span id="aiDevPlanCost" class="font-mono font-bold text-white text-sm">₹0/mo</span>
+              </div>
+              <div id="aiDevPlanSummary" class="text-slate-300 font-mono text-[11px] leading-relaxed">
+                Awaiting schema threshold (>40%) to trigger algorithmic bundle generation.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -1125,8 +1273,7 @@
             if (custInput) custInput.value = profData.business_name;
           }
           if (profData.customer_schema && Object.keys(profData.customer_schema).length > 0) {
-            currentCustomerSchema = { ...currentCustomerSchema, ...profData.customer_schema };
-            updateSchemaUI(currentCustomerSchema);
+            updateCustomerSchemaUI(profData.customer_schema);
           }
         }
 
@@ -1170,7 +1317,7 @@
       switchTab('assistant');
       
       // Append inquiry message to chat
-      appendMessage(`Could you tell me more about **${productName}**? What are its key specifications and commercial value?`, 'user');
+      appendMessage(`Could you tell me more about ${productName}? What are its key specifications and commercial value?`, 'user');
 
       try {
         const token = getAuthToken();
@@ -1184,19 +1331,53 @@
         const data = await res.json();
 
         const botReplyHtml = `
-          <div class="space-y-2">
-            <p>${data.explanation}</p>
-            <div class="p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-amber-900 mt-2">
-              <p class="font-bold text-xs flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-[16px] text-amber-700">help</span>
+          <div class="space-y-3">
+            <!-- Sleek Product Info Card -->
+            <div class="p-4 bg-white border border-slate-200/90 rounded-2xl shadow-sm space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-red-50 text-[#e40000] flex items-center justify-center font-bold">
+                    <span class="material-symbols-outlined text-[18px]">router</span>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-slate-900 text-sm leading-tight">${data.product_name}</h4>
+                    <span class="text-[10px] font-mono text-slate-400">${data.product_id || 'CATALOGUE'}</span>
+                  </div>
+                </div>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">${data.category}</span>
+              </div>
+              
+              <p class="text-xs text-slate-700 leading-relaxed font-normal">${data.description || data.explanation}</p>
+
+              <!-- Specifications & Commercial Terms Strip -->
+              <div class="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px]">
+                <div>
+                  <span class="text-slate-400 block text-[10px]">Monthly Fee</span>
+                  <span class="font-bold text-slate-900 text-xs">₹${Number(data.monthly_price_inr || 0).toLocaleString('en-IN')}<span class="text-[10px] font-normal text-slate-400">/mo</span></span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px]">Setup &amp; Router</span>
+                  <span class="font-bold text-slate-900 text-xs">${data.one_time_price_inr > 0 ? '₹' + Number(data.one_time_price_inr).toLocaleString('en-IN') : '₹0 Free'}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px]">Contract SLA</span>
+                  <span class="font-bold text-slate-900 text-xs">${data.contract_months || 12} Mos (${data.typical_install_days || 5}d SLA)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Requirement Confirmation Box -->
+            <div class="p-3.5 bg-amber-50/90 border border-amber-200 rounded-2xl text-amber-950">
+              <p class="font-bold text-xs flex items-center gap-1.5 text-amber-900">
+                <span class="material-symbols-outlined text-[16px] text-amber-600">help</span>
                 <span>${data.question}</span>
               </p>
-              <div class="mt-2.5 flex items-center gap-2">
-                <button onclick="addUserNeedFromProduct('${data.suggested_need_key}', '${data.product_name}')" class="px-3 py-1.5 bg-[#e40000] hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-2xs">
-                  <span class="material-symbols-outlined text-[14px]">check_circle</span>
+              <div class="mt-3 flex items-center gap-2">
+                <button onclick="addUserNeedFromProduct('${data.product_id}', '${data.product_name}', '${data.category}')" class="px-3.5 py-2 bg-[#e40000] hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                  <span class="material-symbols-outlined text-[15px]">check_circle</span>
                   <span>Yes, Add to My Needs</span>
                 </button>
-                <button onclick="appendMessage('Not required for our current operations, thank you.', 'user')" class="px-2.5 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-50 transition">
+                <button onclick="appendMessage('Not required for our current operations, thank you.', 'user')" class="px-3 py-2 bg-white border border-slate-300 text-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 transition">
                   Not Right Now
                 </button>
               </div>
@@ -1209,12 +1390,37 @@
       }
     }
 
-    function addUserNeedFromProduct(needKey, productName) {
-      appendMessage(`Yes, we need **${productName}** for our business operations.`, 'user');
+    async function addUserNeedFromProduct(productId, productName, category) {
+      appendMessage(`Yes, we need ${productName} for our business operations.`, 'user');
       
-      // Send directly to chat endpoint to update customer needs schema and re-score bundle
+      const token = getAuthToken();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const activeUserId = (currentUser && currentUser.id) ? currentUser.id : (currentUser && currentUser.email ? currentUser.email : 'guest-user');
+
+      // 1. Post to dedicated Neon PostgreSQL customer_needs endpoint
+      try {
+        await fetch(`${API_BASE}/api/customer/needs`, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            user_id: activeUserId,
+            session_id: currentSessionId,
+            product_id: productId,
+            need_name: productName,
+            category: category || 'Connectivity',
+            source: 'chat_ai'
+          })
+        });
+      } catch (e) {
+        console.warn('Customer need persistence notice:', e);
+      }
+
+      // 2. Also send to chat to trigger AI agent discovery re-evaluation and update quote
       document.getElementById('chatInput').value = `We need ${productName} for our business. Please update our requirements and quote.`;
-      sendChat();
+      sendChatMessage();
+      showAddedToast(`✓ Added ${productName} to your verified business needs in database!`);
     }
 
     // 0. ROLE PORTAL ROUTING
@@ -1261,6 +1467,13 @@
       const btn = document.getElementById('tab-' + tabId);
       if (sec) sec.classList.remove('hidden');
       if (btn) btn.classList.add('active');
+
+      if (tabId === 'admin-agent-debugger') {
+        fetchAiAgentTelemetryLogs();
+        startAiDebuggerPolling();
+      } else {
+        stopAiDebuggerPolling();
+      }
     }
 
     // 1. PRODUCTS
@@ -2004,11 +2217,14 @@
         ? 'self-end bg-[#e40000] text-white px-3.5 py-2 rounded-xl text-xs max-w-[80%] ml-auto'
         : 'self-start bg-slate-100 text-slate-800 px-3.5 py-2 rounded-xl text-xs max-w-[85%]';
       
+      // Clean any accidental raw markdown double asterisks
+      const cleaned = (typeof text === 'string') ? text.replace(/\*\*/g, '') : text;
+
       // If html string passed with formatting
-      if (text.includes('<') && text.includes('>')) {
-        div.innerHTML = text;
+      if (cleaned.includes('<') && cleaned.includes('>')) {
+        div.innerHTML = cleaned;
       } else {
-        div.textContent = text;
+        div.textContent = cleaned;
       }
       container.appendChild(div);
       container.scrollTop = container.scrollHeight;
@@ -2992,6 +3208,233 @@
         await fetchOrders();
       } catch (err) {
         alert('Update failed: ' + err.message);
+      }
+    }
+
+    // =========================================================================
+    // 7. DEVELOPER AI AGENT WORKING DASHBOARD & TELEMETRY
+    // =========================================================================
+    let aiDebuggerPollTimer = null;
+    let cachedAiLogs = [];
+    let selectedAiLogIndex = 0;
+
+    async function fetchAiAgentTelemetryLogs() {
+      try {
+        const res = await fetch(`${API_BASE}/api/ai/telemetry-logs?limit=40`);
+        const data = await res.json();
+        if (data.status === 'success') {
+          cachedAiLogs = data.logs || [];
+          if (cachedAiLogs.length > 0) {
+            if (selectedAiLogIndex >= cachedAiLogs.length) selectedAiLogIndex = 0;
+            renderAiDevSplitView(selectedAiLogIndex);
+          } else {
+            renderEmptyAiDevSplitView();
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch AI telemetry logs:', err);
+      }
+    }
+
+    function renderEmptyAiDevSplitView() {
+      const chatLog = document.getElementById('aiDevChatLog');
+      const stagesCont = document.getElementById('aiDevStagesProgressContainer');
+      if (chatLog) chatLog.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">No active conversation yet. Type in the box below to test how the AI behaves live.</div>`;
+      if (stagesCont) stagesCont.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">Waiting for conversation pipeline trace to evolve...</div>`;
+    }
+
+    function renderAiDevSplitView(index) {
+      if (!cachedAiLogs || cachedAiLogs.length === 0) {
+        renderEmptyAiDevSplitView();
+        return;
+      }
+
+      const item = cachedAiLogs[index] || cachedAiLogs[0];
+      const reqObj = item.request || item.request_data || {};
+      const resObj = item.response || item.response_data || {};
+      const userMsg = reqObj.message || '(Customer action / inquiry)';
+      const botReply = resObj.reply || '(Awaiting turn reply)';
+      const schema = resObj.customer_schema || {};
+      const recPlan = resObj.recommended_plan;
+      const pipelineTrace = resObj.pipeline_trace || [];
+      const totalTurns = cachedAiLogs.length;
+
+      // Update Pagination controls
+      document.getElementById('aiDevTurnSelectorBadge').textContent = `Turn #${totalTurns - index}`;
+      document.getElementById('aiDevTurnPageLabel').textContent = `${index + 1} of ${totalTurns}`;
+
+      // Left Column: Render Customer Chat Mirror
+      renderCustomerChatMirror(index);
+
+      // Left Column: Customer Schema Progress
+      const completion = resObj.completion_percentage !== undefined ? resObj.completion_percentage : 0;
+      const badge = document.getElementById('aiDevCompletionBadge');
+      if (badge) {
+        badge.textContent = `${completion}% Collected`;
+        badge.className = `text-[10px] font-bold px-2 py-0.5 rounded-full border ${completion >= 60 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-[#e40000] border-red-200'}`;
+      }
+      document.getElementById('aiDevSchType').textContent = schema.business_type || 'Not identified';
+      document.getElementById('aiDevSchCity').textContent = schema.city ? `${schema.city} (Tier ${schema.city_tier || 1})` : 'Not identified';
+      document.getElementById('aiDevSchStaff').textContent = `${schema.num_sites || 1} site(s) • ${schema.employee_count || '-'} staff`;
+      document.getElementById('aiDevSchNeeds').textContent = (schema.needs && schema.needs.length) ? schema.needs.join(', ') : 'None logged';
+
+      // Right Column: Request Turn & AI Answer Box
+      document.getElementById('aiDevUserReqText').textContent = userMsg;
+      document.getElementById('aiDevBotResText').innerHTML = botReply;
+
+      // Right Column: 11 Stages Evolution Progress
+      renderEvolvingStages(pipelineTrace);
+
+      // Right Column: Tailored Recommendation Box
+      const planCostEl = document.getElementById('aiDevPlanCost');
+      const planSummEl = document.getElementById('aiDevPlanSummary');
+
+      if (recPlan) {
+        const cost = Math.round(recPlan.monthly_cost || 0);
+        planCostEl.textContent = `₹${cost.toLocaleString('en-IN')}/mo`;
+        const prods = (recPlan.products || []).map(p => typeof p === 'object' ? p.product_name : p).join(', ');
+        planSummEl.innerHTML = `
+          <div class="space-y-1">
+            <div class="text-emerald-300 font-bold">${recPlan.bundle_name || 'Enterprise Bundle'} • Code: ${recPlan.bundle_code || 'BUNDLE-LIVE'}</div>
+            <div class="text-slate-300"><strong>Provisioned Stack:</strong> ${prods || 'None'}</div>
+            <div class="text-slate-400 text-[10px]"><strong>Explanation:</strong> ${recPlan.explanation || '-'}</div>
+          </div>
+        `;
+      } else {
+        planCostEl.textContent = 'Discovery Phase';
+        planSummEl.textContent = 'Customer schema completeness below recommendation threshold (needs > 40% profile discovery).';
+      }
+    }
+
+    function renderCustomerChatMirror(currentIndex) {
+      const chatLog = document.getElementById('aiDevChatLog');
+      if (!chatLog) return;
+      chatLog.innerHTML = '';
+
+      // Reconstruct turns up to currentIndex in chronological order
+      const sliceTurns = cachedAiLogs.slice(currentIndex).reverse();
+      sliceTurns.forEach(t => {
+        const req = t.request || t.request_data || {};
+        const res = t.response || t.response_data || {};
+
+        if (req.message) {
+          const uDiv = document.createElement('div');
+          uDiv.className = 'self-end bg-[#e40000] text-white px-3 py-1.5 rounded-xl text-xs max-w-[85%] ml-auto';
+          uDiv.textContent = req.message;
+          chatLog.appendChild(uDiv);
+        }
+
+        if (res.reply) {
+          const bDiv = document.createElement('div');
+          bDiv.className = 'self-start bg-slate-100 text-slate-800 px-3 py-1.5 rounded-xl text-xs max-w-[90%]';
+          bDiv.innerHTML = res.reply;
+          chatLog.appendChild(bDiv);
+        }
+      });
+
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function renderEvolvingStages(pipelineTrace) {
+      const container = document.getElementById('aiDevStagesProgressContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (!pipelineTrace || pipelineTrace.length === 0) {
+        container.innerHTML = `<div class="p-4 bg-slate-50 text-center text-slate-400 text-xs">No stage trace recorded for this turn.</div>`;
+        return;
+      }
+
+      pipelineTrace.forEach((st, idx) => {
+        const stageNum = st.stage || (idx + 1);
+        const stageName = st.name || `Stage ${stageNum}`;
+        const stageStatus = st.status || 'SUCCESS';
+        const stageData = st.data || {};
+
+        const card = document.createElement('div');
+        card.className = 'p-2.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-50 transition flex flex-col gap-1 text-xs';
+        
+        // Pick an informative icon per stage
+        const iconMap = {
+          1: 'mic', 2: 'transcribe', 3: 'translate', 4: 'psychology',
+          5: 'difference', 6: 'troubleshoot', 7: 'speed', 8: 'help_outline',
+          9: 'crisis_alert', 10: 'inventory', 11: 'verified'
+        };
+        const icon = iconMap[stageNum] || 'circle';
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px]">${stageNum}</span>
+              <span class="material-symbols-outlined text-[15px] text-indigo-700">${icon}</span>
+              <span class="font-bold text-slate-900">${stageName}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.2 rounded text-[10px] font-bold ${stageStatus === 'SUCCESS' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${stageStatus}</span>
+              <span class="material-symbols-outlined text-[16px] text-slate-400">expand_more</span>
+            </div>
+          </div>
+          <div class="mt-1 pt-1 border-t border-slate-200/80">
+            <pre class="bg-white p-2 rounded-lg border border-slate-200 font-mono text-[10px] text-slate-800 overflow-x-auto max-h-28 custom-scrollbar leading-relaxed">${JSON.stringify(stageData, null, 2)}</pre>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function prevAiDevTurn() {
+      if (selectedAiLogIndex < cachedAiLogs.length - 1) {
+        selectedAiLogIndex++;
+        renderAiDevSplitView(selectedAiLogIndex);
+      }
+    }
+
+    function nextAiDevTurn() {
+      if (selectedAiLogIndex > 0) {
+        selectedAiLogIndex--;
+        renderAiDevSplitView(selectedAiLogIndex);
+      }
+    }
+
+    async function sendDevSimChatMessage() {
+      const input = document.getElementById('aiDevChatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+
+      // Also set customer chat input and invoke sendChatMessage
+      const mainInput = document.getElementById('chatInput');
+      if (mainInput) mainInput.value = msg;
+      await sendChatMessage();
+
+      // Immediately pull fresh telemetry logs
+      setTimeout(fetchAiAgentTelemetryLogs, 800);
+    }
+
+    function toggleAutoRefreshAiDebugger() {
+      const checkbox = document.getElementById('autoRefreshAiDebugger');
+      if (checkbox && checkbox.checked) {
+        startAiDebuggerPolling();
+      } else {
+        stopAiDebuggerPolling();
+      }
+    }
+
+    function startAiDebuggerPolling() {
+      stopAiDebuggerPolling();
+      aiDebuggerPollTimer = setInterval(() => {
+        const sec = document.getElementById('section-admin-agent-debugger');
+        if (sec && !sec.classList.contains('hidden')) {
+          fetchAiAgentTelemetryLogs();
+        }
+      }, 2000);
+    }
+
+    function stopAiDebuggerPolling() {
+      if (aiDebuggerPollTimer) {
+        clearInterval(aiDebuggerPollTimer);
+        aiDebuggerPollTimer = null;
       }
     }
 

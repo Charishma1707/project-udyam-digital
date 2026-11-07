@@ -49,7 +49,8 @@ def test_stage0_profile_normalisation():
     }
     norm = normalise_profile(profile)
     assert norm["segment"] == "Micro Retail & Services"
-    assert norm["city_tier"] == 2
+    # Bengaluru is Tier 1 in Cities-List.xlsx (84.4 Lakh population)
+    assert norm["city_tier"] == 1
     assert norm["employee_count"] == 10
     assert norm["num_sites"] == 2
     assert "Connectivity" in norm["mapped_categories"]

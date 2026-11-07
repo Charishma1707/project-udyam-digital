@@ -8,6 +8,11 @@ from typing import Dict, Any, Optional
 
 # Empirically discovered quantity drivers from smb_leads.csv (r > 0.5)
 PER_SITE_PRODUCTS = {"P01", "P02", "P09", "P10", "P19", "P22", "P23"}
+# Default baseline quantities for the 25 Airtel products when user does not explicitly supply quantities.
+# P01-P06: Broadband/ILL lines (1 per premise)
+# P07-P08: Multi-user SIP trunks & cybersecurity endpoints
+# P16/P20/P24: Cloud licenses & mobile SIMs (defaulting to 5 units for small teams)
+# P25: IoT tracking endpoints (defaulting to 3 sensors/trackers)
 PRODUCT_MEDIAN_QTYS = {
     "P01": 1, "P02": 1, "P03": 1, "P04": 1, "P05": 1, "P06": 1,
     "P07": 2, "P08": 4, "P09": 1, "P10": 1, "P11": 1, "P12": 2,

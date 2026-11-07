@@ -23,7 +23,6 @@ Scalable Cloud Database Architecture (Neon Serverless PostgreSQL):
 import os
 import csv
 import json
-import sqlite3
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -48,7 +47,6 @@ class DatabaseClient:
     def __init__(self):
         self.database_url = os.getenv("DATABASE_URL")
         self.is_connected = False
-        self.sqlite_path = DATA_DIR / "enterprise_vault.db"
         
         self.products: List[Dict[str, Any]] = []
         self.gstin_registry: Dict[str, Dict[str, Any]] = {}
@@ -70,7 +68,7 @@ class DatabaseClient:
     # =========================================================================
 
     def get_pg_conn(self):
-        """Returns an active thread-safe connection to Neon Cloud PostgreSQL."""
+        """Returns an active thread-safe connection to Cloud PostgreSQL (Neon Serverless)."""
         if not PSYCOPG2_AVAILABLE or not self.database_url:
             return None
         try:
@@ -80,13 +78,6 @@ class DatabaseClient:
         except Exception as e:
             print(f"Warning: Cloud PostgreSQL connection error: {e}")
             return None
-
-    def get_sqlite_fallback_conn(self) -> sqlite3.Connection:
-        """Emergency local fallback only if network connection is unreachable."""
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(str(self.sqlite_path))
-        conn.row_factory = sqlite3.Row
-        return conn
 
     def init_cloud_postgres(self):
         """Ensures all 4 enterprise tables are provisioned in the Cloud PostgreSQL cluster."""
@@ -233,6 +224,19 @@ class DatabaseClient:
                     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
                 );
                 """)
+
+                # 10. Customer Accepted Needs Table
+                cur.execute("""
+                CREATE TABLE IF NOT EXISTS customer_needs (
+                    id SERIAL PRIMARY KEY,
+                    user_id VARCHAR(128) NOT NULL,
+                    product_id VARCHAR(64),
+                    need_name VARCHAR(255) NOT NULL,
+                    category VARCHAR(128),
+                    source VARCHAR(64) DEFAULT 'chat_ai',
+                    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+                );
+                """)
             self.is_connected = True
             conn.close()
         except Exception as e:
@@ -268,18 +272,26 @@ class DatabaseClient:
                             "description": row.get("description", "")
                         })
 
-        # 2. City Tiers
-        city_csv = DATASET_DIR / "city_tier_mapping.csv"
-        if city_csv.exists():
-            with open(city_csv, "r", encoding="utf-8") as f:
-                for row in csv.DictReader(f):
-                    key = row.get("city", "").strip().lower()
+        # 2. City Tiers (Loaded from authoritative JSON mapping seeded from Cities-List.xlsx)
+        city_json = DATA_DIR / "city_tier_mapping.json"
+        if city_json.exists():
+            with open(city_json, "r", encoding="utf-8") as f:
+                city_list = json.load(f)
+                for item in city_list:
+                    key = item.get("city", "").strip().lower()
                     if key:
                         self.city_tiers[key] = {
-                            "city": row.get("city"),
-                            "tier": int(row.get("tier") or 2),
-                            "state": row.get("state")
+                            "city": item.get("city"),
+                            "tier": int(item.get("city_tier") or 2),
+                            "state": item.get("state"),
+                            "population_lakh": item.get("population_lakh", 0.0),
+                            "aliases": item.get("aliases", [])
                         }
+                    # Also register any aliases
+                    for alias in item.get("aliases", []):
+                        a_key = alias.strip().lower()
+                        if a_key and a_key not in self.city_tiers:
+                            self.city_tiers[a_key] = self.city_tiers[key]
 
         # 3. GSTIN Registry
         gst_csv = DATASET_DIR / "mock_gstin_registry.csv"
@@ -361,23 +373,6 @@ class DatabaseClient:
                 print(f"Error saving KYC to Cloud PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback to local SQLite only if cloud is unreachable
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("""
-        INSERT OR REPLACE INTO kyc_records (
-            id, session_id, applicant_id, doc_type, masked_identifier,
-            encrypted_payload, iv, sha256_hash, verification_status,
-            registry_matched, tamper_detected, dpdp_consent_logged,
-            metadata_json, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """, (
-            rec_id, session_id, applicant_id, doc_type, masked_id,
-            enc_payload, iv, sha256, status, reg_matched, tamper,
-            consent, meta, datetime.now().isoformat()
-        ))
-        fb.commit()
-        fb.close()
         return rec_id
 
     def get_kyc_records(self, session_id: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -408,24 +403,6 @@ class DatabaseClient:
                 print(f"Error fetching KYC records from Cloud PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        if session_id:
-            cur.execute("SELECT * FROM kyc_records WHERE session_id = ? ORDER BY created_at DESC;", (session_id,))
-        else:
-            cur.execute("SELECT * FROM kyc_records ORDER BY created_at DESC;")
-        rows = fb.fetchall()
-        results = []
-        for r in rows:
-            d = dict(r)
-            if d.get("metadata_json"):
-                try:
-                    d["registry_record"] = json.loads(d["metadata_json"])
-                except Exception:
-                    d["registry_record"] = {}
-            results.append(d)
-        fb.close()
         return results
 
     def log_dpdp_consent(self, consent: Dict[str, Any]) -> Dict[str, Any]:
@@ -451,16 +428,6 @@ class DatabaseClient:
                 print(f"Error logging DPDP consent to Cloud PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("""
-        INSERT INTO dpdp_consent_logs (
-            session_id, user_id, purpose, language, status, dpdp_compliant, timestamp
-        ) VALUES (?, ?, ?, ?, ?, 1, ?);
-        """, (session_id, user_id, purpose, language, status, datetime.now().isoformat()))
-        fb.commit()
-        fb.close()
         return consent
 
     def get_dpdp_consents(self, session_id: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -485,14 +452,6 @@ class DatabaseClient:
                 print(f"Error reading consents from Cloud PostgreSQL: {e}")
                 conn.close()
 
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        if session_id:
-            cur.execute("SELECT * FROM dpdp_consent_logs WHERE session_id = ? ORDER BY timestamp DESC;", (session_id,))
-        else:
-            cur.execute("SELECT * FROM dpdp_consent_logs ORDER BY timestamp DESC;")
-        rows = [dict(r) for r in cur.fetchall()]
-        fb.close()
         return rows
 
     # =========================================================================
@@ -546,23 +505,6 @@ class DatabaseClient:
                 print(f"Error saving order to Cloud PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("""
-        INSERT OR REPLACE INTO orders (
-            order_id, session_id, customer_name, business_type, status,
-            current_stage_index, bundle_code, bundle_name, monthly_cost,
-            contract_months, contract_terms_json, milestones_json,
-            created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """, (
-            order_id, session_id, customer_name, business_type, status,
-            stage_idx, bundle_code, bundle_name, monthly_cost,
-            contract_months, terms_json, milestones_json, created_at, datetime.now().isoformat()
-        ))
-        fb.commit()
-        fb.close()
         return self.get_order(order_id) or order
 
     def get_all_orders(self) -> List[Dict[str, Any]]:
@@ -597,26 +539,6 @@ class DatabaseClient:
                 print(f"Error fetching orders from Cloud PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("SELECT * FROM orders ORDER BY order_id DESC;")
-        rows = fb.fetchall()
-        orders = []
-        for r in rows:
-            d = dict(r)
-            if d.get("contract_terms_json"):
-                try:
-                    d["contract_terms"] = json.loads(d["contract_terms_json"])
-                except Exception:
-                    d["contract_terms"] = {}
-            if d.get("milestones_json"):
-                try:
-                    d["milestones"] = json.loads(d["milestones_json"])
-                except Exception:
-                    d["milestones"] = []
-            orders.append(d)
-        fb.close()
         return orders
 
     def get_order(self, order_id: str) -> Optional[Dict[str, Any]]:
@@ -650,26 +572,7 @@ class DatabaseClient:
                 print(f"Error fetching order {order_id} from Cloud PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("SELECT * FROM orders WHERE order_id = ? LIMIT 1;", (order_id,))
-        row = cur.fetchone()
-        fb.close()
-        if not row:
-            return None
-        d = dict(row)
-        if d.get("contract_terms_json"):
-            try:
-                d["contract_terms"] = json.loads(d["contract_terms_json"])
-            except Exception:
-                d["contract_terms"] = {}
-        if d.get("milestones_json"):
-            try:
-                d["milestones"] = json.loads(d["milestones_json"])
-            except Exception:
-                d["milestones"] = []
-        return d
+        return None
 
     def update_order_status(self, order_id: str, new_status: str, stage_index: Optional[int] = None) -> Optional[Dict[str, Any]]:
         """Updates an order's status and milestone progress directly in Cloud PostgreSQL."""
@@ -713,16 +616,6 @@ class DatabaseClient:
                 print(f"Error updating order status in Cloud PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("""
-        UPDATE orders
-        SET status = ?, current_stage_index = ?, milestones_json = ?, updated_at = ?
-        WHERE order_id = ?;
-        """, (new_status, stage_idx, milestones_json, datetime.now().isoformat(), order_id))
-        fb.commit()
-        fb.close()
         return self.get_order(order_id)
 
     # =========================================================================
@@ -757,15 +650,6 @@ class DatabaseClient:
                 print(f"Error saving message to Cloud PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("""
-        INSERT INTO admin_messages (message_id, session_id, customer_name, message, timestamp)
-        VALUES (?, ?, ?, ?, ?);
-        """, (msg_id, session_id, customer_name, msg_text, now))
-        fb.commit()
-        fb.close()
         return {
             "message_id": msg_id,
             "session_id": session_id,
@@ -793,11 +677,6 @@ class DatabaseClient:
                 print(f"Error getting admin messages from Cloud PostgreSQL: {e}")
                 conn.close()
 
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("SELECT * FROM admin_messages WHERE session_id = ? ORDER BY timestamp ASC;", (session_id,))
-        rows = [dict(r) for r in cur.fetchall()]
-        fb.close()
         return rows
 
     # =========================================================================
@@ -923,37 +802,6 @@ class DatabaseClient:
                 print(f"Error saving AI escalation to PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback SQLite
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS ai_escalations (
-            escalation_id TEXT PRIMARY KEY,
-            session_id TEXT NOT NULL,
-            customer_name TEXT NOT NULL,
-            priority TEXT DEFAULT 'HIGH',
-            status TEXT DEFAULT 'AWAITING_AGENT',
-            ai_confidence_score REAL NOT NULL,
-            confidence_band TEXT NOT NULL,
-            trigger_reason TEXT NOT NULL,
-            what_ai_could_not_extract_json TEXT,
-            ai_discovery_summary TEXT,
-            recommended_action TEXT,
-            created_at TEXT
-        );
-        """)
-        cur.execute("""
-        INSERT OR REPLACE INTO ai_escalations (
-            escalation_id, session_id, customer_name, priority, status,
-            ai_confidence_score, confidence_band, trigger_reason,
-            what_ai_could_not_extract_json, ai_discovery_summary, recommended_action, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """, (
-            esc_id, session_id, customer_name, priority, status,
-            score, band, trigger, unextracted, summary, rec_action, datetime.now().isoformat()
-        ))
-        fb.commit()
-        fb.close()
         return esc
 
     def get_all_ai_escalations(self) -> List[Dict[str, Any]]:
@@ -983,26 +831,7 @@ class DatabaseClient:
                 print(f"Error querying AI escalations from PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='ai_escalations';")
-        if not cur.fetchone():
-            fb.close()
-            return []
-        cur.execute("SELECT * FROM ai_escalations ORDER BY escalation_id DESC;")
-        rows = cur.fetchall()
-        fb.close()
-        result = []
-        for r in rows:
-            d = dict(r)
-            if d.get("what_ai_could_not_extract_json"):
-                try:
-                    d["what_ai_could_not_extract"] = json.loads(d["what_ai_could_not_extract_json"])
-                except Exception:
-                    d["what_ai_could_not_extract"] = []
-            result.append(d)
-        return result
+        return []
 
     def save_customer_decision(
         self,
@@ -1047,41 +876,7 @@ class DatabaseClient:
                 print(f"Error saving customer decision to PostgreSQL: {e}")
                 conn.close()
 
-        # Fallback SQLite
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS customer_decisions (
-            decision_id TEXT PRIMARY KEY,
-            session_id TEXT NOT NULL,
-            customer_name TEXT NOT NULL,
-            business_type TEXT,
-            decision_type TEXT NOT NULL,
-            bundle_code TEXT,
-            bundle_name TEXT,
-            monthly_cost REAL,
-            ai_response_insights_json TEXT,
-            rejection_reason TEXT,
-            customer_feedback TEXT,
-            budget_offered REAL,
-            escalation_id TEXT,
-            created_at TEXT
-        );
-        """)
-        cur.execute("""
-        INSERT INTO customer_decisions (
-            decision_id, session_id, customer_name, business_type, decision_type,
-            bundle_code, bundle_name, monthly_cost, ai_response_insights_json,
-            rejection_reason, customer_feedback, budget_offered, escalation_id, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """, (
-            dec_id, session_id, customer_name, business_type, decision_type,
-            bundle_code, bundle_name, monthly_cost, insights_json,
-            rejection_reason, customer_feedback, budget_offered, escalation_id, datetime.now().isoformat()
-        ))
-        fb.commit()
-        fb.close()
-        return {"decision_id": dec_id, "status": "SAVED_TO_SQLITE"}
+        return {"decision_id": dec_id, "status": "SAVED_TO_POSTGRES"}
 
     def get_customer_decisions(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Queries customer decisions with linked AI escalation details."""
@@ -1122,16 +917,7 @@ class DatabaseClient:
                 print(f"Error querying customer decisions: {e}")
                 conn.close()
 
-        fb = self.get_sqlite_fallback_conn()
-        cur = fb.cursor()
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='customer_decisions';")
-        if not cur.fetchone():
-            fb.close()
-            return []
-        cur.execute("SELECT * FROM customer_decisions ORDER BY created_at DESC LIMIT ?;", (limit,))
-        rows = cur.fetchall()
-        fb.close()
-        return [dict(r) for r in rows]
+        return []
 
     # =========================================================================
     # USER-SCOPED PERSISTENCE (SUPABASE AUTHENTICATION)
@@ -1262,6 +1048,56 @@ class DatabaseClient:
                     return res
             except Exception as e:
                 print(f"Error fetching user conversations: {e}")
+                conn.close()
+        return []
+
+    # =========================================================================
+    # CUSTOMER NEEDS PERSISTENCE
+    # =========================================================================
+
+    def add_customer_need(self, user_id: str, need_name: str, product_id: Optional[str] = None, category: Optional[str] = None, source: str = "chat_ai") -> Dict[str, Any]:
+        """Persists a customer requirement or accepted product need to Neon PostgreSQL."""
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("""
+                    INSERT INTO customer_needs (user_id, product_id, need_name, category, source, created_at)
+                    VALUES (%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)
+                    RETURNING id, user_id, product_id, need_name, category, source, created_at;
+                    """, (user_id, product_id, need_name, category, source))
+                    row = cur.fetchone()
+                    conn.close()
+                    if row:
+                        return dict(row)
+            except Exception as e:
+                print(f"Error adding customer need: {e}")
+                conn.close()
+        return {
+            "user_id": user_id,
+            "product_id": product_id,
+            "need_name": need_name,
+            "category": category,
+            "source": source
+        }
+
+    def get_customer_needs(self, user_id: str) -> List[Dict[str, Any]]:
+        """Retrieves all accepted needs for a given customer user ID."""
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute("""
+                    SELECT id, user_id, product_id, need_name, category, source, created_at
+                    FROM customer_needs
+                    WHERE user_id = %s
+                    ORDER BY id DESC;
+                    """, (user_id,))
+                    rows = cur.fetchall()
+                    conn.close()
+                    return [dict(r) for r in rows]
+            except Exception as e:
+                print(f"Error fetching customer needs: {e}")
                 conn.close()
         return []
 

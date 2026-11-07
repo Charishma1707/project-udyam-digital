@@ -13,6 +13,7 @@ from database.db_client import db_client
 
 
 class PricingEngine:
+    # 18% statutory Goods and Services Tax (GST) mandatory on telecommunications and IT services in India
     DEFAULT_TAX_RATE = 0.18
 
     @classmethod

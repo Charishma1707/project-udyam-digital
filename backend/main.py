@@ -557,32 +557,110 @@ async def ask_ai_about_product(
     name = prod.get("product_name")
     category = prod.get("category")
     monthly = prod.get("monthly_price_inr", 0)
-    setup = prod.get("one_time_price_inr", 0)
-    sla = prod.get("sla_level") or "Standard SLA"
-    features = prod.get("features", [])
+    setup = prod.get("one_time_setup_inr", 0)
+    contract_months = prod.get("contract_months", 12)
+    typical_install_days = prod.get("typical_install_days", 5)
+    description = prod.get("description") or f"Enterprise {category} business solution."
+    requires_gstin = prod.get("requires_gstin", "N")
+    gstin_note = "Requires verified GSTIN" if requires_gstin == "Y" else "Available without GSTIN"
 
-    feat_bullets = ", ".join(features[:3]) if isinstance(features, list) else str(features)
     explanation = (
-        f"**{name}** ({category}) is an enterprise-grade solution priced at ₹{monthly:,}/mo (One-time setup: ₹{setup:,}). "
-        f"It provides **{sla}** commercial reliability with key capabilities including: {feat_bullets}."
+        f"{name} ({category}) is an enterprise-grade solution priced at ₹{monthly:,.0f}/mo with ₹{setup:,.0f} one-time setup and a {contract_months}-month contract commitment. "
+        f"Key Specifications: {description}. Installation SLA: ~{typical_install_days} business days ({gstin_note})."
     )
     
     question = (
-        f"Would this {category.lower()} capability benefit your business operations? "
-        f"If yes, I can add it to your requirements to customize your overall connectivity bundle."
+        f"Would this {category.lower()} solution benefit your business operations? "
+        f"If yes, click below to add it directly to your business requirements and update your custom enterprise quote."
     )
 
     return {
         "product_id": product_id,
         "product_name": name,
         "category": category,
+        "description": description,
         "monthly_price_inr": monthly,
         "one_time_price_inr": setup,
+        "contract_months": contract_months,
+        "typical_install_days": typical_install_days,
+        "requires_gstin": requires_gstin,
         "explanation": explanation,
         "question": question,
         "suggested_need_key": name.lower(),
         "prompt_action": f"Yes, add {name} to my business needs"
     }
+
+
+@app.post("/api/customer/needs")
+async def add_customer_need_endpoint(
+    payload: Dict[str, Any],
+    user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+):
+    """
+    Persists customer accepted need for their user_id / session into Neon PostgreSQL.
+    Also updates session schema and user profile in database.
+    """
+    user_id = user.get("sub") or user.get("id") if user else payload.get("user_id") or "guest-user"
+    product_id = payload.get("product_id")
+    need_name = payload.get("need_name") or payload.get("product_name")
+    category = payload.get("category") or "Telecom & Connectivity"
+    session_id = payload.get("session_id")
+
+    if not need_name:
+        raise HTTPException(status_code=400, detail="need_name is required")
+
+    # 1. Persist directly to customer_needs table in Neon Postgres
+    saved_need = db_client.add_customer_need(
+        user_id=user_id,
+        need_name=need_name,
+        product_id=product_id,
+        category=category,
+        source=payload.get("source", "chat_ai")
+    )
+
+    # 2. Update session memory schema if session_id is provided
+    session_schema_dict = {}
+    if session_id:
+        session = session_memory.get_or_create(session_id)
+        current_needs = list(session.schema.needs or [])
+        if need_name not in current_needs:
+            current_needs.append(need_name)
+        session.schema = session.schema.merge_updates({"needs": current_needs})
+        session_schema_dict = session.schema.to_dict()
+
+    # 3. Update user_profiles table with updated schema in Neon Postgres
+    user_profile = db_client.get_user_profile(user_id)
+    existing_schema = user_profile.get("customer_schema", {})
+    existing_needs = existing_schema.get("needs", [])
+    if isinstance(existing_needs, list) and need_name not in existing_needs:
+        existing_needs.append(need_name)
+    existing_schema["needs"] = existing_needs
+
+    db_client.save_user_profile(
+        user_id=user_id,
+        email=user.get("email", "") if user else "",
+        business_name=existing_schema.get("business_name") or "",
+        schema_dict=existing_schema
+    )
+
+    return {
+        "status": "success",
+        "saved_need": saved_need,
+        "user_id": user_id,
+        "updated_schema": existing_schema,
+        "session_schema": session_schema_dict
+    }
+
+
+@app.get("/api/customer/needs")
+async def get_customer_needs_endpoint(
+    user_id: Optional[str] = None,
+    user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+):
+    """Retrieves all accepted needs for a user from Neon PostgreSQL."""
+    uid = user.get("sub") or user.get("id") if user else user_id or "guest-user"
+    needs = db_client.get_customer_needs(uid)
+    return {"user_id": uid, "count": len(needs), "needs": needs}
 
 
 @app.get("/api/products")
@@ -828,6 +906,37 @@ async def get_kyc_records(session_id: Optional[str] = None):
         "source": "Neon Serverless Cloud PostgreSQL 18.6 (AWS ap-southeast-1, Fully Scalable)",
         "encryption_standard": "AES-256-GCM (DPDP Act 2023 Compliant)",
         "records": records
+    }
+
+
+@app.get("/api/ai/telemetry-logs")
+async def get_ai_telemetry_logs(limit: int = 40):
+    """
+    Returns real-time developer audit logs from ai_interaction_log.jsonl.
+    Provides detailed 11-stage pipeline traces, incoming user requests,
+    schema diffs, model prompt inputs, and recommendation generator outputs.
+    """
+    logs = []
+    if DEV_LOG_PATH.exists():
+        try:
+            with open(DEV_LOG_PATH, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+                for line in reversed(lines):
+                    line_str = line.strip()
+                    if line_str:
+                        try:
+                            logs.append(json.loads(line_str))
+                            if len(logs) >= limit:
+                                break
+                        except Exception:
+                            continue
+        except Exception as e:
+            return {"status": "error", "message": str(e), "logs": []}
+    return {
+        "status": "success",
+        "count": len(logs),
+        "source": "ai_interaction_log.jsonl",
+        "logs": logs
     }
 
 

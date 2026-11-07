@@ -78,7 +78,7 @@
     </div>
   </header>
 
-  <!-- SUPABASE AUTHENTICATION MODAL -->
+  <!-- CUSTOMER SUPABASE AUTHENTICATION MODAL -->
   <div id="authModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
@@ -86,14 +86,14 @@
           <div class="w-8 h-8 rounded-lg bg-red-100 text-[#e40000] flex items-center justify-center font-bold">
             <span class="material-symbols-outlined text-[18px]">lock</span>
           </div>
-          <h3 class="text-base font-bold text-slate-900" id="authModalTitle">Sign In to Airtel Business</h3>
+          <h3 class="text-base font-bold text-slate-900" id="authModalTitle">Sign In to Customer Portal</h3>
         </div>
         <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 transition">
           <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
       </div>
 
-      <p class="text-xs text-slate-500 mt-2" id="authModalSubtitle">Access your tailored quote, saved discovery schemas, and live cart.</p>
+      <p class="text-xs text-slate-500 mt-2" id="authModalSubtitle">Sign in or register to access tailored quotes, saved discovery schemas, and live cart.</p>
 
       <form id="authForm" onsubmit="handleAuthSubmit(event)" class="mt-4 space-y-3">
         <div>
@@ -125,6 +125,46 @@
     </div>
   </div>
 
+  <!-- ADMIN PASSWORD-ONLY AUTHENTICATION MODAL -->
+  <div id="adminAuthModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Admin Console Access</h3>
+            <span class="text-[10px] text-slate-400 font-medium">Restricted Operations Desk</span>
+          </div>
+        </div>
+        <button onclick="closeAdminAuthModal()" class="text-slate-400 hover:text-slate-600 transition">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-600 mt-3 leading-relaxed">Enter administrator master passkey to unlock the NOC operations and order database console.</p>
+
+      <form id="adminAuthForm" onsubmit="handleAdminAuthSubmit(event)" class="mt-4 space-y-3">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Admin Passkey</label>
+          <div class="relative">
+            <input type="password" id="adminPasswordInput" required placeholder="Enter passkey (e.g. admin123)" class="w-full px-3 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-slate-900 font-mono">
+            <span class="material-symbols-outlined absolute right-3 top-2.5 text-[18px] text-slate-400">key</span>
+          </div>
+          <span class="text-[10px] text-slate-400 mt-1 block">Default Dev Passkey: <code class="font-bold text-slate-600">admin123</code></span>
+        </div>
+
+        <div id="adminAuthError" class="hidden text-xs text-red-600 font-medium p-2 bg-red-50 rounded-lg border border-red-200"></div>
+
+        <button type="submit" id="adminSubmitBtn" class="w-full py-2.5 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">lock_open</span>
+          <span>Unlock Admin Console</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- GATEWAY / ROLE SELECTION SCREEN -->
   <div id="roleGatewayScreen" class="flex-1 flex items-center justify-center p-4">
     <div class="max-w-3xl w-full flex flex-col items-center">
@@ -143,7 +183,7 @@
             <h2 class="text-lg font-bold text-slate-900">Enterprise Customer</h2>
             <p class="text-xs text-slate-500 mt-1 font-medium">Business Owners, Founders &amp; Procurement Heads</p>
           </div>
-          <button onclick="enterPortal('customer')" class="mt-8 w-full py-3 bg-[#e40000] hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md shadow-red-500/20 flex items-center justify-center gap-2 transition active:scale-[0.99]">
+          <button onclick="requestCustomerEntry()" class="mt-8 w-full py-3 bg-[#e40000] hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-md shadow-red-500/20 flex items-center justify-center gap-2 transition active:scale-[0.99]">
             <span>Enter Customer Portal</span>
             <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
           </button>
@@ -158,7 +198,7 @@
             <h2 class="text-lg font-bold text-slate-900">Operations &amp; Admin Console</h2>
             <p class="text-xs text-slate-500 mt-1 font-medium">Enterprise Orders Database, Provisioning Management &amp; AI Escalations</p>
           </div>
-          <button onclick="enterPortal('admin')" class="mt-8 w-full py-3 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-md shadow-slate-900/20 flex items-center justify-center gap-2 transition active:scale-[0.99]">
+          <button onclick="requestAdminEntry()" class="mt-8 w-full py-3 bg-slate-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow-md shadow-slate-900/20 flex items-center justify-center gap-2 transition active:scale-[0.99]">
             <span>Enter Operations Console</span>
             <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
           </button>
@@ -1002,13 +1042,63 @@
 
         // Sync cloud user cart and discovery schema
         await syncUserCloudData();
-        alert(`Welcome, ${email}! Your enterprise profile and order cart are now active.`);
+        
+        // Enter customer portal automatically upon customer sign-in
+        enterPortal('customer');
       } catch (err) {
         errorDiv.textContent = err.message || 'Authentication failed. Please verify credentials.';
         errorDiv.classList.remove('hidden');
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
+      }
+    }
+
+    // =========================================================================
+    // ADMIN AUTHENTICATION (PASSWORD-ONLY ACCESS)
+    // =========================================================================
+    function openAdminAuthModal() {
+      document.getElementById('adminAuthModal')?.classList.remove('hidden');
+      document.getElementById('adminAuthError')?.classList.add('hidden');
+      document.getElementById('adminPasswordInput').value = '';
+      setTimeout(() => document.getElementById('adminPasswordInput')?.focus(), 100);
+    }
+
+    function closeAdminAuthModal() {
+      document.getElementById('adminAuthModal')?.classList.add('hidden');
+    }
+
+    function handleAdminAuthSubmit(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('adminPasswordInput').value.trim();
+      const errEl = document.getElementById('adminAuthError');
+
+      // Admin Master Passkey (Supports default 'admin123' or 'airtel2026')
+      if (pwd === 'admin123' || pwd === 'airtel2026' || pwd.toLowerCase() === 'admin') {
+        errEl.classList.add('hidden');
+        closeAdminAuthModal();
+        sessionStorage.setItem('admin_authenticated', 'true');
+        enterPortal('admin');
+      } else {
+        errEl.textContent = 'Invalid administrator passkey. Access denied.';
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    // Gateways that trigger sign-in modals
+    function requestCustomerEntry() {
+      if (currentUser && currentUser.email) {
+        enterPortal('customer');
+      } else {
+        openAuthModal();
+      }
+    }
+
+    function requestAdminEntry() {
+      if (sessionStorage.getItem('admin_authenticated') === 'true') {
+        enterPortal('admin');
+      } else {
+        openAdminAuthModal();
       }
     }
 

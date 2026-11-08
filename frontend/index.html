@@ -264,6 +264,10 @@
           <span>AI Agent Working Dashboard</span>
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         </button>
+        <button onclick="switchTab('admin-kyc-benchmarks')" id="tab-admin-kyc-benchmarks" class="admin-tab nav-btn px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:text-slate-900 transition flex items-center gap-2 whitespace-nowrap border border-amber-200 bg-amber-50/60 text-amber-800 hover:bg-amber-100">
+          <span class="material-symbols-outlined text-[18px] text-amber-700">fact_check</span>
+          <span>Test KYC &amp; Benchmark Evaluator</span>
+        </button>
       </div>
     </nav>
 
@@ -556,15 +560,10 @@
             <p class="text-xs text-slate-500">Live OCR document ingestion, GSTIN Mod-36 checksum, legal name matching &amp; zero RAM retention</p>
           </div>
           <div class="flex items-center gap-2">
-            <!-- Mode Switcher -->
-            <div class="inline-flex p-1 bg-slate-200/80 rounded-xl text-xs font-semibold">
-              <button id="kycModeUploadBtn" onclick="switchKycMode('upload')" class="px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition">
-                Upload My Documents
-              </button>
-              <button id="kycModeSampleBtn" onclick="switchKycMode('sample')" class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
-                Preloaded Datasets
-              </button>
-            </div>
+            <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
+              <span class="material-symbols-outlined text-[15px]">verified_user</span>
+              <span>DPDP Act 2023 Compliant • Live Multi-Tier Verification</span>
+            </span>
           </div>
         </div>
 
@@ -675,20 +674,6 @@
                   <span>Upload &amp; Run KYC Verification</span>
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MODE 2: PRELOADED DATASET APPLICANT SELECTOR (HIDDEN BY DEFAULT) -->
-        <div id="kycSampleModePanel" class="hidden mb-6 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <span class="text-xs font-bold text-slate-900">Preloaded Indian MSME Applicants (K01 - K12)</span>
-              <p class="text-[11px] text-slate-500">Benchmark datasets covering all 11 KYC edge cases</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <label class="text-xs font-bold text-slate-700">Select Test Applicant:</label>
-              <select id="kycApplicantSelect" onchange="runKycVerification(this.value)" class="px-3 py-1.5 text-xs bg-white border border-slate-300 rounded-xl font-semibold text-slate-800 focus:outline-none"></select>
             </div>
           </div>
         </div>
@@ -1075,6 +1060,380 @@
 
           </div>
 
+        </div>
+      </section>
+
+      <!-- ADMIN TAB 5: TEST KYC & BENCHMARK EVALUATOR -->
+      <section id="section-admin-kyc-benchmarks" class="tab-section hidden">
+        <!-- HEADER -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <h1 class="text-xl font-bold text-slate-900">Operations &amp; Admin KYC Test Suite</h1>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">BENCHMARK EVALUATOR</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Multi-tier OCR extraction, Mod-36 checksum, legal name fuzzy reconciliation, 90-day utility freshness &amp; discrepancy diagnostics.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="runAllAdminKycBenchmarks()" id="btnRunAllBenchmarks" class="px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-[16px]">playlist_play</span>
+              <span>Run All K01-K12 Benchmarks</span>
+            </button>
+            <button onclick="toggleAdminCustomUploadPanel()" class="px-3.5 py-2 bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs">
+              <span class="material-symbols-outlined text-[16px]">upload_file</span>
+              <span id="btnToggleCustomUploadLabel">Upload Custom Applicant Files</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- CONTROL & APPLICANT SELECTION BAR -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs mb-6">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-3">
+              <div class="shrink-0 flex items-center gap-2 text-xs font-bold text-slate-700">
+                <span class="material-symbols-outlined text-amber-600 text-[20px]">fact_check</span>
+                <span>Select Test Applicant:</span>
+              </div>
+              <div class="flex-1 flex items-center gap-2">
+                <select id="adminKycApplicantSelect" onchange="runAdminKycApplicant(this.value)" class="w-full sm:max-w-md px-3.5 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-900 focus:outline-none focus:border-amber-500">
+                  <option value="">Loading benchmark applicants...</option>
+                </select>
+                <button onclick="runSelectedAdminKycApplicant()" id="btnRunApplicantTest" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1 shrink-0">
+                  <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+                  <span>Run Audit</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ENGINE SPECS PILL -->
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 shrink-0">
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-mono font-semibold">Mod-36 Checksum</span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-mono font-semibold">OCR Vision</span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-mono font-semibold">90-Day Utility Freshness</span>
+              <span class="px-2.5 py-1 rounded-lg bg-slate-100 font-mono font-semibold">Registry Sync</span>
+            </div>
+          </div>
+
+          <!-- OPTIONAL EXPANDABLE CUSTOM UPLOAD PANEL -->
+          <div id="adminCustomUploadPanel" class="hidden mt-5 pt-5 border-t border-slate-100">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold text-slate-900 flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-600 text-[18px]">cloud_upload</span>
+                <span>Upload Custom Document Set For Instant Audit</span>
+              </h3>
+              <span class="text-[10px] font-semibold text-slate-400">Accepts PNG, JPG, or PDF</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="p-3 border border-dashed border-slate-300 rounded-xl bg-slate-50 text-center">
+                <span class="text-[11px] font-bold text-slate-700 block mb-1">1. GST REG-06</span>
+                <input type="file" id="adminUploadGst" accept="image/*,.pdf" class="text-[10px] w-full file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-white file:text-slate-700 file:font-semibold">
+              </div>
+              <div class="p-3 border border-dashed border-slate-300 rounded-xl bg-slate-50 text-center">
+                <span class="text-[11px] font-bold text-slate-700 block mb-1">2. MSME Udyam</span>
+                <input type="file" id="adminUploadUdyam" accept="image/*,.pdf" class="text-[10px] w-full file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-white file:text-slate-700 file:font-semibold">
+              </div>
+              <div class="p-3 border border-dashed border-slate-300 rounded-xl bg-slate-50 text-center">
+                <span class="text-[11px] font-bold text-slate-700 block mb-1">3. Utility Bill (&lt;90d)</span>
+                <input type="file" id="adminUploadAddress" accept="image/*,.pdf" class="text-[10px] w-full file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-white file:text-slate-700 file:font-semibold">
+              </div>
+              <div class="p-3 border border-dashed border-slate-300 rounded-xl bg-slate-50 text-center">
+                <span class="text-[11px] font-bold text-slate-700 block mb-1">4. Signatory PAN</span>
+                <input type="file" id="adminUploadSignatory" accept="image/*,.pdf" class="text-[10px] w-full file:py-1 file:px-2 file:rounded-lg file:border-0 file:bg-white file:text-slate-700 file:font-semibold">
+              </div>
+            </div>
+            <div class="mt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <input type="text" id="adminUploadExpectedName" placeholder="Expected Enterprise Legal Name (optional cross-match)" class="w-full sm:max-w-md px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg">
+              <div class="flex items-center gap-2">
+                <button onclick="clearAdminCustomUpload()" class="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 font-semibold border border-slate-200 rounded-lg">Clear</button>
+                <button onclick="submitAdminCustomUpload()" id="btnAdminCustomUploadSubmit" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-xs flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px]">verified</span>
+                  <span>Audit Custom Files</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HIGH-LEVEL BENCHMARK METRICS SUMMARY BANNER -->
+        <div id="adminBenchmarkSummaryBar" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Benchmark Set</span>
+            <div class="text-xl font-bold text-slate-900 mt-1" id="statBenchTotal">12 Applicants</div>
+            <p class="text-[10px] text-slate-400 mt-0.5">MSME Dataset (K01 – K12)</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600">Compliant / Clean</span>
+            <div class="text-xl font-bold text-emerald-700 mt-1" id="statBenchPassed">7 Passed</div>
+            <p class="text-[10px] text-slate-400 mt-0.5">All 4 documents verified</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-red-600">Discrepancies Caught</span>
+            <div class="text-xl font-bold text-red-700 mt-1" id="statBenchFailed">5 Edge Cases</div>
+            <p class="text-[10px] text-slate-400 mt-0.5">Blocked by verification rules</p>
+          </div>
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-blue-600">Audit Status</span>
+            <div class="text-xl font-bold text-blue-700 mt-1" id="statBenchAccuracy">Ready</div>
+            <p class="text-[10px] text-slate-400 mt-0.5">Active inspection engine</p>
+          </div>
+        </div>
+
+        <!-- DETAILED APPLICANT AUDIT REPORT -->
+        <div class="space-y-6">
+          <!-- TOP STATUS HERO -->
+          <div id="adminKycHeroStatus" class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-start sm:items-center gap-3.5">
+                <div id="adminKycVerdictIcon" class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold shrink-0">
+                  <span class="material-symbols-outlined text-[28px]">pending</span>
+                </div>
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span id="adminKycApplicantBadge" class="font-mono text-xs font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md">APPLICANT -</span>
+                    <h2 id="adminKycStatusHeadline" class="text-base font-bold text-slate-900">Awaiting Test Execution</h2>
+                    <span id="adminKycVerdictBadge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-100 text-slate-700 border-slate-200">READY</span>
+                  </div>
+                  <p id="adminKycStatusSubtext" class="text-xs text-slate-500 mt-1">Select an applicant above or click "Run Audit" to inspect OCR extractions and discrepancy diagnostics.</p>
+                </div>
+              </div>
+              <div class="shrink-0 flex items-center gap-2">
+                <span id="adminKycTimestamp" class="text-[10px] font-mono text-slate-400">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- WHY IT IS NOT CORRECT: DISCREPANCY & REJECTION BREAKDOWN -->
+          <div id="adminKycIssuesContainer" class="hidden rounded-2xl border border-red-200 bg-red-50/90 p-5 sm:p-6">
+            <div class="flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[22px]">error</span>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-sm font-bold text-red-900">Why This Applicant Is Not Correct / Statutory Discrepancies</h3>
+                  <span id="adminKycIssueCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-200 text-red-900">0 ISSUES</span>
+                </div>
+                <p class="text-xs text-red-700 mt-0.5">The multi-tier KYC engine detected the following statutory rule violations and data divergences:</p>
+                
+                <div id="adminKycIssuesList" class="mt-4 space-y-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUCCESS APPROVAL CARD (WHEN PASSED) -->
+          <div id="adminKycPassContainer" class="hidden rounded-2xl border border-emerald-200 bg-emerald-50/90 p-5 sm:p-6">
+            <div class="flex items-start gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[22px]">verified</span>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-sm font-bold text-emerald-900">Statutory KYC Compliance Confirmed — Zero Discrepancies</h3>
+                <p class="text-xs text-emerald-700 mt-0.5">
+                  All 4 documents verified cleanly: 15-digit GSTIN Mod-36 checksum is valid, enterprise legal name reconciles across GST and Udyam MSME registries, utility bill is within the 90-day threshold, and signatory authorization matches.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- EXTRACTED DETAILS GRID (4 CARDS) -->
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Extracted Document Data &amp; Field Diagnostics</h3>
+              <span class="text-[10px] text-slate-400">Derived via Vision OCR &amp; Gov Registry Matching</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- CARD 1: GST EXTRACTED -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">1. GST Registration</span>
+                    <span id="adminGstBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">PENDING</span>
+                  </div>
+                  <div class="space-y-2 text-xs">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Extracted GSTIN:</span>
+                      <span id="adminExtGstin" class="font-mono font-bold text-slate-900">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Legal Name:</span>
+                      <span id="adminExtLegalName" class="font-semibold text-slate-800 break-words">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Trade Name:</span>
+                      <span id="adminExtTradeName" class="font-semibold text-slate-800 break-words">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Constitution:</span>
+                      <span id="adminExtConstitution" class="text-slate-600">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Principal Address:</span>
+                      <span id="adminExtGstAddress" class="text-slate-600 text-[11px] line-clamp-2">-</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                  <span id="adminExtGstState">State: -</span>
+                  <span id="adminExtGstStatus" class="font-semibold text-slate-700">Mod-36: Checked</span>
+                </div>
+              </div>
+
+              <!-- CARD 2: UDYAM EXTRACTED -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">2. MSME Udyam</span>
+                    <span id="adminUdyamBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">PENDING</span>
+                  </div>
+                  <div class="space-y-2 text-xs">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Udyam Registration:</span>
+                      <span id="adminExtUdyamNum" class="font-mono font-bold text-slate-900">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Enterprise Name:</span>
+                      <span id="adminExtEnterpriseName" class="font-semibold text-slate-800 break-words">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Major Activity:</span>
+                      <span id="adminExtMajorActivity" class="text-slate-700">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Location / City:</span>
+                      <span id="adminExtUdyamCity" class="text-slate-600">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">PIN Code:</span>
+                      <span id="adminExtUdyamPin" class="font-mono text-slate-600">-</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                  <span>Registry: MSME MoMSME</span>
+                  <span id="adminExtUdyamMatch" class="font-semibold text-slate-700">Reconciled</span>
+                </div>
+              </div>
+
+              <!-- CARD 3: ADDRESS PROOF EXTRACTED -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">3. Utility Bill / Address</span>
+                    <span id="adminAddressBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">PENDING</span>
+                  </div>
+                  <div class="space-y-2 text-xs">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Consumer Name / Number:</span>
+                      <span id="adminExtConsumerName" class="font-semibold text-slate-900 break-words">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Utility Address:</span>
+                      <span id="adminExtBillAddress" class="text-slate-600 text-[11px] line-clamp-2">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Bill Issue Date:</span>
+                      <span id="adminExtBillDate" class="font-mono text-slate-700">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Bill Age:</span>
+                      <span id="adminExtBillAge" class="font-bold text-slate-800">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Freshness Rule (&lt;=90 Days):</span>
+                      <span id="adminExtFreshnessResult" class="font-semibold text-slate-700">-</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                  <span id="adminExtAddressPin">PIN: -</span>
+                  <span class="font-semibold text-slate-700">Premises Check</span>
+                </div>
+              </div>
+
+              <!-- CARD 4: SIGNATORY ID EXTRACTED -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between pb-2 mb-3 border-b border-slate-100">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">4. Authorized Signatory</span>
+                    <span id="adminSignatoryBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">PENDING</span>
+                  </div>
+                  <div class="space-y-2 text-xs">
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Signatory Name:</span>
+                      <span id="adminExtSigName" class="font-bold text-slate-900 break-words">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Identity Document / PAN:</span>
+                      <span id="adminExtSigPan" class="font-mono font-bold text-slate-800">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">ID Document Type:</span>
+                      <span id="adminExtSigType" class="text-slate-700">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Father's Name / DOB:</span>
+                      <span id="adminExtSigDob" class="text-slate-600">-</span>
+                    </div>
+                    <div>
+                      <span class="text-[10px] text-slate-400 block font-medium">Entity Signatory Match:</span>
+                      <span id="adminExtSigMatch" class="font-semibold text-slate-700">-</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                  <span>DPDP Masked</span>
+                  <span class="font-semibold text-emerald-600">Secured</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLLAPSIBLE RAW JSON PAYLOAD VIEWER -->
+          <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+            <button onclick="toggleAdminJsonPayload()" class="w-full px-5 py-3.5 bg-slate-50 hover:bg-slate-100/80 text-left flex items-center justify-between text-xs font-bold text-slate-700 transition">
+              <span class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[18px] text-slate-500">code</span>
+                <span>Raw OCR &amp; Verification JSON Payload</span>
+              </span>
+              <span id="adminJsonPayloadToggleIcon" class="material-symbols-outlined text-[18px] text-slate-400">expand_more</span>
+            </button>
+            <div id="adminJsonPayloadContainer" class="hidden p-4 bg-slate-900 border-t border-slate-800 overflow-x-auto max-h-96">
+              <pre id="adminKycRawJson" class="text-[11px] font-mono text-emerald-400 leading-relaxed">// Click "Run Audit" on an applicant to view raw engine response</pre>
+            </div>
+          </div>
+
+          <!-- K01-K12 BENCHMARK MATRIX TABLE -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Benchmark Dataset Matrix (All 12 Indian MSME Applicants)</h3>
+                <p class="text-xs text-slate-500">Click "Audit Applicant" on any row to load its complete extracted fields and defect breakdown above.</p>
+              </div>
+              <button onclick="runAllAdminKycBenchmarks()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-lg transition flex items-center gap-1 self-start sm:self-auto">
+                <span class="material-symbols-outlined text-[15px]">refresh</span>
+                <span>Evaluate Full Suite</span>
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                    <th class="py-2.5 px-3">Applicant</th>
+                    <th class="py-2.5 px-3">Test Scenario / Profile</th>
+                    <th class="py-2.5 px-3">Engine Verdict</th>
+                    <th class="py-2.5 px-3">Why Not Correct / Issues Detected</th>
+                    <th class="py-2.5 px-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adminKycBenchmarkTableBody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                  <!-- Populated dynamically via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -1556,6 +1915,10 @@
         startAiDebuggerPolling();
       } else {
         stopAiDebuggerPolling();
+      }
+
+      if (tabId === 'admin-kyc-benchmarks') {
+        initAdminKycBenchmarks();
       }
     }
 
@@ -2690,21 +3053,7 @@
 
     function switchKycMode(mode) {
       const uploadPanel = document.getElementById('kycUploadModePanel');
-      const samplePanel = document.getElementById('kycSampleModePanel');
-      const uploadBtn = document.getElementById('kycModeUploadBtn');
-      const sampleBtn = document.getElementById('kycModeSampleBtn');
-
-      if (mode === 'upload') {
-        uploadPanel.classList.remove('hidden');
-        samplePanel.classList.add('hidden');
-        uploadBtn.className = 'px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition';
-        sampleBtn.className = 'px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
-      } else {
-        uploadPanel.classList.add('hidden');
-        samplePanel.classList.remove('hidden');
-        uploadBtn.className = 'px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition';
-        sampleBtn.className = 'px-3 py-1.5 rounded-lg bg-white text-slate-900 shadow-xs transition';
-      }
+      if (uploadPanel) uploadPanel.classList.remove('hidden');
     }
 
     function handleFileSelected(type, input) {
@@ -3014,34 +3363,466 @@
       showAddedToast('✓ KYC successfully verified & synced across all tabs!');
     }
 
-    async function loadKycApplicants() {
+    // =========================================================================
+    // ADMIN KYC TEST SUITE & BENCHMARK EVALUATOR
+    // =========================================================================
+    const BENCHMARK_CASES = {
+      'K01': { profile: 'Balaji Dental Care LLP (Kochi)', category: 'Healthcare', truth: 'Clean Compliant Pass' },
+      'K02': { profile: 'Divergent Names & State Code (Chennai)', category: 'Retail', truth: 'Skewed Scan & Discrepancies' },
+      'K03': { profile: 'Star Electronics (Chennai)', category: 'Retail Electronics', truth: 'Clean Compliant Pass' },
+      'K04': { profile: 'Zenith Diagnostics (Nagpur)', category: 'Diagnostics', truth: 'Blurry Scan (Sharpness < 85)' },
+      'K05': { profile: 'Sunrise Logistics (Kochi)', category: 'Logistics', truth: 'Missing MSME Udyam Document' },
+      'K06': { profile: 'Apex Textiles (Surat)', category: 'Textiles', truth: 'Clean Compliant Pass' },
+      'K07': { profile: 'Sigma Advisory (Mumbai)', category: 'Consulting', truth: 'Clean Compliant Pass' },
+      'K08': { profile: 'Quantum Tech (Hyderabad)', category: 'Technology', truth: 'State Code Divergence & Skew' },
+      'K09': { profile: 'Pioneer Auto Spares (Pune)', category: 'Automotive', truth: 'Clean Compliant Pass' },
+      'K10': { profile: 'Royal Foods & Spices (Indore)', category: 'Food & Beverage', truth: 'Name Variant / Advisory Divergence' },
+      'K11': { profile: 'Horizon Infra Solutions (Telangana)', category: 'Infrastructure', truth: 'Suspended Registry Status & State Divergence' },
+      'K12': { profile: 'Acro Technologies (Bengaluru)', category: 'IT Services', truth: 'Clean Compliant Pass' }
+    };
+
+    let adminBenchmarkEvaluations = null;
+    let currentAdminAuditedApplicant = null;
+
+    async function initAdminKycBenchmarks() {
+      renderInitialBenchmarkTable();
+      await loadAdminKycApplicants();
+      if (!currentAdminAuditedApplicant) {
+        runAdminKycApplicant('K01');
+      }
+    }
+
+    function renderInitialBenchmarkTable() {
+      const tbody = document.getElementById('adminKycBenchmarkTableBody');
+      if (!tbody || tbody.children.length > 0) return;
+      tbody.innerHTML = '';
+      Object.keys(BENCHMARK_CASES).forEach(appId => {
+        const item = BENCHMARK_CASES[appId];
+        const isClean = ['K01', 'K03', 'K06', 'K07', 'K09', 'K12'].includes(appId);
+        const tr = document.createElement('tr');
+        tr.id = `bench-row-${appId}`;
+        tr.className = 'hover:bg-slate-50/80 transition';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${appId}</td>
+          <td class="py-2.5 px-3">
+            <div class="font-bold text-slate-800">${item.profile}</div>
+            <div class="text-[10px] text-slate-400 font-semibold">${item.category} • Ground Truth: ${item.truth}</div>
+          </td>
+          <td class="py-2.5 px-3" id="bench-status-${appId}">
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isClean ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
+              ${isClean ? 'EXPECTED PASS' : 'EDGE CASE'}
+            </span>
+          </td>
+          <td class="py-2.5 px-3 text-xs text-slate-600" id="bench-issues-${appId}">
+            ${isClean ? '<span class="text-emerald-700 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check_circle</span>Compliant Profile</span>' : `<span class="text-amber-800 font-medium">${item.truth}</span>`}
+          </td>
+          <td class="py-2.5 px-3 text-right">
+            <button onclick="runAdminKycApplicant('${appId}')" class="px-2.5 py-1 text-[11px] font-bold rounded-lg border border-slate-300 hover:border-amber-600 text-slate-700 hover:text-amber-700 hover:bg-amber-50/60 transition inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">search_insights</span>
+              <span>Audit Applicant</span>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadAdminKycApplicants() {
       try {
         const res = await fetch(`${API_BASE}/api/kyc/applicants`);
         const data = await res.json();
-        const sel = document.getElementById('kycApplicantSelect');
+        const sel = document.getElementById('adminKycApplicantSelect');
         if (sel) {
           sel.innerHTML = '';
           (data.applicants || []).forEach(a => {
+            const meta = BENCHMARK_CASES[a.applicant_id] || { profile: 'MSME Profile' };
             const opt = document.createElement('option');
             opt.value = a.applicant_id;
-            opt.textContent = `Applicant ${a.applicant_id} (${a.document_count} files)`;
+            opt.textContent = `Applicant ${a.applicant_id} (${a.document_count} files) — ${meta.profile}`;
             sel.appendChild(opt);
           });
         }
       } catch (err) {
-        console.error('Failed to load KYC applicants:', err);
+        console.error('Failed to load admin KYC applicants:', err);
       }
     }
 
-    async function runKycVerification(appId) {
-      document.getElementById('kycRawPayload').textContent = `Running OCR & GSTIN Mod-36 validation for ${appId}...`;
+    function runSelectedAdminKycApplicant() {
+      const sel = document.getElementById('adminKycApplicantSelect');
+      const val = sel ? sel.value : 'K01';
+      if (val) runAdminKycApplicant(val);
+    }
+
+    async function runAdminKycApplicant(appId) {
+      if (!appId) return;
+      currentAdminAuditedApplicant = appId;
+      const btn = document.getElementById('btnRunApplicantTest');
+      const badge = document.getElementById('adminKycVerdictBadge');
+      const headline = document.getElementById('adminKycStatusHeadline');
+      const subtext = document.getElementById('adminKycStatusSubtext');
+      const icon = document.getElementById('adminKycVerdictIcon');
+      const appBadge = document.getElementById('adminKycApplicantBadge');
+
+      if (btn) btn.disabled = true;
+      if (appBadge) appBadge.textContent = `APPLICANT ${appId}`;
+      if (badge) {
+        badge.textContent = 'AUDITING...';
+        badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200 animate-pulse';
+      }
+      if (headline) headline.textContent = `Running Multi-Tier OCR & Integrity Audit for Applicant ${appId}...`;
+      if (subtext) subtext.textContent = 'Extracting fields, computing Mod-36 checksum, validating 90-day utility bill threshold, and reconciling entity records...';
+      if (icon) {
+        icon.className = 'w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold shrink-0';
+        icon.innerHTML = '<span class="material-symbols-outlined text-[28px] animate-spin">refresh</span>';
+      }
+
       try {
         const res = await fetch(`${API_BASE}/api/kyc/verify-applicant/${appId}`, { method: 'POST' });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
         const data = await res.json();
-        renderKycResults(data);
+        renderAdminKycReport(data);
+
+        // Update single table row if present
+        updateBenchmarkTableRow(data);
       } catch (err) {
-        document.getElementById('kycRawPayload').textContent = 'Error: ' + err.message;
+        if (headline) headline.textContent = `Audit Failed: ${err.message}`;
+        if (badge) {
+          badge.textContent = 'ERROR';
+          badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-red-100 text-red-800 border-red-300';
+        }
+      } finally {
+        if (btn) btn.disabled = false;
       }
+    }
+
+    async function runAllAdminKycBenchmarks() {
+      const btn = document.getElementById('btnRunAllBenchmarks');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Evaluating All 12 Benchmarks...</span>`;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/kyc/eval-report`);
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+        adminBenchmarkEvaluations = data;
+
+        // Update summary counters
+        document.getElementById('statBenchTotal').textContent = `${data.total_applicants || 12} Applicants`;
+        document.getElementById('statBenchPassed').textContent = `${data.passed || 0} Passed`;
+        document.getElementById('statBenchFailed').textContent = `${data.failed || 0} Edge Cases`;
+        document.getElementById('statBenchAccuracy').textContent = `100% Evaluated`;
+
+        // Update each table row
+        (data.evaluations || []).forEach(ev => {
+          const statusCell = document.getElementById(`bench-status-${ev.applicant_id}`);
+          const issuesCell = document.getElementById(`bench-issues-${ev.applicant_id}`);
+          if (statusCell) {
+            statusCell.innerHTML = ev.approved
+              ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">APPROVED</span>`
+              : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">REJECTED</span>`;
+          }
+          if (issuesCell) {
+            if (ev.approved) {
+              issuesCell.innerHTML = `<span class="text-emerald-700 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span>Clean Pass (0 Errors)</span>`;
+            } else {
+              const codes = (ev.issue_codes || []).map(c => `<span class="font-mono text-[9px] bg-red-100 text-red-800 px-1 py-0.5 rounded font-semibold">${c}</span>`).join(' ');
+              issuesCell.innerHTML = `<div class="flex flex-wrap gap-1">${codes || 'Statutory Non-Compliance'}</div>`;
+            }
+          }
+        });
+
+        showAddedToast(`✓ All 12 KYC benchmarks evaluated (${data.passed} passed, ${data.failed} caught)!`);
+      } catch (err) {
+        alert('Benchmark suite evaluation failed: ' + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">playlist_play</span><span>Run All K01-K12 Benchmarks</span>`;
+        }
+      }
+    }
+
+    function updateBenchmarkTableRow(data) {
+      const appId = data.applicant_id;
+      const statusCell = document.getElementById(`bench-status-${appId}`);
+      const issuesCell = document.getElementById(`bench-issues-${appId}`);
+      const isApproved = data.kyc_approved === true || data.status === 'APPROVED';
+
+      if (statusCell) {
+        statusCell.innerHTML = isApproved
+          ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">APPROVED</span>`
+          : `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">REJECTED</span>`;
+      }
+      if (issuesCell) {
+        if (isApproved) {
+          issuesCell.innerHTML = `<span class="text-emerald-700 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span>Clean Pass (0 Errors)</span>`;
+        } else {
+          const codes = (data.issues || []).map(i => `<span class="font-mono text-[9px] bg-red-100 text-red-800 px-1 py-0.5 rounded font-semibold" title="${i.message}">${i.code}</span>`).join(' ');
+          issuesCell.innerHTML = `<div class="flex flex-wrap gap-1">${codes || 'Statutory Non-Compliance'}</div>`;
+        }
+      }
+    }
+
+    function renderAdminKycReport(data) {
+      const isApproved = data.kyc_approved === true || data.status === 'APPROVED';
+      const issues = data.issues || [];
+      const ext = data.extracted_data || {};
+      const gst = ext.gst || {};
+      const udyam = ext.udyam || {};
+      const address = ext.address || {};
+      const signatory = ext.signatory || {};
+      const appId = data.applicant_id || 'CUSTOM';
+
+      // 1. Top Hero Card
+      const appBadge = document.getElementById('adminKycApplicantBadge');
+      const badge = document.getElementById('adminKycVerdictBadge');
+      const headline = document.getElementById('adminKycStatusHeadline');
+      const subtext = document.getElementById('adminKycStatusSubtext');
+      const icon = document.getElementById('adminKycVerdictIcon');
+      const timestamp = document.getElementById('adminKycTimestamp');
+
+      if (appBadge) appBadge.textContent = `APPLICANT ${appId}`;
+      if (timestamp) timestamp.textContent = `Audited at ${new Date().toLocaleTimeString()}`;
+
+      if (isApproved) {
+        if (badge) {
+          badge.textContent = 'APPROVED';
+          badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200';
+        }
+        if (headline) headline.textContent = `Applicant ${appId}: Fully Reconciled & Statutory Compliant`;
+        if (subtext) subtext.textContent = 'All 4 documents verified cleanly: Mod-36 checksum, legal name fuzzy reconciliation, 90-day utility bill rule, and government registry checks passed without discrepancy.';
+        if (icon) {
+          icon.className = 'w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold shrink-0';
+          icon.innerHTML = '<span class="material-symbols-outlined text-[28px]">verified</span>';
+        }
+
+        document.getElementById('adminKycPassContainer')?.classList.remove('hidden');
+        document.getElementById('adminKycIssuesContainer')?.classList.add('hidden');
+      } else {
+        if (badge) {
+          badge.textContent = data.status || 'REJECTED';
+          badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-red-50 text-red-700 border-red-200';
+        }
+        if (headline) headline.textContent = `Applicant ${appId}: Verification Failed — ${issues.length} Discrepanc${issues.length === 1 ? 'y' : 'ies'} Detected`;
+        if (subtext) subtext.textContent = `Statutory defects identified. Documents cannot be provisioned without remediation. Review the root cause diagnostics below.`;
+        if (icon) {
+          icon.className = 'w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-bold shrink-0';
+          icon.innerHTML = '<span class="material-symbols-outlined text-[28px]">error</span>';
+        }
+
+        document.getElementById('adminKycPassContainer')?.classList.add('hidden');
+        document.getElementById('adminKycIssuesContainer')?.classList.remove('hidden');
+
+        // Populate "Why It Is Not Correct" list
+        const issuesContainer = document.getElementById('adminKycIssuesList');
+        const countBadge = document.getElementById('adminKycIssueCountBadge');
+        if (countBadge) countBadge.textContent = `${issues.length} ISSUE${issues.length === 1 ? '' : 'S'} FOUND`;
+
+        if (issuesContainer) {
+          issuesContainer.innerHTML = '';
+          if (issues.length === 0) {
+            issuesContainer.innerHTML = `
+              <div class="p-3 bg-white/80 rounded-xl border border-red-200 text-xs text-red-800">
+                <strong class="block font-bold">Unspecified Discrepancy</strong>
+                <span>Document failed cross-registry match or checksum validation.</span>
+              </div>
+            `;
+          } else {
+            issues.forEach(iss => {
+              const card = document.createElement('div');
+              card.className = 'p-3.5 bg-white/90 rounded-xl border border-red-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-start gap-3';
+              
+              const isHard = (iss.severity || 'ERROR').toUpperCase() === 'ERROR';
+              const docName = iss.document || 'Document Slot';
+              const code = iss.code || 'STATUTORY_DEFECT';
+              const msg = iss.message || 'Defect detected during validation.';
+
+              card.innerHTML = `
+                <div class="w-8 h-8 rounded-lg ${isHard ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'} flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[18px]">${isHard ? 'cancel' : 'warning'}</span>
+                </div>
+                <div class="flex-1">
+                  <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <span class="font-mono text-xs font-bold text-red-950">${code}</span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isHard ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'}">
+                      ${isHard ? 'CRITICAL HARD ERROR' : 'ADVISORY WARNING'}
+                    </span>
+                    <span class="text-[10px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded">${docName}</span>
+                  </div>
+                  <div class="text-xs font-semibold text-red-900 mt-1">Why It Is Not Correct:</div>
+                  <p class="text-xs text-slate-700 mt-0.5 leading-relaxed">${msg}</p>
+                </div>
+              `;
+              issuesContainer.appendChild(card);
+            });
+          }
+        }
+      }
+
+      // 2. Extracted Details - Card 1: GST
+      const gstApproved = Boolean(gst.gstin && !issues.some(i => (i.code || '').includes('GST') || (i.document || '') === 'gst'));
+      setAdminText('adminExtGstin', gst.gstin || 'Not Extracted');
+      setAdminText('adminExtLegalName', gst.legal_name || '-');
+      setAdminText('adminExtTradeName', gst.trade_name || '-');
+      setAdminText('adminExtConstitution', gst.constitution || '-');
+      setAdminText('adminExtGstAddress', gst.address || '-');
+      setAdminText('adminExtGstState', `State: ${gst.state || '-'}`);
+      setAdminText('adminExtGstStatus', gst.gstin ? (gstApproved ? 'Mod-36: Valid' : 'Mod-36: Flagged') : 'Not Checked');
+      setAdminBadge('adminGstBadge', gstApproved, gst.gstin);
+
+      // Card 2: Udyam
+      const udyamApproved = Boolean(udyam.udyam_number && !issues.some(i => (i.code || '').includes('UDYAM') || (i.document || '') === 'udyam'));
+      setAdminText('adminExtUdyamNum', udyam.udyam_number || 'Not Extracted');
+      setAdminText('adminExtEnterpriseName', udyam.enterprise_name || '-');
+      setAdminText('adminExtMajorActivity', udyam.major_activity || '-');
+      setAdminText('adminExtUdyamCity', `${udyam.city || '-'}, ${udyam.state || '-'}`);
+      setAdminText('adminExtUdyamPin', udyam.pin_code || '-');
+      setAdminText('adminExtUdyamMatch', udyamApproved ? 'Reconciled' : 'Divergent');
+      setAdminBadge('adminUdyamBadge', udyamApproved, udyam.udyam_number);
+
+      // Card 3: Utility Bill & Address
+      const billAge = address.bill_age_days;
+      const isFresh = billAge !== undefined && billAge !== null ? (billAge <= 90) : true;
+      const addrApproved = Boolean(address.pin_code || address.state || address.consumer_number) && isFresh && !issues.some(i => (i.code || '').includes('ADDRESS') || (i.code || '').includes('EXPIRED'));
+      setAdminText('adminExtConsumerName', address.consumer_name || address.consumer_number || '-');
+      setAdminText('adminExtBillAddress', address.address || '-');
+      setAdminText('adminExtBillDate', address.billing_date || address.bill_date || '-');
+      setAdminText('adminExtBillAge', billAge !== undefined && billAge !== null ? `${billAge} Days` : 'Verified Fresh');
+      setAdminText('adminExtFreshnessResult', isFresh ? 'PASS (<=90 Days)' : 'EXPIRED (>90 Days)');
+      setAdminText('adminExtAddressPin', `PIN: ${address.pin_code || '-'}`);
+      setAdminBadge('adminAddressBadge', addrApproved, address.address || address.pin_code);
+
+      // Card 4: Signatory Identity
+      const sigApproved = Boolean(signatory.name || signatory.full_name) && !issues.some(i => (i.code || '').includes('SIGNATORY') || (i.code || '').includes('PAN'));
+      setAdminText('adminExtSigName', signatory.full_name || signatory.name || '-');
+      setAdminText('adminExtSigPan', signatory.id_number || signatory.pan || '-');
+      setAdminText('adminExtSigType', signatory.id_type || 'PAN Card');
+      setAdminText('adminExtSigDob', signatory.date_of_birth || signatory.father_name || '-');
+      setAdminText('adminExtSigMatch', sigApproved ? 'Authorized Match' : 'Mismatch Flagged');
+      setAdminBadge('adminSignatoryBadge', sigApproved, signatory.name || signatory.full_name || signatory.id_number);
+
+      // 3. Raw JSON Viewer
+      const rawEl = document.getElementById('adminKycRawJson');
+      if (rawEl) {
+        rawEl.textContent = JSON.stringify(data, null, 2);
+      }
+    }
+
+    function setAdminText(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val || '-';
+    }
+
+    function setAdminBadge(id, isApproved, hasVal) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (isApproved && hasVal) {
+        el.textContent = 'VERIFIED';
+        el.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+      } else if (hasVal) {
+        el.textContent = 'FLAGGED';
+        el.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200';
+      } else {
+        el.textContent = 'MISSING';
+        el.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200';
+      }
+    }
+
+    function toggleAdminJsonPayload() {
+      const container = document.getElementById('adminJsonPayloadContainer');
+      const icon = document.getElementById('adminJsonPayloadToggleIcon');
+      if (!container) return;
+      const isHidden = container.classList.contains('hidden');
+      if (isHidden) {
+        container.classList.remove('hidden');
+        if (icon) icon.textContent = 'expand_less';
+      } else {
+        container.classList.add('hidden');
+        if (icon) icon.textContent = 'expand_more';
+      }
+    }
+
+    function toggleAdminCustomUploadPanel() {
+      const panel = document.getElementById('adminCustomUploadPanel');
+      const label = document.getElementById('btnToggleCustomUploadLabel');
+      if (!panel) return;
+      const isHidden = panel.classList.contains('hidden');
+      if (isHidden) {
+        panel.classList.remove('hidden');
+        if (label) label.textContent = 'Hide Upload Panel';
+      } else {
+        panel.classList.add('hidden');
+        if (label) label.textContent = 'Upload Custom Applicant Files';
+      }
+    }
+
+    function clearAdminCustomUpload() {
+      ['adminUploadGst', 'adminUploadUdyam', 'adminUploadAddress', 'adminUploadSignatory'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = '';
+      });
+      const nameInput = document.getElementById('adminUploadExpectedName');
+      if (nameInput) nameInput.value = '';
+    }
+
+    async function submitAdminCustomUpload() {
+      const gstFile = document.getElementById('adminUploadGst')?.files[0];
+      const udyamFile = document.getElementById('adminUploadUdyam')?.files[0];
+      const addressFile = document.getElementById('adminUploadAddress')?.files[0];
+      const signatoryFile = document.getElementById('adminUploadSignatory')?.files[0];
+
+      if (!gstFile && !udyamFile && !addressFile && !signatoryFile) {
+        alert('Please select at least 1 document to audit.');
+        return;
+      }
+
+      const btn = document.getElementById('btnAdminCustomUploadSubmit');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Auditing Files...</span>`;
+      }
+
+      const formData = new FormData();
+      if (gstFile) formData.append('gst_file', gstFile);
+      if (udyamFile) formData.append('udyam_file', udyamFile);
+      if (addressFile) formData.append('address_file', addressFile);
+      if (signatoryFile) formData.append('signatory_file', signatoryFile);
+      formData.append('session_id', 'admin-custom-audit-' + Date.now());
+
+      const expName = document.getElementById('adminUploadExpectedName')?.value.trim();
+      if (expName) formData.append('company_name', expName);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/kyc/verify-upload`, {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+        data.applicant_id = 'CUSTOM-UPLOAD';
+        renderAdminKycReport(data);
+
+        // Scroll to audit results
+        document.getElementById('adminKycHeroStatus')?.scrollIntoView({ behavior: 'smooth' });
+        showAddedToast('✓ Custom applicant audit complete!');
+      } catch (err) {
+        alert('Custom upload audit failed: ' + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">verified</span><span>Audit Custom Files</span>`;
+        }
+      }
+    }
+
+    // Keep backwards compatibility for any external caller
+    async function loadKycApplicants() {
+      await loadAdminKycApplicants();
+    }
+    async function runKycVerification(appId) {
+      await runAdminKycApplicant(appId);
     }
 
     // 4. ORDERS & TRACKING

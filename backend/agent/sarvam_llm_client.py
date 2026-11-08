@@ -65,18 +65,18 @@ class SarvamLLMClient:
         except Exception:
             return self._mock_completion(messages)
 
-    def speech_to_text(self, audio_bytes: bytes, filename: str = "audio.wav", mime_type: str = "audio/wav") -> Dict[str, Any]:
-        """Uploads audio stream to Sarvam Saaras:v3 STT engine."""
+    def speech_to_text(self, audio_bytes: bytes, filename: str = "audio.wav", mime_type: str = "audio/wav", language_code: str = "hi-IN") -> Dict[str, Any]:
+        """Uploads audio stream to Sarvam Saaras:v3 STT engine with Indic multilingual support."""
         if not self.api_key:
             return {
                 "transcript": "We operate a retail store in Mumbai with 12 employees and need high speed internet and CCTV.",
-                "language_code": "en-IN"
+                "language_code": language_code or "en-IN"
             }
 
         url = f"{self.base_url}/speech-to-text"
         headers = {"api-subscription-key": self.api_key}
         files = {"file": (filename, audio_bytes, mime_type)}
-        data = {"model": SARVAM_STT_MODEL, "with_diarization": "false"}
+        data = {"model": SARVAM_STT_MODEL, "with_diarization": "false", "language_code": language_code or "hi-IN"}
 
         try:
             resp = requests.post(url, headers=headers, files=files, data=data, timeout=30)

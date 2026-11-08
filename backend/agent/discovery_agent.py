@@ -33,7 +33,8 @@ class CustomerDiscoveryAgent:
         session_id: Optional[str] = None,
         audio_bytes: Optional[bytes] = None,
         filename: str = "recording.wav",
-        mime_type: str = "audio/wav"
+        mime_type: str = "audio/wav",
+        language_code: str = "hi-IN"
     ) -> Dict[str, Any]:
         """
         Executes the full 11-stage AI customer discovery pipeline.
@@ -53,11 +54,12 @@ class CustomerDiscoveryAgent:
                 "data": {
                     "audio_size_bytes": len(audio_bytes),
                     "filename": filename,
-                    "mime_type": mime_type
+                    "mime_type": mime_type,
+                    "language_code": language_code
                 }
             })
             # STAGE 2: Speech-to-Text
-            stt_result = sarvam_llm_client.speech_to_text(audio_bytes, filename, mime_type)
+            stt_result = sarvam_llm_client.speech_to_text(audio_bytes, filename, mime_type, language_code=language_code)
             raw_text = stt_result.get("transcript", "")
             cleaned_text = SpeechCleaner.clean(raw_text)
             message = cleaned_text or raw_text
@@ -238,8 +240,16 @@ class CustomerDiscoveryAgent:
             captured_summaries.append(f"budget around ₹{int(extracted_facts['monthly_telecom_spend_inr'])}/mo")
 
         ack_prefix = ""
+        msg_trimmed_lower = (message or "").strip().lower()
+        is_user_greeting = any(
+            msg_trimmed_lower == g or msg_trimmed_lower.startswith(g + " ")
+            for g in ["hi", "hello", "hey", "namaste", "vanakkam", "pranam", "good morning", "good evening"]
+        )
+
         if captured_summaries:
             ack_prefix = f"Understood, we have noted your {', '.join(captured_summaries)}. "
+        elif is_user_greeting:
+            ack_prefix = "Namaste! Welcome to Airtel Business. "
         elif len(session.history) > 1 and session.schema.business_type:
             ack_prefix = f"Got it, noting this for your {session.schema.business_type} operations. "
 

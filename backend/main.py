@@ -274,11 +274,12 @@ async def chat_endpoint(request: ChatRequest, user: Optional[Dict[str, Any]] = D
 @app.post("/api/voice")
 async def voice_endpoint(
     audio: UploadFile = File(...),
-    session_id: Optional[str] = Form(None)
+    session_id: Optional[str] = Form(None),
+    language_code: Optional[str] = Form("hi-IN")
 ):
     """
-    Accepts spoken audio recordings, converts via Sarvam STT, updates profile,
-    and returns live tailored recommendations.
+    Accepts spoken audio recordings in Indic languages (Hindi, Tamil, Telugu, English, etc.),
+    converts via Sarvam STT, updates profile, and returns live tailored recommendations.
     """
     audio_bytes = await audio.read()
     if not audio_bytes:
@@ -289,7 +290,8 @@ async def voice_endpoint(
         session_id=session_id,
         audio_bytes=audio_bytes,
         filename=audio.filename or "recording.wav",
-        mime_type=audio.content_type or "audio/wav"
+        mime_type=audio.content_type or "audio/wav",
+        language_code=language_code or "hi-IN"
     )
 
     try:

@@ -308,11 +308,15 @@
                   <p class="text-xs text-slate-500">Sarvam Indic LLM &amp; Speech Processing</p>
                 </div>
               </div>
-              <div class="flex items-center gap-2">
-                <button onclick="clearChat()" class="text-xs text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition">Clear Chat</button>
-                <button onclick="clearAllCustomerInfo()" class="text-xs text-red-600 hover:text-white hover:bg-[#e40000] px-2.5 py-1 rounded-lg border border-red-200 transition flex items-center gap-1 font-semibold" title="Removes all customer info, schema, KYC, and chat history from database">
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <button id="autoReadToggleBtn" onclick="toggleAutoRead()" class="text-xs px-2 sm:px-2.5 py-1 rounded-lg border border-slate-200 transition flex items-center gap-1 font-medium bg-slate-50 hover:bg-slate-100 text-slate-700" title="Automatically read questions aloud">
+                  <span id="autoReadIcon" class="material-symbols-outlined text-[15px] text-emerald-600">volume_up</span>
+                  <span id="autoReadLabel" class="hidden sm:inline">Read Aloud: <b class="text-emerald-600">ON</b></span>
+                </button>
+                <button onclick="clearChat()" class="text-xs text-slate-500 hover:text-slate-800 px-2 sm:px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition">Clear Chat</button>
+                <button onclick="clearAllCustomerInfo()" class="text-xs text-red-600 hover:text-white hover:bg-[#e40000] px-2 sm:px-2.5 py-1 rounded-lg border border-red-200 transition flex items-center gap-1 font-semibold" title="Removes all customer info, schema, KYC, and chat history from database">
                   <span class="material-symbols-outlined text-[13px]">delete_forever</span>
-                  <span>Clear Your Info</span>
+                  <span class="hidden sm:inline">Clear Your Info</span>
                 </button>
               </div>
             </div>
@@ -320,10 +324,22 @@
             <div id="chatMessages" class="flex-1 overflow-y-auto py-4 space-y-3 custom-scrollbar"></div>
 
             <div class="pt-2.5 sm:pt-3 border-t border-slate-100 flex items-center gap-1.5 sm:gap-2">
-              <button id="micBtn" onclick="toggleVoiceRecording()" title="Speak with Airtel Advisor" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e40000] flex items-center justify-center transition shrink-0 mobile-touch-target">
-                <span class="material-symbols-outlined text-[22px]">mic</span>
-              </button>
-              <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Ask about internet, cloud, CCTV (Hindi/Eng)..." class="flex-1 px-3.5 py-2.5 text-xs sm:text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000] focus:bg-white min-w-0">
+              <div class="relative shrink-0 flex items-center gap-1">
+                <select id="voiceLangSelect" onchange="onVoiceLangChange()" class="text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-1.5 sm:px-2 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-[#e40000] cursor-pointer" title="Choose Speaking & Voice Language">
+                  <option value="hi-IN" selected>🇮🇳 Hindi</option>
+                  <option value="en-IN">🇬🇧 English</option>
+                  <option value="te-IN">🇮🇳 Telugu</option>
+                  <option value="ta-IN">🇮🇳 Tamil</option>
+                  <option value="kn-IN">🇮🇳 Kannada</option>
+                  <option value="mr-IN">🇮🇳 Marathi</option>
+                  <option value="bn-IN">🇮🇳 Bengali</option>
+                  <option value="gu-IN">🇮🇳 Gujarati</option>
+                </select>
+                <button id="micBtn" onclick="toggleVoiceRecording()" title="Speak with Airtel Advisor (Multilingual Voice)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e40000] flex items-center justify-center transition shrink-0 mobile-touch-target">
+                  <span class="material-symbols-outlined text-[22px]">mic</span>
+                </button>
+              </div>
+              <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Ask in Hindi, English, Telugu... or click mic to speak" class="flex-1 px-3.5 py-2.5 text-xs sm:text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000] focus:bg-white min-w-0">
               <button onclick="sendChatMessage()" class="px-3.5 sm:px-4 py-2.5 bg-[#e40000] hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shadow-sm shrink-0 mobile-touch-target">
                 <span class="hidden sm:inline">Send</span>
                 <span class="material-symbols-outlined text-[18px]">send</span>

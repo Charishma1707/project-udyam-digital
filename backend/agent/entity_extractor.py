@@ -9,11 +9,6 @@ from customer turns into structured JSON. Eliminates hallucinations.
 
 import re
 import json
-from typing import Dict, Any
-from agent.sarvam_llm_client import sarvam_llm_client
-
-import re
-import json
 from typing import Dict, Any, Optional
 from rapidfuzz import process, fuzz
 from agent.sarvam_llm_client import sarvam_llm_client
@@ -24,10 +19,15 @@ Extract facts into a clean JSON object. Handle colloquial terms, typos (e.g. 're
 
 RULES:
 1. Extract facts mentioned or answered directly by the customer.
-2. Numeric fields (employee_count, num_sites, max_installation_days, monthly_telecom_spend_inr, overall_budget) must be numbers.
-3. Classify recurring monthly telecom/internet spend into `monthly_telecom_spend_inr`. Classify total package budget into `overall_budget`.
-4. If customer says "Yes we have GST" or "yes", set `has_gstin: "Y"`. If "No", set `has_gstin: "N"`.
-5. Return ONLY a valid JSON object without markdown formatting.
+2. CRITICAL NEGATIVE CONSTRAINTS:
+   - NEVER extract greetings (e.g. 'hi', 'hello', 'hey', 'namaste', 'vanakkam', 'good morning', 'kya haal hai'), conversational pleasantries, or questions as `business_name`, `business_type`, or `city`. Leave them as empty string "" if not mentioned.
+   - NEVER extract lone numbers (e.g. '3', '10', '500') as `business_type` or `business_name`.
+   - If the previous question asked for employee count/headcount and customer replies with a number (e.g. '3', '15'), extract it as `employee_count`, NOT `num_sites` and NOT `business_type`.
+   - If the previous question asked for branches/sites and customer replies with a number, extract it as `num_sites`.
+3. Numeric fields (employee_count, num_sites, max_installation_days, monthly_telecom_spend_inr, overall_budget) must be numbers.
+4. Classify recurring monthly telecom/internet spend into `monthly_telecom_spend_inr`. Classify total package budget into `overall_budget`.
+5. If customer explicitly confirms GST ("Yes we have GST" or "yes"), set `has_gstin: "Y"`. If explicitly "No", set `has_gstin: "N"`. Do NOT infer 'N' if they didn't discuss GST.
+6. Return ONLY a valid JSON object without markdown formatting.
 
 Keys:
 - business_name (str)
@@ -50,8 +50,16 @@ COMMON_BUSINESS_TYPES = [
     "Retail Store", "Manufacturing", "Clinic", "Hospital", "Dental Clinic",
     "Bakery", "Restaurant", "Cafe", "Pharmacy", "Law Firm", "CA Firm",
     "Architect", "Consultant", "Warehouse", "Coaching Centre", "Hotel",
-    "Gym", "Real Estate", "IT Firm", "Software Company", "Logistics", "Auto Parts"
+    "Gym", "Real Estate", "IT Firm", "Software Company", "Logistics", "Auto Parts",
+    "Electronics Shop", "Garment Store", "Trading Company", "School", "Supermarket"
 ]
+
+GREETINGS_AND_FILLERS = {
+    "hi", "hello", "hey", "hiya", "namaste", "namaskar", "namaskaram", "vanakkam", "pranam",
+    "kese ho", "kaise ho", "kya haal hai", "good morning", "good afternoon", "good evening",
+    "ok", "okay", "yes", "no", "sure", "thanks", "thank you", "bye", "goodbye", "test", "testing",
+    "help", "start", "restart", "yo", "sup"
+}
 
 
 class EntityExtractor:
@@ -87,13 +95,42 @@ class EntityExtractor:
                     pass
 
         # -------------------------------------------------------------
-        # RESILIENT FALLBACK / HEURISTIC ENRICHMENT
-        # (Guarantees short messages, typos & direct replies never get lost)
+        # RESILIENT FALLBACK / HEURISTIC ENRICHMENT & SANITIZATION
+        # (Guarantees short messages, typos & direct replies never get lost or corrupted)
         # -------------------------------------------------------------
         msg_clean = message.strip()
         msg_lower = msg_clean.lower()
+        msg_no_punct = re.sub(r'[^\w\s]', '', msg_lower).strip()
 
-        # 1. Needs detection (e.g. 'need fiber', 'internet', 'wifi', 'leased line', 'cctv')
+        is_greeting = (
+            msg_no_punct in GREETINGS_AND_FILLERS or
+            (any(msg_no_punct.startswith(g + " ") for g in ["hi", "hello", "hey", "namaste", "vanakkam"]) and len(msg_no_punct.split()) <= 3)
+        )
+        is_lone_number = bool(re.match(r'^\d+$', msg_clean))
+
+        # Isolate the actual question from any prior acknowledgment prefix
+        q_lower = (last_question or "").lower()
+        if "?" in q_lower:
+            parts = [p.strip() for p in q_lower.split("?") if p.strip()]
+            q_target = parts[-1] if parts else q_lower
+        else:
+            q_target = q_lower
+
+        is_asking_business = any(k in q_target for k in ["what type of business", "kind of business", "nature of your business", "what business do you", "business do you run"])
+        is_asking_employees = any(k in q_target for k in ["employee", "staff", "people work", "headcount", "how many employees"])
+        is_asking_sites = any(k in q_target for k in ["branch", "branches", "locations or sites", "locations do you", "sites do you"])
+        is_asking_city = any(k in q_target for k in ["which city", "city is your", "located in"])
+
+        # 1. Sanitize text fields from greetings and numbers
+        for field in ["business_type", "business_name", "city", "current_provider"]:
+            val = extracted.get(field)
+            if val is not None:
+                s_val = str(val).strip().lower()
+                s_no_p = re.sub(r'[^\w\s]', '', s_val)
+                if s_no_p in GREETINGS_AND_FILLERS or re.match(r'^\d+$', s_val) or s_val in ["hi", "hello", "namaste"]:
+                    extracted[field] = ""
+
+        # 2. Needs detection (e.g. 'need fiber', 'internet', 'wifi', 'leased line', 'cctv')
         current_needs = extracted.get("needs") or []
         if isinstance(current_needs, str):
             current_needs = [current_needs]
@@ -110,38 +147,33 @@ class EntityExtractor:
         if current_needs:
             extracted["needs"] = current_needs
 
-        # 2. Direct answer to "What type of business do you run?" or direct business type utterance
-        if not extracted.get("business_type"):
-            is_answering_business = (last_question and ("business" in last_question.lower() or "type" in last_question.lower()))
-            
-            # Direct match or fuzzy typo match (e.g., 'retial' -> 'Retail Store')
+        # 3. Direct answer to "What type of business do you run?"
+        if not extracted.get("business_type") and not is_greeting and not is_lone_number:
             match_res = process.extractOne(msg_clean, COMMON_BUSINESS_TYPES, scorer=fuzz.ratio)
             if match_res and match_res[1] >= 65:
                 extracted["business_type"] = match_res[0]
-            elif is_answering_business and len(msg_clean.split()) <= 4:
-                # Treat the user's short response as their business name/type
+            elif is_asking_business and len(msg_clean.split()) <= 4:
                 extracted["business_type"] = msg_clean.capitalize()
 
-        # 3. Direct answer to location / city
-        if not extracted.get("city"):
-            if last_question and "city" in last_question.lower():
-                extracted["city"] = msg_clean.capitalize()
+        # 4. Direct numeric answers (e.g. '3', '15 staff', '2 branches')
+        num_m = re.search(r'\b(\d+)\b', msg_lower)
+        if num_m:
+            num_val = int(num_m.group(1))
+            if is_asking_employees:
+                extracted["employee_count"] = num_val
+                # If LLM mistakenly put the same number in num_sites or business_type, clear it
+                if extracted.get("num_sites") == num_val:
+                    extracted["num_sites"] = 0
+                if extracted.get("business_type") == str(num_val):
+                    extracted["business_type"] = ""
+            elif is_asking_sites:
+                extracted["num_sites"] = num_val
+                if extracted.get("employee_count") == num_val:
+                    extracted["employee_count"] = 0
 
-        # 4. Direct answer to number of sites / branches
-        if not extracted.get("num_sites"):
-            if last_question and ("branch" in last_question.lower() or "location" in last_question.lower() or "site" in last_question.lower()):
-                num_m = re.search(r'\b(\d+)\b', msg_lower)
-                if num_m:
-                    extracted["num_sites"] = int(num_m.group(1))
-                elif "single" in msg_lower or "one" in msg_lower or "only 1" in msg_lower:
-                    extracted["num_sites"] = 1
-
-        # 5. Direct answer to employee headcount
-        if not extracted.get("employee_count"):
-            if last_question and ("employee" in last_question.lower() or "people" in last_question.lower() or "staff" in last_question.lower()):
-                num_m = re.search(r'\b(\d+)\b', msg_lower)
-                if num_m:
-                    extracted["employee_count"] = int(num_m.group(1))
+        # 5. Direct answer to location / city
+        if not extracted.get("city") and is_asking_city and not is_greeting and not is_lone_number:
+            extracted["city"] = msg_clean.capitalize()
 
         # 6. Direct answer to GST registration
         if not extracted.get("has_gstin"):

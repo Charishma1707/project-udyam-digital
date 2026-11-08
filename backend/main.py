@@ -127,8 +127,13 @@ async def chat_endpoint(request: ChatRequest, user: Optional[Dict[str, Any]] = D
         session_id=request.session_id
     )
 
-    # If user is authenticated, save chat turns and update user profile in PostgreSQL
-    user_id = user.get("sub") or user.get("id") if user else None
+    # Check if this is a simulation / developer test session (must NOT write to database)
+    is_sim = bool(
+        (request.session_id and ("sim" in request.session_id.lower() or "mock" in request.session_id.lower()))
+    )
+
+    # If user is authenticated and not a simulation session, save chat turns and update user profile in PostgreSQL
+    user_id = user.get("sub") or user.get("id") if (user and not is_sim) else None
     if user_id:
         try:
             db_client.save_user_conversation(
@@ -185,30 +190,39 @@ async def chat_endpoint(request: ChatRequest, user: Optional[Dict[str, Any]] = D
             }
             result["escalation"] = esc_obj
 
-            # Persist directly into Neon Cloud PostgreSQL ai_escalations table
-            db_client.save_ai_escalation(esc_obj)
+            if not is_sim:
+                # Persist directly into Neon Cloud PostgreSQL ai_escalations table
+                db_client.save_ai_escalation(esc_obj)
 
-            # Record customer decision audit log with Foreign Key link to this escalation
-            db_client.save_customer_decision(
-                session_id=esc_obj["session_id"],
-                customer_name=esc_obj["customer_name"],
-                business_type=schema.business_type,
-                decision_type="ESCALATED",
-                ai_response_insights={
-                    "stage": "Customer Discovery Chat",
-                    "trigger": esc_obj["trigger_reason"],
-                    "ai_confidence": esc_obj["ai_confidence_score"],
-                    "action_required": esc_obj["recommended_action"]
-                },
-                escalation_id=esc_obj["escalation_id"]
-            )
+                # Record customer decision audit log with Foreign Key link to this escalation
+                db_client.save_customer_decision(
+                    session_id=esc_obj["session_id"],
+                    customer_name=esc_obj["customer_name"],
+                    business_type=schema.business_type,
+                    decision_type="ESCALATED",
+                    ai_response_insights={
+                        "stage": "Customer Discovery Chat",
+                        "trigger": esc_obj["trigger_reason"],
+                        "ai_confidence": esc_obj["ai_confidence_score"],
+                        "action_required": esc_obj["recommended_action"]
+                    },
+                    escalation_id=esc_obj["escalation_id"]
+                )
 
         # Only generate recommendation proposal if essential customer schema attributes have been collected
         # (Must have business_type, city, employee_count, num_sites and stated needs)
         is_schema_ready = result.get("ready_for_recommendation", False)
         completion_pct = result.get("completion_percentage", 0)
 
-        if is_schema_ready or completion_pct >= 60:
+        has_essential_fields = bool(
+            schema.business_type and (
+                (schema.needs and len(schema.needs) > 0) or
+                (schema.city and schema.employee_count) or
+                completion_pct >= 40
+            )
+        )
+
+        if is_schema_ready or completion_pct >= 40 or has_essential_fields:
             recs = bundle_engine.generate_recommendations(schema)
             result["recommendations_data"] = recs
             if isinstance(recs, dict) and recs.get("options") and len(recs["options"]) > 0:
@@ -233,8 +247,8 @@ async def chat_endpoint(request: ChatRequest, user: Optional[Dict[str, Any]] = D
     except Exception as e:
         result["recommendation_error"] = str(e)
 
-    # If user is authenticated, save voice interaction
-    user_id = user.get("sub") or user.get("id") if user else None
+    # If user is authenticated, save voice interaction (skip if simulation)
+    user_id = user.get("sub") or user.get("id") if (user and not is_sim) else None
     if user_id and schema:
         try:
             db_client.save_user_profile(

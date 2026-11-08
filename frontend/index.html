@@ -954,12 +954,18 @@
                     <p class="text-[10px] text-slate-400">Live conversation simulation</p>
                   </div>
                 </div>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Active Session</span>
+                <div class="flex items-center gap-2">
+                  <button onclick="clearDevSimChat()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center gap-1 border border-slate-200 shadow-2xs" title="Clear simulation chat &amp; reset stages">
+                    <span class="material-symbols-outlined text-[14px]">delete</span>
+                    <span>Clear Chat</span>
+                  </button>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Live Mock Sandbox</span>
+                </div>
               </div>
 
               <!-- Chat messages mirror container -->
               <div id="aiDevChatLog" class="flex-1 overflow-y-auto py-3 space-y-2.5 custom-scrollbar text-xs">
-                <div class="p-4 text-center text-slate-400">Loading conversation history...</div>
+                <div class="p-6 text-center text-slate-400 text-xs">Sandbox chat ready. Type as customer below to test AI discovery and tailored recommendations live.</div>
               </div>
 
               <!-- Interactive testing chat box -->
@@ -4113,59 +4119,72 @@
     }
 
     // =========================================================================
-    // 7. DEVELOPER AI AGENT WORKING DASHBOARD & TELEMETRY
+    // 7. DEVELOPER AI AGENT WORKING DASHBOARD & TELEMETRY (LIVE MOCK SANDBOX)
     // =========================================================================
-    let aiDebuggerPollTimer = null;
-    let cachedAiLogs = [];
-    let selectedAiLogIndex = 0;
+    let devSimSessionId = 'sim-' + Math.random().toString(36).substring(2, 9);
+    let devSimTurns = []; // In-memory sandbox turns: [{ turnNum, request, response, timestamp }]
+    let devSimCurrentTurnIndex = 0;
 
-    async function fetchAiAgentTelemetryLogs() {
-      try {
-        const res = await fetch(`${API_BASE}/api/ai/telemetry-logs?limit=40`);
-        const data = await res.json();
-        if (data.status === 'success') {
-          cachedAiLogs = data.logs || [];
-          if (cachedAiLogs.length > 0) {
-            if (selectedAiLogIndex >= cachedAiLogs.length) selectedAiLogIndex = 0;
-            renderAiDevSplitView(selectedAiLogIndex);
-          } else {
-            renderEmptyAiDevSplitView();
-          }
-        }
-      } catch (err) {
-        console.warn('Failed to fetch AI telemetry logs:', err);
+    function clearDevSimChat() {
+      devSimTurns = [];
+      devSimCurrentTurnIndex = 0;
+      devSimSessionId = 'sim-' + Math.random().toString(36).substring(2, 9);
+
+      const chatLog = document.getElementById('aiDevChatLog');
+      if (chatLog) {
+        chatLog.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">Sandbox chat cleared. Type as customer below to test AI discovery and recommendations live.</div>`;
       }
+
+      renderEmptyAiDevSplitView();
+      showAddedToast('✓ Developer simulation chat cleared!');
     }
 
     function renderEmptyAiDevSplitView() {
-      const chatLog = document.getElementById('aiDevChatLog');
+      document.getElementById('aiDevTurnSelectorBadge').textContent = 'Turn #0';
+      document.getElementById('aiDevTurnPageLabel').textContent = '0 of 0';
+      document.getElementById('aiDevUserReqText').textContent = 'Waiting for user message...';
+      document.getElementById('aiDevBotResText').textContent = 'Awaiting AI reply...';
+
       const stagesCont = document.getElementById('aiDevStagesProgressContainer');
-      if (chatLog) chatLog.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">No active conversation yet. Type in the box below to test how the AI behaves live.</div>`;
       if (stagesCont) stagesCont.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">Waiting for conversation pipeline trace to evolve...</div>`;
+
+      const badge = document.getElementById('aiDevCompletionBadge');
+      if (badge) {
+        badge.textContent = '0% Collected';
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-[#e40000] border border-red-200';
+      }
+      document.getElementById('aiDevSchType').textContent = 'Not identified';
+      document.getElementById('aiDevSchCity').textContent = 'Not identified';
+      document.getElementById('aiDevSchStaff').textContent = '-';
+      document.getElementById('aiDevSchNeeds').textContent = '-';
+
+      document.getElementById('aiDevPlanCost').textContent = 'Discovery Phase';
+      document.getElementById('aiDevPlanSummary').textContent = 'Customer schema completeness below recommendation threshold (needs > 40% profile discovery).';
     }
 
-    function renderAiDevSplitView(index) {
-      if (!cachedAiLogs || cachedAiLogs.length === 0) {
+    function renderDevSimTurn(index) {
+      if (!devSimTurns || devSimTurns.length === 0) {
         renderEmptyAiDevSplitView();
         return;
       }
 
-      const item = cachedAiLogs[index] || cachedAiLogs[0];
-      const reqObj = item.request || item.request_data || {};
-      const resObj = item.response || item.response_data || {};
-      const userMsg = reqObj.message || '(Customer action / inquiry)';
-      const botReply = resObj.reply || '(Awaiting turn reply)';
+      if (index < 0) index = 0;
+      if (index >= devSimTurns.length) index = devSimTurns.length - 1;
+      devSimCurrentTurnIndex = index;
+
+      const item = devSimTurns[index];
+      const reqObj = item.request || {};
+      const resObj = item.response || {};
+      const userMsg = reqObj.message || '(Customer message)';
+      const botReply = resObj.reply || '(Awaiting reply)';
       const schema = resObj.customer_schema || {};
       const recPlan = resObj.recommended_plan;
       const pipelineTrace = resObj.pipeline_trace || [];
-      const totalTurns = cachedAiLogs.length;
+      const totalTurns = devSimTurns.length;
 
       // Update Pagination controls
-      document.getElementById('aiDevTurnSelectorBadge').textContent = `Turn #${totalTurns - index}`;
+      document.getElementById('aiDevTurnSelectorBadge').textContent = `Turn #${item.turnNum || (index + 1)}`;
       document.getElementById('aiDevTurnPageLabel').textContent = `${index + 1} of ${totalTurns}`;
-
-      // Left Column: Render Customer Chat Mirror
-      renderCustomerChatMirror(index);
 
       // Left Column: Customer Schema Progress
       const completion = resObj.completion_percentage !== undefined ? resObj.completion_percentage : 0;
@@ -4205,35 +4224,6 @@
         planCostEl.textContent = 'Discovery Phase';
         planSummEl.textContent = 'Customer schema completeness below recommendation threshold (needs > 40% profile discovery).';
       }
-    }
-
-    function renderCustomerChatMirror(currentIndex) {
-      const chatLog = document.getElementById('aiDevChatLog');
-      if (!chatLog) return;
-      chatLog.innerHTML = '';
-
-      // Reconstruct turns up to currentIndex in chronological order
-      const sliceTurns = cachedAiLogs.slice(currentIndex).reverse();
-      sliceTurns.forEach(t => {
-        const req = t.request || t.request_data || {};
-        const res = t.response || t.response_data || {};
-
-        if (req.message) {
-          const uDiv = document.createElement('div');
-          uDiv.className = 'self-end bg-[#e40000] text-white px-3 py-1.5 rounded-xl text-xs max-w-[85%] ml-auto';
-          uDiv.textContent = req.message;
-          chatLog.appendChild(uDiv);
-        }
-
-        if (res.reply) {
-          const bDiv = document.createElement('div');
-          bDiv.className = 'self-start bg-slate-100 text-slate-800 px-3 py-1.5 rounded-xl text-xs max-w-[90%]';
-          bDiv.innerHTML = res.reply;
-          chatLog.appendChild(bDiv);
-        }
-      });
-
-      chatLog.scrollTop = chatLog.scrollHeight;
     }
 
     function renderEvolvingStages(pipelineTrace) {
@@ -4285,16 +4275,16 @@
     }
 
     function prevAiDevTurn() {
-      if (selectedAiLogIndex < cachedAiLogs.length - 1) {
-        selectedAiLogIndex++;
-        renderAiDevSplitView(selectedAiLogIndex);
+      if (devSimCurrentTurnIndex > 0) {
+        devSimCurrentTurnIndex--;
+        renderDevSimTurn(devSimCurrentTurnIndex);
       }
     }
 
     function nextAiDevTurn() {
-      if (selectedAiLogIndex > 0) {
-        selectedAiLogIndex--;
-        renderAiDevSplitView(selectedAiLogIndex);
+      if (devSimCurrentTurnIndex < devSimTurns.length - 1) {
+        devSimCurrentTurnIndex++;
+        renderDevSimTurn(devSimCurrentTurnIndex);
       }
     }
 
@@ -4304,39 +4294,109 @@
       if (!msg) return;
       input.value = '';
 
-      // Also set customer chat input and invoke sendChatMessage
-      const mainInput = document.getElementById('chatInput');
-      if (mainInput) mainInput.value = msg;
-      await sendChatMessage();
+      const chatLog = document.getElementById('aiDevChatLog');
+      if (chatLog) {
+        // If initial placeholder is showing, clear it
+        if (devSimTurns.length === 0) {
+          chatLog.innerHTML = '';
+        }
 
-      // Immediately pull fresh telemetry logs
-      setTimeout(fetchAiAgentTelemetryLogs, 800);
+        // 1. Append User message immediately
+        const uDiv = document.createElement('div');
+        uDiv.className = 'self-end bg-[#e40000] text-white px-3 py-1.5 rounded-xl text-xs max-w-[85%] ml-auto break-words shadow-2xs';
+        uDiv.textContent = msg;
+        chatLog.appendChild(uDiv);
+
+        // 2. Append temporary typing indicator
+        const typingDiv = document.createElement('div');
+        typingDiv.id = 'aiDevSimTyping';
+        typingDiv.className = 'self-start text-[11px] text-slate-400 italic py-1';
+        typingDiv.textContent = 'Airtel AI Advisor is thinking...';
+        chatLog.appendChild(typingDiv);
+
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: msg,
+            session_id: devSimSessionId
+          })
+        });
+
+        // Remove typing indicator
+        document.getElementById('aiDevSimTyping')?.remove();
+
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+
+        // 3. Append Bot reply
+        if (chatLog) {
+          const bDiv = document.createElement('div');
+          bDiv.className = 'self-start bg-slate-100 text-slate-800 px-3 py-1.5 rounded-xl text-xs max-w-[90%] leading-relaxed shadow-2xs';
+          bDiv.innerHTML = data.reply || 'Understood.';
+          chatLog.appendChild(bDiv);
+
+          // If tailored recommendation generated, show a clean plan card in chat
+          if (data.recommended_plan) {
+            const plan = data.recommended_plan;
+            const recDiv = document.createElement('div');
+            recDiv.className = 'self-start bg-emerald-50 border border-emerald-200 text-emerald-900 p-2.5 rounded-xl text-xs max-w-[92%] mt-1 shadow-2xs';
+            recDiv.innerHTML = `
+              <div class="flex items-center justify-between font-bold text-emerald-800">
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[15px]">verified</span>${plan.bundle_name || 'Tailored Suite'}</span>
+                <span class="font-mono">₹${Math.round(plan.monthly_cost || 0).toLocaleString('en-IN')}/mo</span>
+              </div>
+              <p class="text-[11px] text-emerald-700 mt-1">${plan.explanation || 'Tailored based on verified customer requirements.'}</p>
+            `;
+            chatLog.appendChild(recDiv);
+          }
+
+          chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        // 4. Record turn and update right pane immediately
+        devSimTurns.push({
+          turnNum: devSimTurns.length + 1,
+          request: { message: msg },
+          response: data,
+          timestamp: new Date().toLocaleTimeString()
+        });
+
+        renderDevSimTurn(devSimTurns.length - 1);
+
+      } catch (err) {
+        document.getElementById('aiDevSimTyping')?.remove();
+        if (chatLog) {
+          const errDiv = document.createElement('div');
+          errDiv.className = 'self-start bg-red-50 text-red-700 px-3 py-1.5 rounded-xl text-xs';
+          errDiv.textContent = 'Error: ' + err.message;
+          chatLog.appendChild(errDiv);
+        }
+      }
+    }
+
+    // Optional background sync if ever needed
+    async function fetchAiAgentTelemetryLogs() {
+      // If we have simulation turns, keep them active; otherwise render empty
+      if (devSimTurns.length === 0) {
+        renderEmptyAiDevSplitView();
+      }
     }
 
     function toggleAutoRefreshAiDebugger() {
-      const checkbox = document.getElementById('autoRefreshAiDebugger');
-      if (checkbox && checkbox.checked) {
-        startAiDebuggerPolling();
-      } else {
-        stopAiDebuggerPolling();
-      }
+      // In live mock sandbox mode, updates trigger on each turn synchronously
     }
 
     function startAiDebuggerPolling() {
-      stopAiDebuggerPolling();
-      aiDebuggerPollTimer = setInterval(() => {
-        const sec = document.getElementById('section-admin-agent-debugger');
-        if (sec && !sec.classList.contains('hidden')) {
-          fetchAiAgentTelemetryLogs();
-        }
-      }, 2000);
+      // Kept for interface compatibility
     }
 
     function stopAiDebuggerPolling() {
-      if (aiDebuggerPollTimer) {
-        clearInterval(aiDebuggerPollTimer);
-        aiDebuggerPollTimer = null;
-      }
+      // Kept for interface compatibility
     }
 
     // INIT

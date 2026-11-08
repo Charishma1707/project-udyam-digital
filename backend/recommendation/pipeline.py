@@ -54,7 +54,7 @@ class RecommendationPipeline:
             "needs": profile.get("needs_raw", [])
         }
 
-        if not ready and not profile.get("needs_raw"):
+        if not ready:
             return {
                 "ready": False,
                 "profile_used": profile_used,

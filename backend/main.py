@@ -203,21 +203,32 @@ async def chat_endpoint(request: ChatRequest, user: Optional[Dict[str, Any]] = D
                 escalation_id=esc_obj["escalation_id"]
             )
 
-        recs = bundle_engine.generate_recommendations(schema)
-        result["recommendations_data"] = recs
-        result["recommendations_data"] = recs
-        if isinstance(recs, dict) and recs.get("options"):
-            top_opt = recs["options"][0]
-            quote = top_opt.get("quote", {})
-            result["recommended_plan"] = {
-                "bundle_name": top_opt.get("label") or "Recommended Enterprise Plan",
-                "bundle_code": top_opt.get("bundle_code") or "BUNDLE-LIVE",
-                "products": quote.get("products", []),
-                "monthly_cost": quote.get("monthly_total") or 4199.0,
-                "setup_cost": quote.get("setup_total") or 0.0,
-                "contract_months": quote.get("contract_months") or 12,
-                "explanation": top_opt.get("explanation", {}).get("text") or "Tailored commercial connectivity with 99.9% uptime SLA.",
-                "optional_addons": top_opt.get("addons", {}).get("optional", [])
+        # Only generate recommendation proposal if essential customer schema attributes have been collected
+        # (Must have business_type, city, employee_count, num_sites and stated needs)
+        is_schema_ready = result.get("ready_for_recommendation", False)
+        completion_pct = result.get("completion_percentage", 0)
+
+        if is_schema_ready or completion_pct >= 60:
+            recs = bundle_engine.generate_recommendations(schema)
+            result["recommendations_data"] = recs
+            if isinstance(recs, dict) and recs.get("options") and len(recs["options"]) > 0:
+                top_opt = recs["options"][0]
+                quote = top_opt.get("quote", {})
+                result["recommended_plan"] = {
+                    "bundle_name": top_opt.get("label") or "Recommended Enterprise Plan",
+                    "bundle_code": top_opt.get("bundle_code") or "BUNDLE-LIVE",
+                    "products": quote.get("products", []),
+                    "monthly_cost": quote.get("monthly_total") or 4199.0,
+                    "setup_cost": quote.get("setup_total") or 0.0,
+                    "contract_months": quote.get("contract_months") or 12,
+                    "explanation": top_opt.get("explanation", {}).get("text") or "Tailored commercial connectivity with 99.9% uptime SLA.",
+                    "optional_addons": top_opt.get("addons", {}).get("optional", [])
+                }
+        else:
+            result["recommended_plan"] = None
+            result["recommendations_data"] = {
+                "ready": False,
+                "message": "Customer schema in discovery phase. Awaiting essential profile fields."
             }
     except Exception as e:
         result["recommendation_error"] = str(e)
@@ -270,20 +281,30 @@ async def voice_endpoint(
     try:
         session = session_memory.get_or_create(session_id)
         schema = session.schema
-        recs = bundle_engine.generate_recommendations(schema)
-        result["recommendations_data"] = recs
-        if isinstance(recs, dict) and recs.get("options"):
-            top_opt = recs["options"][0]
-            quote = top_opt.get("quote", {})
-            result["recommended_plan"] = {
-                "bundle_name": top_opt.get("label") or "Recommended Enterprise Plan",
-                "bundle_code": top_opt.get("bundle_code") or "BUNDLE-LIVE",
-                "products": quote.get("products", []),
-                "monthly_cost": quote.get("monthly_total") or 4199.0,
-                "setup_cost": quote.get("setup_total") or 0.0,
-                "contract_months": quote.get("contract_months") or 12,
-                "explanation": top_opt.get("explanation", {}).get("text") or "Tailored commercial connectivity with 99.9% uptime SLA.",
-                "optional_addons": top_opt.get("addons", {}).get("optional", [])
+        is_schema_ready = result.get("ready_for_recommendation", False)
+        completion_pct = result.get("completion_percentage", 0)
+
+        if is_schema_ready or completion_pct >= 60:
+            recs = bundle_engine.generate_recommendations(schema)
+            result["recommendations_data"] = recs
+            if isinstance(recs, dict) and recs.get("options") and len(recs["options"]) > 0:
+                top_opt = recs["options"][0]
+                quote = top_opt.get("quote", {})
+                result["recommended_plan"] = {
+                    "bundle_name": top_opt.get("label") or "Recommended Enterprise Plan",
+                    "bundle_code": top_opt.get("bundle_code") or "BUNDLE-LIVE",
+                    "products": quote.get("products", []),
+                    "monthly_cost": quote.get("monthly_total") or 4199.0,
+                    "setup_cost": quote.get("setup_total") or 0.0,
+                    "contract_months": quote.get("contract_months") or 12,
+                    "explanation": top_opt.get("explanation", {}).get("text") or "Tailored commercial connectivity with 99.9% uptime SLA.",
+                    "optional_addons": top_opt.get("addons", {}).get("optional", [])
+                }
+        else:
+            result["recommended_plan"] = None
+            result["recommendations_data"] = {
+                "ready": False,
+                "message": "Customer schema in discovery phase. Awaiting essential profile fields."
             }
     except Exception as e:
         result["recommendation_error"] = str(e)
@@ -1155,7 +1176,8 @@ async def serve_index():
             content = f.read()
 
         # Inject runtime environment variable into HTML <head>
-        backend_env_url = os.getenv("BACKEND_URL") or os.getenv("API_BASE_URL") or os.getenv("RENDER_EXTERNAL_URL") or ""
+        # If running locally on localhost/127.0.0.1, always target local server so inspection works seamlessly
+        backend_env_url = "" if os.getenv("RENDER") is None else (os.getenv("BACKEND_URL") or os.getenv("API_BASE_URL") or os.getenv("RENDER_EXTERNAL_URL") or "")
         injection = f"""<script>
     window.ENV_API_BASE = {json.dumps(backend_env_url)};
   </script>"""

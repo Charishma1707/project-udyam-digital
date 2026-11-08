@@ -28,11 +28,19 @@
     };
   </script>
   <style>
-    body { background-color: #f8fafc; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background-color: #f8fafc; color: #0f172a; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     .nav-btn.active { background-color: #e40000; color: #ffffff; font-weight: 700; box-shadow: 0 4px 12px rgba(228, 0, 0, 0.25); }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    @media (max-width: 640px) {
+      .mobile-safe-bottom { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)); }
+      .mobile-touch-target { min-height: 44px; min-width: 44px; }
+    }
+    .mobile-nav-btn.active { color: #e40000; font-weight: 700; }
+    .mobile-nav-btn.active .mobile-icon-wrap { background-color: #fee2e2; color: #e40000; transform: translateY(-1px); }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
@@ -59,6 +67,10 @@
           <div id="userProfilePill" class="hidden flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-100 border border-slate-200 text-xs">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             <span id="userEmailLabel" class="font-bold text-slate-800 max-w-[130px] truncate">user@example.com</span>
+            <button onclick="clearAllCustomerInfo()" title="Clear all customer info & history from database" class="text-xs font-semibold px-2 py-0.5 rounded-lg bg-red-50 text-[#e40000] border border-red-200 hover:bg-[#e40000] hover:text-white transition flex items-center gap-1 ml-1">
+              <span class="material-symbols-outlined text-[13px]">delete_sweep</span>
+              <span class="hidden sm:inline">Clear Info</span>
+            </button>
             <button onclick="handleLogout()" title="Sign Out" class="text-slate-400 hover:text-red-600 ml-1 transition">
               <span class="material-symbols-outlined text-[15px]">logout</span>
             </button>
@@ -256,7 +268,7 @@
     </nav>
 
     <!-- MAIN CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 mobile-safe-bottom">
 
       <!-- TAB 1: PRODUCTS CATALOGUE -->
       <section id="section-products" class="tab-section block">
@@ -265,9 +277,9 @@
             <h1 class="text-xl font-bold text-slate-900">Airtel Business Enterprise Products</h1>
             <p class="text-xs text-slate-500">Live products retrieved from PostgreSQL Catalogue</p>
           </div>
-          <div class="flex items-center gap-2">
-            <input type="text" id="productSearch" oninput="filterProducts()" placeholder="Filter products by name or category..." class="px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white w-64 focus:outline-none focus:border-[#e40000]">
-            <select id="categoryFilter" onchange="filterProducts()" class="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white text-slate-700 font-semibold focus:outline-none">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <input type="text" id="productSearch" oninput="filterProducts()" placeholder="Filter products by name..." class="px-3.5 py-2 text-xs border border-slate-300 rounded-xl bg-white w-full sm:w-64 focus:outline-none focus:border-[#e40000]">
+            <select id="categoryFilter" onchange="filterProducts()" class="px-3 py-2 text-xs border border-slate-300 rounded-xl bg-white text-slate-700 font-semibold focus:outline-none w-full sm:w-auto">
               <option value="ALL">All Categories</option>
               <option value="Connectivity">Connectivity</option>
               <option value="Security">Security</option>
@@ -281,7 +293,7 @@
       <!-- TAB 2: AI ADVISOR & VOICE -->
       <section id="section-assistant" class="tab-section hidden">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col h-[600px]">
+          <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-3.5 sm:p-5 shadow-sm flex flex-col h-[70vh] sm:h-[600px]">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-red-100 text-[#e40000] flex items-center justify-center font-bold">
@@ -293,20 +305,24 @@
                 </div>
               </div>
               <div class="flex items-center gap-2">
-                <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-600 ml-1 px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition">Clear Chat</button>
+                <button onclick="clearChat()" class="text-xs text-slate-500 hover:text-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition">Clear Chat</button>
+                <button onclick="clearAllCustomerInfo()" class="text-xs text-red-600 hover:text-white hover:bg-[#e40000] px-2.5 py-1 rounded-lg border border-red-200 transition flex items-center gap-1 font-semibold" title="Removes all customer info, schema, KYC, and chat history from database">
+                  <span class="material-symbols-outlined text-[13px]">delete_forever</span>
+                  <span>Clear Your Info</span>
+                </button>
               </div>
             </div>
 
             <div id="chatMessages" class="flex-1 overflow-y-auto py-4 space-y-3 custom-scrollbar"></div>
 
-            <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
-              <button id="micBtn" onclick="toggleVoiceRecording()" title="Speak with Airtel Advisor" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e40000] flex items-center justify-center transition">
-                <span class="material-symbols-outlined text-[20px]">mic</span>
+            <div class="pt-2.5 sm:pt-3 border-t border-slate-100 flex items-center gap-1.5 sm:gap-2">
+              <button id="micBtn" onclick="toggleVoiceRecording()" title="Speak with Airtel Advisor" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-700 hover:text-[#e40000] flex items-center justify-center transition shrink-0 mobile-touch-target">
+                <span class="material-symbols-outlined text-[22px]">mic</span>
               </button>
-              <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Describe your business needs (e.g., 'Need 200 Mbps for clinic in Pune')..." class="flex-1 px-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000] focus:bg-white">
-              <button onclick="sendChatMessage()" class="px-4 py-2.5 bg-[#e40000] hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
-                <span>Send</span>
-                <span class="material-symbols-outlined text-[16px]">send</span>
+              <input type="text" id="chatInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Ask about internet, cloud, CCTV (Hindi/Eng)..." class="flex-1 px-3.5 py-2.5 text-xs sm:text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#e40000] focus:bg-white min-w-0">
+              <button onclick="sendChatMessage()" class="px-3.5 sm:px-4 py-2.5 bg-[#e40000] hover:bg-red-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shadow-sm shrink-0 mobile-touch-target">
+                <span class="hidden sm:inline">Send</span>
+                <span class="material-symbols-outlined text-[18px]">send</span>
               </button>
             </div>
           </div>
@@ -1286,6 +1302,64 @@
             updateCartUI();
           }
         }
+
+        // 3. Fetch user conversations from database and restore in chat
+        try {
+          const convRes = await fetch(`${API_BASE}/api/user/conversations`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (convRes.ok) {
+            const convData = await convRes.json();
+            if (Array.isArray(convData.conversations) && convData.conversations.length > 0) {
+              const chatContainer = document.getElementById('chatMessages');
+              if (chatContainer) {
+                chatContainer.innerHTML = '';
+                appendMessage('Namaste! Welcome back to Airtel Business. Restored your previous session from database.', 'bot');
+                convData.conversations.forEach(c => {
+                  if (c.message) {
+                    appendMessage(c.message, c.sender === 'user' ? 'user' : 'bot');
+                  }
+                });
+              }
+            }
+          }
+        } catch (convErr) {
+          console.warn('Could not restore conversations:', convErr);
+        }
+
+        // 4. Fetch verified KYC record from database and restore verified status
+        try {
+          const kycRes = await fetch(`${API_BASE}/api/kyc/records`);
+          if (kycRes.ok) {
+            const kycData = await kycRes.json();
+            const activeUserId = (currentUser && currentUser.id) ? currentUser.id : '';
+            const matchingRecord = (kycData.records || []).find(r => 
+              (r.applicant_id && (r.applicant_id === activeUserId || r.applicant_id === currentUser?.email)) ||
+              (r.session_id && (r.session_id.includes(activeUserId) || r.session_id === currentSessionId))
+            );
+            if (matchingRecord && matchingRecord.registry_record) {
+              const isApproved = matchingRecord.verification_status === 'APPROVED' || matchingRecord.registry_matched === 1;
+              syncVerifiedKycToEntireApp({
+                kyc_approved: isApproved,
+                status: matchingRecord.verification_status,
+                extracted_data: matchingRecord.registry_record.extracted_data || matchingRecord.registry_record
+              });
+              const kycBadge = document.getElementById('kycVerdictBadge');
+              if (kycBadge && isApproved) {
+                kycBadge.textContent = 'APPROVED';
+                kycBadge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200';
+              }
+              const kycHeadline = document.getElementById('kycStatusHeadline');
+              if (kycHeadline && isApproved) {
+                kycHeadline.textContent = 'KYC Verified (Restored from Cloud Database)';
+              }
+              const pill = document.getElementById('kycVerifiedBadgePill');
+              if (pill && isApproved) pill.classList.remove('hidden');
+            }
+          }
+        } catch (kycErr) {
+          console.warn('Could not restore KYC records:', kycErr);
+        }
       } catch (err) {
         console.warn('Could not sync cloud data:', err);
       }
@@ -1434,6 +1508,7 @@
         roleBadge.textContent = 'Customer Portal';
         roleBadge.className = 'text-[11px] bg-red-50 text-[#e40000] border border-red-200 font-bold px-2 py-0.5 rounded-full ml-2';
         document.getElementById('cartHeaderBtn')?.classList.remove('hidden');
+        document.getElementById('mobileBottomNav')?.classList.remove('hidden');
         document.querySelectorAll('.customer-tab').forEach(el => el.classList.remove('hidden'));
         document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
         switchTab('products');
@@ -1441,6 +1516,7 @@
         roleBadge.textContent = 'Admin Console';
         roleBadge.className = 'text-[11px] bg-slate-100 text-slate-800 border border-slate-300 font-bold px-2 py-0.5 rounded-full ml-2';
         document.getElementById('cartHeaderBtn')?.classList.add('hidden');
+        document.getElementById('mobileBottomNav')?.classList.add('hidden');
         document.querySelectorAll('.customer-tab').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.admin-tab').forEach(el => el.classList.remove('hidden'));
         fetchSalesDashboard();
@@ -1453,6 +1529,7 @@
       document.getElementById('portalContentWrapper').classList.add('hidden');
       document.getElementById('switchRoleBtn').classList.add('hidden');
       document.getElementById('cartHeaderBtn')?.classList.add('hidden');
+      document.getElementById('mobileBottomNav')?.classList.add('hidden');
       document.getElementById('roleBadge').textContent = 'Access Portal';
     }
 
@@ -1460,11 +1537,19 @@
     function switchTab(tabId) {
       document.querySelectorAll('.tab-section').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.mobile-nav-btn').forEach(el => el.classList.remove('active'));
 
       const sec = document.getElementById('section-' + tabId);
       const btn = document.getElementById('tab-' + tabId);
+      const mobBtn = document.getElementById('mob-tab-' + tabId);
       if (sec) sec.classList.remove('hidden');
       if (btn) btn.classList.add('active');
+      if (mobBtn) mobBtn.classList.add('active');
+
+      // Scroll smoothly to top on mobile tab change
+      if (window.innerWidth <= 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 
       if (tabId === 'admin-agent-debugger') {
         fetchAiAgentTelemetryLogs();
@@ -1653,6 +1738,12 @@
     function updateCartUI() {
       const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0);
       document.getElementById('cartBadgeCount').textContent = totalItems;
+      const mobBadge = document.getElementById('mobileCartBadge');
+      if (mobBadge) {
+        mobBadge.textContent = totalItems;
+        if (totalItems > 0) mobBadge.classList.remove('hidden');
+        else mobBadge.classList.add('hidden');
+      }
       document.getElementById('navCartCount').textContent = totalItems;
       const cartItemsCountEl = document.getElementById('cartItemsCount');
       if (cartItemsCountEl) cartItemsCountEl.textContent = totalItems;
@@ -1952,79 +2043,35 @@
       if (!listEl) return;
       listEl.innerHTML = '';
 
-      // Standard telecom provisioned stack if raw products is empty or simple array
-      const productItems = [
-        {
-          id: 'PROD-FIBRE',
-          name: '300 Mbps Symmetric Optical Fibre',
-          tag: '99.9% Uptime',
+      if (!products || products.length === 0) {
+        listEl.innerHTML = '<p class="text-xs text-slate-400 italic">No products provisioned.</p>';
+        return;
+      }
+
+      const productItems = products.map((p, idx) => {
+        const pName = typeof p === 'object' ? (p.product_name || p.name || 'Provisioned Solution') : p;
+        const pId = typeof p === 'object' ? (p.product_id || p.id || `PROD-${idx}`) : `PROD-${idx}`;
+        const pMonthly = typeof p === 'object' ? (p.monthly || p.monthly_price_inr || p.price || 0) : 0;
+        const pSetup = typeof p === 'object' ? (p.one_time_setup_inr || p.setup || 0) : 0;
+        const pDesc = typeof p === 'object' ? (p.description || p.tagline || 'Enterprise Service SLA') : 'Dedicated commercial solution';
+        const pTag = typeof p === 'object' ? (p.category || 'Standard SLA') : 'Standard SLA';
+
+        return {
+          id: pId,
+          name: pName,
+          tag: pTag,
           tagClass: 'bg-blue-100 text-blue-700',
-          desc: 'Dedicated 1:1 Bandwidth with strict SLA',
-          price: '₹2,699/mo',
-          monthly: 2699,
+          desc: pDesc,
+          price: `₹${Number(pMonthly).toLocaleString('en-IN')}/mo`,
+          monthly: Number(pMonthly),
           period: 'Annual Contract',
-          icon: 'speed',
-          iconBg: 'bg-blue-600 text-white',
+          icon: idx === 0 ? 'speed' : (idx === 1 ? 'videocam' : (idx === 2 ? 'dns' : 'handyman')),
+          iconBg: idx === 0 ? 'bg-blue-600 text-white' : (idx === 1 ? 'bg-amber-600 text-white' : 'bg-purple-600 text-white'),
           cardBg: 'bg-blue-50/40 border-blue-100',
           checked: true,
-          setup: 0
-        },
-        {
-          id: 'PROD-CCTV',
-          name: '4 HD Cloud CCTV Cameras',
-          tag: '30-Day Cloud',
-          tagClass: 'bg-amber-100 text-amber-800',
-          desc: 'Encrypted cloud secure archive & audit trail',
-          price: '+ ₹1,200/mo',
-          monthly: 1200,
-          period: 'NABH Compliant',
-          icon: 'videocam',
-          iconBg: 'bg-amber-600 text-white',
-          cardBg: 'bg-amber-50/40 border-amber-100',
-          checked: true,
-          setup: 0
-        },
-        {
-          id: 'PROD-IP',
-          name: 'Static IPv4 Subnet Pool',
-          tag: '/29 Public Subnet',
-          tagClass: 'bg-purple-100 text-purple-700',
-          desc: 'Secure Tele-Radiology & PACS hospital servers',
-          price: '+ ₹300/mo',
-          monthly: 300,
-          period: 'Smart Routing',
-          icon: 'dns',
-          iconBg: 'bg-purple-600 text-white',
-          cardBg: 'bg-purple-50/40 border-purple-100',
-          checked: true,
-          setup: 0
-        },
-        {
-          id: 'PROD-SETUP',
-          name: 'Enterprise Splicing & Setup',
-          tag: 'Zero Pkts Loss',
-          tagClass: 'bg-emerald-100 text-emerald-800',
-          desc: 'OTDR tested zero loss optical patch termination',
-          price: '₹1,000 One-time',
-          monthly: 0,
-          period: 'Cisco Router Config',
-          icon: 'handyman',
-          iconBg: 'bg-emerald-600 text-white',
-          cardBg: 'bg-emerald-50/40 border-emerald-100',
-          checked: true,
-          setup: 1000
-        }
-      ];
-
-      // If backend passed specific products, customize the first card
-      if (products && products.length > 0) {
-        const first = products[0];
-        const firstName = typeof first === 'object' ? first.product_name : first;
-        const firstPrice = typeof first === 'object' ? (first.monthly || first.monthly_price_inr || 2699) : 2699;
-        productItems[0].name = firstName;
-        productItems[0].monthly = Number(firstPrice);
-        productItems[0].price = `₹${Number(firstPrice).toLocaleString('en-IN')}/mo`;
-      }
+          setup: Number(pSetup)
+        };
+      });
 
       productItems.forEach((item, idx) => {
         const isUntoggled = untoggledPrimaryItemIds.has(item.id);
@@ -2063,55 +2110,36 @@
       if (!listEl) return;
       listEl.innerHTML = '';
 
-      const curatedAddons = [
-        {
-          id: 'ADDON-CISCO',
-          name: 'Cisco Dual-WAN Router',
-          tag: 'Gigabit VPN',
+      if (!addons || addons.length === 0) {
+        return;
+      }
+
+      const curatedAddons = addons.map((a, idx) => {
+        const aName = a.product_name || a.name || `Add-on Solution ${idx + 1}`;
+        const aId = a.product_id || a.id || `ADDON-${idx}`;
+        const aMonthly = a.monthly_delta || a.monthly_price_inr || a.price || 0;
+        const aDesc = a.description || a.tagline || 'Enterprise add-on upgrade';
+        return {
+          id: aId,
+          name: aName,
+          tag: a.category || 'Managed Solution',
           tagClass: 'bg-cyan-100 text-cyan-800',
-          desc: 'Hardware lease + proactive lifetime replacement',
-          price: '+ ₹550/mo',
-          meta: 'Managed Device',
-          icon: 'router',
-          iconBg: 'bg-cyan-600 text-white',
-          monthly: 550,
-          setup: 0
-        },
-        {
-          id: 'ADDON-SLA',
-          name: 'Platinum 24/7 Operations SLA',
-          tag: '2-Hour MTTR',
-          tagClass: 'bg-indigo-100 text-indigo-800',
-          desc: 'Dedicated enterprise engineer L3 desk',
-          price: '+ ₹600/mo',
-          meta: 'Priority Queue',
-          icon: 'headset_mic',
-          iconBg: 'bg-indigo-600 text-white',
-          monthly: 600,
-          setup: 0
-        },
-        {
-          id: 'ADDON-FAILOVER',
-          name: 'Secondary 4G/5G Failover',
-          tag: 'Auto-Switch',
-          tagClass: 'bg-rose-100 text-rose-800',
-          desc: 'Uninterrupted card swipes & patient telemetry',
-          price: '+ ₹350/mo',
-          meta: 'Seamless Sync',
-          icon: 'cell_tower',
-          iconBg: 'bg-rose-600 text-white',
-          monthly: 350,
-          setup: 0
-        }
-      ];
+          desc: aDesc,
+          price: `+ ₹${Number(aMonthly).toLocaleString('en-IN')}/mo`,
+          meta: 'Managed Option',
+          icon: 'tune',
+          monthly: Number(aMonthly),
+          cardBg: 'bg-cyan-50/40 border-cyan-100'
+        };
+      });
 
       curatedAddons.forEach(addon => {
         const isToggled = toggledAddonIds.has(addon.id);
         const card = document.createElement('div');
-        card.className = `p-3 rounded-xl border transition flex items-start justify-between gap-3 ${isToggled ? 'bg-red-50/60 border-red-200' : 'bg-slate-50/50 border-slate-200 hover:border-slate-300'}`;
+        card.className = `p-3 rounded-xl border ${addon.cardBg} transition flex items-start justify-between gap-3 ${isToggled ? 'ring-1 ring-cyan-400' : 'opacity-70'}`;
         card.innerHTML = `
           <div class="flex items-start gap-2.5 flex-1 min-w-0">
-            <div class="w-8 h-8 rounded-lg ${addon.iconBg} flex items-center justify-center shrink-0 mt-0.5">
+            <div class="w-8 h-8 rounded-lg bg-cyan-600 text-white flex items-center justify-center shrink-0 mt-0.5">
               <span class="material-symbols-outlined text-[18px]">${addon.icon}</span>
             </div>
             <div class="flex-1 min-w-0">
@@ -2162,54 +2190,47 @@
     }
 
     function recalculatePlanTotals() {
-      // Base breakdown for primary stack items
-      const primaryItemMonthly = {
-        'PROD-FIBRE': 2699,
-        'PROD-CCTV': 1200,
-        'PROD-IP': 300,
-        'PROD-SETUP': 0
-      };
-      const primaryItemSetup = {
-        'PROD-SETUP': 1000
-      };
+      if (!currentRecommendationData) return;
+      const products = currentRecommendationData.products || [];
+      const addons = currentRecommendationData.optional_addons || [];
 
-      // Calculate primary monthly
-      let baseMonthly = 0;
-      Object.entries(primaryItemMonthly).forEach(([id, amt]) => {
-        if (!untoggledPrimaryItemIds.has(id)) {
-          baseMonthly += amt;
+      let totalMonthly = 0;
+      let totalSetup = 0;
+
+      products.forEach((p, idx) => {
+        const pId = typeof p === 'object' ? (p.product_id || p.id || `PROD-${idx}`) : `PROD-${idx}`;
+        const pMonthly = typeof p === 'object' ? (p.monthly || p.monthly_price_inr || p.price || 0) : 0;
+        const pSetup = typeof p === 'object' ? (p.one_time_setup_inr || p.setup || 0) : 0;
+        if (!untoggledPrimaryItemIds.has(pId)) {
+          totalMonthly += Number(pMonthly);
+          totalSetup += Number(pSetup);
         }
       });
 
-      // Calculate primary setup
-      let baseSetup = 0;
-      Object.entries(primaryItemSetup).forEach(([id, amt]) => {
-        if (!untoggledPrimaryItemIds.has(id)) {
-          baseSetup += amt;
+      addons.forEach((a, idx) => {
+        const aId = a.product_id || a.id || `ADDON-${idx}`;
+        const aMonthly = Number(a.monthly_delta || a.monthly_price_inr || a.price || 0);
+        if (toggledAddonIds.has(aId)) {
+          totalMonthly += aMonthly;
         }
       });
 
-      // Add deltas from toggled add-ons
-      const addonPrices = {
-        'ADDON-CISCO': 550,
-        'ADDON-SLA': 600,
-        'ADDON-FAILOVER': 350
-      };
-
-      toggledAddonIds.forEach(id => {
-        if (addonPrices[id]) {
-          baseMonthly += addonPrices[id];
-        }
-      });
+      // Fallback to base plan total if products array was empty
+      if (totalMonthly === 0 && currentRecommendationData.monthly_cost) {
+        totalMonthly = Number(currentRecommendationData.monthly_cost);
+      }
+      if (totalSetup === 0 && currentRecommendationData.setup_cost) {
+        totalSetup = Number(currentRecommendationData.setup_cost);
+      }
 
       const priceEl = document.getElementById('rec-price');
       const setupEl = document.getElementById('rec-setup');
       const summaryEl = document.getElementById('rec-contract-summary');
 
-      if (priceEl) priceEl.textContent = '₹' + Math.round(baseMonthly).toLocaleString('en-IN');
-      if (setupEl) setupEl.textContent = baseSetup > 0 ? '+ ₹' + Math.round(baseSetup).toLocaleString('en-IN') : '₹0 (Free)';
+      if (priceEl) priceEl.textContent = '₹' + Math.round(totalMonthly).toLocaleString('en-IN');
+      if (setupEl) setupEl.textContent = totalSetup > 0 ? '+ ₹' + Math.round(totalSetup).toLocaleString('en-IN') : '₹0 (Free)';
       if (summaryEl) {
-        summaryEl.textContent = `₹${Math.round(baseMonthly).toLocaleString('en-IN')}/mo recurring + ${baseSetup > 0 ? '₹' + Math.round(baseSetup).toLocaleString('en-IN') : '₹0'} one-time • 12 Months Contract`;
+        summaryEl.textContent = `₹${Math.round(totalMonthly).toLocaleString('en-IN')}/mo recurring + ${totalSetup > 0 ? '₹' + Math.round(totalSetup).toLocaleString('en-IN') : '₹0'} one-time • 12 Months Contract`;
       }
     }
 
@@ -2490,6 +2511,99 @@
       const recContainer = document.getElementById('recPlanContainer');
       if (recContainer) recContainer.classList.add('hidden');
       currentRecommendationData = null;
+    }
+
+    async function clearAllCustomerInfo() {
+      if (!confirm('Are you sure you want to completely clear all your customer information, schema, KYC records, and conversation history from the database? This cannot be undone.')) {
+        return;
+      }
+
+      const token = getAuthToken();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const activeUserId = (currentUser && currentUser.id) ? currentUser.id : (currentUser && currentUser.email ? currentUser.email : 'guest-user');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/user/clear-all`, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            user_id: activeUserId,
+            session_id: currentSessionId
+          })
+        });
+
+        const data = await res.json();
+        
+        // 1. Reset frontend UI states
+        clearChat();
+
+        // 2. Reset extracted customer schema UI to blank/empty
+        updateCustomerSchemaUI({
+          business_type: null,
+          city: null,
+          city_tier: null,
+          employee_count: null,
+          num_sites: null,
+          needs: []
+        }, 0);
+        document.getElementById('sch-type').textContent = 'Not identified';
+        document.getElementById('sch-city').textContent = 'Not identified';
+        document.getElementById('sch-tier').textContent = '-';
+        document.getElementById('sch-employees').textContent = '-';
+        document.getElementById('sch-sites').textContent = '-';
+        document.getElementById('sch-needs').textContent = '-';
+        document.getElementById('sch-completion').textContent = '0%';
+        const badge = document.getElementById('sch-completion-badge');
+        if (badge) {
+          badge.textContent = '0% Collected';
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full border bg-red-50 text-[#e40000] border-red-200';
+        }
+
+        // 3. Clear cart state
+        cart = [];
+        updateCartUI();
+
+        // 4. Reset customer name fields
+        const custInput = document.getElementById('cartCustomerName');
+        if (custInput) custInput.value = '';
+        const custCity = document.getElementById('cartCustomerCity');
+        if (custCity) custCity.value = '';
+        const custType = document.getElementById('cartCustomerType');
+        if (custType) custType.value = '';
+
+        // 5. Reset KYC UI
+        resetUploadedFiles();
+
+        // 6. Reset new session ID
+        currentSessionId = 'sess-' + Math.random().toString(36).slice(2, 10);
+
+        showAddedToast('✓ Successfully cleared all customer data from database!');
+      } catch (err) {
+        alert('Failed to clear customer information: ' + err.message);
+      }
+    }
+
+    function resetUploadedFiles() {
+      uploadedFiles = { gst: null, udyam: null, address: null, signatory: null };
+      ['gst', 'udyam', 'address', 'signatory'].forEach(slot => {
+        const fileIn = document.getElementById(`${slot}FileInput`);
+        if (fileIn) fileIn.value = '';
+        const nameEl = document.getElementById(`${slot}FileName`);
+        if (nameEl) nameEl.textContent = 'PDF, PNG, JPG up to 10MB';
+        const cardEl = document.getElementById(`${slot}SlotCard`);
+        if (cardEl) cardEl.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition relative';
+      });
+      const badge = document.getElementById('kycVerdictBadge');
+      if (badge) {
+        badge.textContent = 'READY';
+        badge.className = 'text-[11px] font-bold px-2.5 py-0.5 rounded-full border bg-slate-100 text-slate-700 border-slate-200';
+      }
+      const headline = document.getElementById('kycStatusHeadline');
+      if (headline) headline.textContent = 'Awaiting 4-Document Upload';
+      const pill = document.getElementById('kycVerifiedBadgePill');
+      if (pill) pill.classList.add('hidden');
     }
 
     // Voice recording
@@ -3454,5 +3568,48 @@
       updateCartUI();
     });
   </script>
+
+  <!-- MOBILE BOTTOM APP NAVIGATION BAR (CUSTOMER ONLY) -->
+  <nav id="mobileBottomNav" class="hidden md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+    <div class="grid grid-cols-5 gap-1 items-center max-w-md mx-auto">
+      <button onclick="switchTab('products')" id="mob-tab-products" class="mobile-nav-btn flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-900 transition">
+        <span class="mobile-icon-wrap w-8 h-8 rounded-xl flex items-center justify-center mb-0.5 transition">
+          <span class="material-symbols-outlined text-[20px]">storefront</span>
+        </span>
+        <span class="text-[10px] font-semibold tracking-tight">Products</span>
+      </button>
+
+      <button onclick="switchTab('assistant')" id="mob-tab-assistant" class="mobile-nav-btn active flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-900 transition relative">
+        <span class="mobile-icon-wrap w-8 h-8 rounded-xl flex items-center justify-center mb-0.5 transition">
+          <span class="material-symbols-outlined text-[20px]">smart_toy</span>
+        </span>
+        <span class="text-[10px] font-semibold tracking-tight">AI Advisor</span>
+        <span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-[#e40000] animate-pulse"></span>
+      </button>
+
+      <button onclick="switchTab('kyc')" id="mob-tab-kyc" class="mobile-nav-btn flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-900 transition">
+        <span class="mobile-icon-wrap w-8 h-8 rounded-xl flex items-center justify-center mb-0.5 transition">
+          <span class="material-symbols-outlined text-[20px]">verified_user</span>
+        </span>
+        <span class="text-[10px] font-semibold tracking-tight">KYC</span>
+      </button>
+
+      <button onclick="switchTab('cart')" id="mob-tab-cart" class="mobile-nav-btn flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-900 transition relative">
+        <span class="mobile-icon-wrap w-8 h-8 rounded-xl flex items-center justify-center mb-0.5 transition">
+          <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+        </span>
+        <span class="text-[10px] font-semibold tracking-tight">Cart</span>
+        <span id="mobileCartBadge" class="hidden absolute top-0.5 right-2 w-4 h-4 rounded-full bg-[#e40000] text-white text-[9px] font-bold flex items-center justify-center">0</span>
+      </button>
+
+      <button onclick="switchTab('orders')" id="mob-tab-orders" class="mobile-nav-btn flex flex-col items-center justify-center py-1 text-slate-500 hover:text-slate-900 transition">
+        <span class="mobile-icon-wrap w-8 h-8 rounded-xl flex items-center justify-center mb-0.5 transition">
+          <span class="material-symbols-outlined text-[20px]">local_shipping</span>
+        </span>
+        <span class="text-[10px] font-semibold tracking-tight">Orders</span>
+      </button>
+    </div>
+  </nav>
+
 </body>
 </html>

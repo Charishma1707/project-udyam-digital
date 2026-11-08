@@ -215,13 +215,13 @@ async def chat_endpoint(request: ChatRequest, user: Optional[Dict[str, Any]] = D
                 top_opt = recs["options"][0]
                 quote = top_opt.get("quote", {})
                 result["recommended_plan"] = {
-                    "bundle_name": top_opt.get("label") or "Recommended Enterprise Plan",
-                    "bundle_code": top_opt.get("bundle_code") or "BUNDLE-LIVE",
+                    "bundle_name": top_opt.get("label") or None,
+                    "bundle_code": top_opt.get("bundle_code") or None,
                     "products": quote.get("products", []),
-                    "monthly_cost": quote.get("monthly_total") or 4199.0,
-                    "setup_cost": quote.get("setup_total") or 0.0,
-                    "contract_months": quote.get("contract_months") or 12,
-                    "explanation": top_opt.get("explanation", {}).get("text") or "Tailored commercial connectivity with 99.9% uptime SLA.",
+                    "monthly_cost": quote.get("monthly_total", None),
+                    "setup_cost": quote.get("setup_total", None),
+                    "contract_months": quote.get("contract_months", None),
+                    "explanation": top_opt.get("explanation", {}).get("text") or None,
                     "optional_addons": top_opt.get("addons", {}).get("optional", [])
                 }
         else:
@@ -291,13 +291,13 @@ async def voice_endpoint(
                 top_opt = recs["options"][0]
                 quote = top_opt.get("quote", {})
                 result["recommended_plan"] = {
-                    "bundle_name": top_opt.get("label") or "Recommended Enterprise Plan",
-                    "bundle_code": top_opt.get("bundle_code") or "BUNDLE-LIVE",
+                    "bundle_name": top_opt.get("label") or None,
+                    "bundle_code": top_opt.get("bundle_code") or None,
                     "products": quote.get("products", []),
-                    "monthly_cost": quote.get("monthly_total") or 4199.0,
-                    "setup_cost": quote.get("setup_total") or 0.0,
-                    "contract_months": quote.get("contract_months") or 12,
-                    "explanation": top_opt.get("explanation", {}).get("text") or "Tailored commercial connectivity with 99.9% uptime SLA.",
+                    "monthly_cost": quote.get("monthly_total", None),
+                    "setup_cost": quote.get("setup_total", None),
+                    "contract_months": quote.get("contract_months", None),
+                    "explanation": top_opt.get("explanation", {}).get("text") or None,
                     "optional_addons": top_opt.get("addons", {}).get("optional", [])
                 }
         else:
@@ -360,6 +360,39 @@ async def reset_session(session_id: str):
     """Resets session back to initial empty state."""
     session_memory.reset(session_id)
     return {"status": "reset_successful", "session_id": session_id}
+
+
+@app.post("/api/user/clear-all")
+async def clear_user_all_info(
+    payload: Optional[Dict[str, Any]] = None,
+    user: Optional[Dict[str, Any]] = Depends(get_optional_user)
+):
+    """
+    Completely removes all information about the customer from PostgreSQL database:
+    - User discovery schema & profile
+    - Chat & speech conversation history
+    - Saved persistent cart
+    - Verified customer needs
+    - Session KYC verification documents & DPDP consent records
+    """
+    body = payload or {}
+    session_id = body.get("session_id")
+    user_id = user.get("sub") or user.get("id") if user else body.get("user_id") or "guest-user"
+
+    # Reset memory session
+    if session_id:
+        session_memory.reset(session_id)
+
+    # Purge from Neon PostgreSQL
+    success = db_client.clear_user_all_data(user_id=user_id, session_id=session_id)
+
+    return {
+        "status": "cleared",
+        "user_id": user_id,
+        "session_id": session_id,
+        "database_purged": success,
+        "message": "All customer info, schema, KYC, and previous conversations cleared from database."
+    }
 
 
 # =============================================================================
@@ -788,7 +821,8 @@ async def verify_uploaded_kyc(
     address_file: Optional[UploadFile] = File(None),
     signatory_file: Optional[UploadFile] = File(None),
     session_id: str = Form("session-1"),
-    company_name: Optional[str] = Form(None)
+    company_name: Optional[str] = Form(None),
+    user: Optional[Dict[str, Any]] = Depends(get_optional_user)
 ):
     """
     Accepts uploaded user KYC files (GST, Udyam, Address proof, Signatory ID),
@@ -840,8 +874,44 @@ async def verify_uploaded_kyc(
             raise HTTPException(status_code=400, detail="Please upload at least one document (GST certificate or Udyam certificate).")
 
         user_inputs = {"company_name": company_name} if company_name else None
-        result = smart_kyc_verifier.verify_customer("UPLOAD_" + session_id[:8], saved_files, user_inputs=user_inputs)
+        applicant_id = (user.get("sub") or user.get("id")) if user else ("UPLOAD_" + session_id[:8])
+        result = smart_kyc_verifier.verify_customer(applicant_id, saved_files, user_inputs=user_inputs)
         result["s3_encrypted_storage"] = s3_records
+
+        # Also persist to Neon PostgreSQL encrypted kyc_records table
+        try:
+            from kyc_verification.secure_vault import secure_vault
+            ext_data = result.get("extracted_data", {})
+            gst_obj = ext_data.get("gst", {})
+            udyam_obj = ext_data.get("udyam", {})
+            doc_id_val = gst_obj.get("gstin") or udyam_obj.get("udyam_number") or applicant_id
+            enc_res = secure_vault.encrypt_document_bytes(f"USER:{applicant_id}|STATUS:{result.get('status')}|GST:{doc_id_val}".encode("utf-8"))
+            masked_id = secure_vault.mask_pii(doc_id_val, "gstin" if gst_obj.get("gstin") else "udyam")
+
+            db_client.save_kyc_record({
+                "id": f"KYC-{applicant_id}-{int(datetime.now().timestamp())}",
+                "session_id": session_id,
+                "applicant_id": applicant_id,
+                "doc_type": "enterprise_upload",
+                "extracted_identifier": masked_id,
+                "ciphertext": enc_res.get("ciphertext", ""),
+                "iv": enc_res.get("iv", ""),
+                "sha256": enc_res.get("sha256", ""),
+                "status": result.get("status", "PENDING"),
+                "registry_matched": result.get("kyc_approved", False),
+                "tamper_detected": any(i.get("code") == "TAMPER_DETECTED" for i in result.get("issues", [])),
+                "dpdp_consent_logged": True,
+                "registry_record": {
+                    "applicant_id": applicant_id,
+                    "trade_name": gst_obj.get("legal_name") or gst_obj.get("trade_name") or udyam_obj.get("enterprise_name") or "",
+                    "extracted_data": ext_data,
+                    "issues": [i.get("message") for i in result.get("issues", [])],
+                    "status": result.get("status")
+                }
+            })
+        except Exception as kyc_db_err:
+            print(f"Warning: Failed to save uploaded KYC record to database: {kyc_db_err}")
+
         return result
     finally:
         # DPDP Act 2023 zero-retention ephemeral cleanup

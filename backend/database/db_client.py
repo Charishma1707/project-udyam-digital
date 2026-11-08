@@ -1101,5 +1101,36 @@ class DatabaseClient:
                 conn.close()
         return []
 
+    def clear_user_all_data(self, user_id: str, session_id: Optional[str] = None) -> bool:
+        """Purges customer profile, schema, conversations, cart, needs, and session KYC from PostgreSQL."""
+        conn = self.get_pg_conn()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    # 1. Reset user_profiles schema
+                    cur.execute("""
+                    UPDATE user_profiles
+                    SET customer_schema_json = '{}', updated_at = CURRENT_TIMESTAMP
+                    WHERE user_id = %s;
+                    """, (user_id,))
+                    # 2. Delete conversations
+                    cur.execute("DELETE FROM user_conversations WHERE user_id = %s;", (user_id,))
+                    # 3. Delete saved cart
+                    cur.execute("DELETE FROM user_carts WHERE user_id = %s;", (user_id,))
+                    # 4. Delete saved customer needs
+                    cur.execute("DELETE FROM customer_needs WHERE user_id = %s;", (user_id,))
+                    # 5. Delete session KYC records & consent logs if session_id passed
+                    if session_id:
+                        cur.execute("DELETE FROM kyc_records WHERE session_id = %s;", (session_id,))
+                        cur.execute("DELETE FROM dpdp_consent_logs WHERE session_id = %s;", (session_id,))
+                        cur.execute("DELETE FROM ai_escalations WHERE session_id = %s;", (session_id,))
+                conn.close()
+                return True
+            except Exception as e:
+                print(f"Error clearing user data from PostgreSQL: {e}")
+                if conn:
+                    conn.close()
+        return False
+
 
 db_client = DatabaseClient()
